@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { H1, H2, P } from "~/components/ui/typography";
 import { auth } from "~/lib/auth";
 import { getMyTeamMemberships } from "~/services";
+import SyncMemberships from "./_components/join";
 
 export default async function MyOverviewPage() {
 	const session = await auth.api.getSession({
@@ -18,9 +19,15 @@ export default async function MyOverviewPage() {
 
 	return (
 		<div className="mx-auto min-h-screen w-full max-w-7xl space-y-20 px-2 py-32 lg:px-12">
-			<div>
-				<H1>Mine medlemskap</H1>
-				<P>Her kan du se en oversikt over alle idrettslagene du er medlem av</P>
+			<div className="flex items-center justify-between">
+				<div>
+					<H1>Mine medlemskap</H1>
+					<P>
+						Her kan du se en oversikt over alle idrettslagene du er medlem av
+					</P>
+				</div>
+
+				<SyncMemberships />
 			</div>
 
 			{memberships.length === 0 && (
@@ -30,6 +37,20 @@ export default async function MyOverviewPage() {
 						<H2>Ingen medlemskap funnet</H2>
 						<P>Du er ikke medlem av noen idrettslag.</P>
 					</div>
+				</div>
+			)}
+
+			{memberships.length > 0 && (
+				<div className="grid w-full gap-6 md:grid-cols-2 lg:grid-cols-3">
+					{memberships.map((membership) => (
+						<div
+							key={membership.id}
+							className="rounded-lg border bg-card p-6 shadow"
+						>
+							<H2>{membership.team.name}</H2>
+							<P>{membership.role === "ADMIN" ? "Administrator" : "Medlem"}</P>
+						</div>
+					))}
 				</div>
 			)}
 		</div>

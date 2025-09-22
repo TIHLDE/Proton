@@ -7,6 +7,9 @@ export async function getMyTeamMemberships(userId: string) {
 		where: {
 			userId,
 		},
+		include: {
+			team: true,
+		},
 	});
 
 	return memberships;

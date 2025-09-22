@@ -1,5 +1,6 @@
 "use server";
 
+import { cookies } from "next/headers";
 import type { z } from "zod";
 import { auth } from "~/lib/auth";
 import { SignInInputSchema } from "~/schemas";
@@ -79,6 +80,10 @@ export async function login(
 			},
 		});
 
+		// Add token to user in cookies
+		const cookiesStore = await cookies();
+		cookiesStore.set("tihlde_token", data.token, { httpOnly: true, path: "/" });
+
 		return {};
 	} catch (e) {
 		if (e instanceof Error) {
@@ -148,4 +153,11 @@ export async function getUserMemberships(
 	}
 
 	return await response.json();
+}
+
+export async function getTIHLDEToken(): Promise<string | null> {
+	const cookiesStore = await cookies();
+	const token = cookiesStore.get("tihlde_token")?.value;
+
+	return token || null;
 }

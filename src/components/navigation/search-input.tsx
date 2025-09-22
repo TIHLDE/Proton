@@ -58,6 +58,7 @@ export default function SearchInput({
 			<div className="absolute inset-y-0 flex h-full w-10 items-center justify-center">
 				{search.length > 0 ? (
 					<button
+						type="button"
 						onClick={() => {
 							setSearch("");
 							removeSearch();

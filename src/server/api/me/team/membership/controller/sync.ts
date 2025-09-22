@@ -1,8 +1,9 @@
+import type { TeamRole } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { getTIHLDEToken, getUserMemberships } from "~/actions";
 import { type Controller, authorizedProcedure } from "~/server/api/trpc";
 
-const handler: Controller<void, void> = async ({ ctx, input }) => {
+const handler: Controller<void, void> = async ({ ctx }) => {
 	// Get TIHLDE token
 	const token = await getTIHLDEToken();
 
@@ -57,7 +58,7 @@ const handler: Controller<void, void> = async ({ ctx, input }) => {
 							id: existingMembership.id,
 						},
 						data: {
-							role: membership.role,
+							role: membership.role as TeamRole,
 						},
 					});
 				}
@@ -69,7 +70,7 @@ const handler: Controller<void, void> = async ({ ctx, input }) => {
 				data: {
 					userId: ctx.user.id,
 					teamId: team.id,
-					role: membership.role,
+					role: membership.role as TeamRole,
 				},
 			});
 		}),

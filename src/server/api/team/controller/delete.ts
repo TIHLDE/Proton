@@ -15,33 +15,6 @@ const handler: Controller<
 		});
 	}
 
-	// Check if team exists
-	const existingTeam = await ctx.db.team.findUnique({
-		where: { id: input.id },
-		include: {
-			_count: {
-				select: {
-					members: true,
-				},
-			},
-		},
-	});
-
-	if (!existingTeam) {
-		throw new TRPCError({
-			code: "NOT_FOUND",
-			message: "Laget finnes ikke.",
-		});
-	}
-
-	// Check if team has members
-	if (existingTeam._count.members > 0) {
-		throw new TRPCError({
-			code: "CONFLICT",
-			message: "Kan ikke slette lag som har medlemmer. Fjern alle medlemmer først.",
-		});
-	}
-
 	await ctx.db.team.delete({
 		where: { id: input.id },
 	});

@@ -131,6 +131,20 @@ src/
 └── trpc/               # tRPC konfigurasjon
 ```
 
+## Env
+
+Kopier `.env.example` til `.env` og fyll inn nødvendige miljøvariabler:
+
+```bash
+cp .env.example .env
+```
+
+```bash
+DATABASE_URL="postgresql://postgres:password@localhost:5452/proton"
+BETTER_AUTH_SECRET="your-secret-key"
+BETTER_AUTH_URL="http://localhost:3000"
+```
+
 ## 🗄️ Database
 
 Prosjektet bruker PostgreSQL som database med Prisma som ORM. Database-skjemaet finnes i `prisma/schema.prisma`.

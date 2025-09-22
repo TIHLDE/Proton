@@ -35,7 +35,7 @@ export default function CreateTeam() {
 			setOpen(false);
 			form.reset({
 				name: "",
-				url: "",
+				slug: "",
 			});
 			router.refresh();
 			toast.success("Lag opprettet!");
@@ -79,9 +79,9 @@ export default function CreateTeam() {
 
 						<FormInput
 							form={form}
-							name="url"
-							label="Nettside-URL"
-							placeholder="Nettside-URL til laget"
+							name="slug"
+							label="Nettside-slug"
+							placeholder="Nettside-slug til laget"
 							description="Vi trenger denne for å hente medlemskap"
 						/>
 

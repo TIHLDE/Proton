@@ -15,24 +15,24 @@ const handler: Controller<
 		});
 	}
 
-	// Check if team with same name or url exists
+	// Check if team with same name or slug exists
 	const existingTeam = await ctx.db.team.findFirst({
 		where: {
-			OR: [{ name: input.name }, { url: input.url }],
+			OR: [{ name: input.name }, { slug: input.slug }],
 		},
 	});
 
 	if (existingTeam) {
 		throw new TRPCError({
 			code: "CONFLICT",
-			message: "Et lag med samme navn eller URL finnes allerede.",
+			message: "Et lag med samme navn eller slug finnes allerede.",
 		});
 	}
 
 	await ctx.db.team.create({
 		data: {
 			name: input.name,
-			url: input.url,
+			slug: input.slug,
 		},
 	});
 };

@@ -1,4 +1,5 @@
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
+import { meRouter } from "./me/router";
 import { teamRouter } from "./team/router";
 
 /**
@@ -8,6 +9,7 @@ import { teamRouter } from "./team/router";
  */
 export const appRouter = createTRPCRouter({
 	team: teamRouter,
+	me: meRouter,
 });
 
 // export type definition of API

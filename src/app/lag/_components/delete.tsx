@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -19,48 +19,63 @@ import {
   DialogTrigger,
 } from "~/components/ui/dialog";
 import { Form } from "~/components/ui/form";
-import { CreateTeamInputSchema } from "~/schemas";
+import { UpdateTeamInputSchema } from "~/schemas";
 import { api } from "~/trpc/react";
 
-export default function CreateTeam() {
+interface EditTeamProps {
+  team: {
+    id: string;
+    name: string;
+    slug: string | null;
+    createdAt: Date;
+    updatedAt: Date;
+  };
+}
+
+export default function EditTeam({ team }: EditTeamProps) {
   const [open, setOpen] = useState<boolean>(false);
   const router = useRouter();
 
-  const form = useForm<z.infer<typeof CreateTeamInputSchema>>({
-    resolver: zodResolver(CreateTeamInputSchema),
+  const form = useForm<z.infer<typeof UpdateTeamInputSchema>>({
+    resolver: zodResolver(UpdateTeamInputSchema),
+    defaultValues: {
+      id: team.id,
+      name: team.name,
+      slug: team.slug || "",
+    },
   });
 
-  const { mutate: createTeam, status } = api.team.create.useMutation({
-    onSuccess: () => {
+  const { mutate: updateTeam, status } = api.team.update.useMutation({
+    onSuccess: (_, variables) => {
       setOpen(false);
       form.reset({
-        name: "",
-        slug: "",
+        id: variables.id,
+        name: variables.name,
+        slug: variables.slug || "",
       });
       router.refresh();
-      toast.success("Lag opprettet!");
+      toast.success("Lag oppdatert!");
     },
     onError: (error) => {
       toast.error(error.message);
     },
   });
 
-  const onSubmit = async (values: z.infer<typeof CreateTeamInputSchema>) =>
-    createTeam(values);
+  const onSubmit = async (values: z.infer<typeof UpdateTeamInputSchema>) =>
+    updateTeam(values);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>
-          <Plus />
-          Opprett lag
+        <Button size="sm" variant="outline">
+          <Pencil className="h-4 w-4" />
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Opprett nytt lag</DialogTitle>
+          <DialogTitle>Endre lag</DialogTitle>
           <DialogDescription>
-            Fyll inn informasjonen under for å opprette et nytt idrettslag.
+            Fyll inn informasjonen under for å endre idrettslaget.
           </DialogDescription>
         </DialogHeader>
 
@@ -69,6 +84,8 @@ export default function CreateTeam() {
             className="mt-6 space-y-8"
             onSubmit={form.handleSubmit(onSubmit)}
           >
+            <input type="hidden" {...form.register("id")} />
+
             <FormInput
               form={form}
               name="name"
@@ -88,8 +105,7 @@ export default function CreateTeam() {
             <div className="md:flex md:justify-end">
               <SubmitButton
                 status={status}
-                text="Opprett lag"
-                size="sm"
+                text="Endre laget"
                 className="md:w-auto"
               />
             </div>

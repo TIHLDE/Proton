@@ -2,6 +2,8 @@
 
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
+import Navigation from "~/components/navigation/navigation";
+import SearchInput from "~/components/navigation/search-input";
 import { H1, H3, P } from "~/components/ui/typography";
 import { auth } from "~/lib/auth";
 import {
@@ -23,6 +25,8 @@ export default async function TeamMembersPage({
 	const { id } = await params;
 	const { search, page } = await searchParams;
 
+	const currentPage = page ? Number.parseInt(page) : 1;
+
 	const session = await auth.api.getSession({
 		headers: await headers(),
 	});
@@ -37,7 +41,7 @@ export default async function TeamMembersPage({
 
 	if (!team) notFound();
 
-	const memberships = await getTeamMemberships(id);
+	const membershipsData = await getTeamMemberships(id, currentPage, search);
 	const membersCount = await getTeamMembershipsCount(id);
 
 	return (
@@ -49,16 +53,28 @@ export default async function TeamMembersPage({
 				</div>
 			</div>
 
-			<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-				{memberships.map((membership) => (
-					<div
-						key={membership.id}
-						className="rounded-lg border bg-card p-4 shadow-sm"
-					>
-						<H3>{membership.user.name}</H3>
-						<P>{membership.role === "ADMIN" ? "Administrator" : "Medlem"}</P>
-					</div>
-				))}
+			<div className="space-y-6">
+				<SearchInput />
+
+				<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+					{membershipsData.memberships.map((membership) => (
+						<div
+							key={membership.id}
+							className="rounded-lg border bg-card p-4 shadow-sm"
+						>
+							<H3>{membership.user.name}</H3>
+							<P>{membership.role === "ADMIN" ? "Administrator" : "Medlem"}</P>
+						</div>
+					))}
+				</div>
+
+				<div className="md:flex md:justify-end">
+					<Navigation
+						page={Number(page)}
+						nextPage={Number(page) + 1}
+						totalPages={Math.ceil(membersCount / 10)}
+					/>
+				</div>
 			</div>
 		</div>
 	);

@@ -1,7 +1,8 @@
 "use server";
 
-import { PackageOpen } from "lucide-react";
+import { ArrowRight, PackageOpen } from "lucide-react";
 import { headers } from "next/headers";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { H1, H2, P } from "~/components/ui/typography";
 import { auth } from "~/lib/auth";
@@ -43,13 +44,19 @@ export default async function MyOverviewPage() {
 			{memberships.length > 0 && (
 				<div className="grid w-full gap-6 md:grid-cols-2 lg:grid-cols-3">
 					{memberships.map((membership) => (
-						<div
+						<Link
 							key={membership.id}
 							className="rounded-lg border bg-card p-6 shadow"
+							href={`/lag/${membership.team.id}`}
 						>
 							<H2>{membership.team.name}</H2>
 							<P>{membership.role === "ADMIN" ? "Administrator" : "Medlem"}</P>
-						</div>
+
+							<div className="flex items-center justify-end gap-x-2">
+								<p>Se mer</p>
+								<ArrowRight className="h-4 w-4" />
+							</div>
+						</Link>
 					))}
 				</div>
 			)}

@@ -89,7 +89,7 @@ model Team {
 
 model TeamMember {
   id        String   @id @default(cuid())
-  role      String
+  role      TeamRole @default(USER)
   userId    String
   teamId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -102,7 +102,7 @@ model TeamMember {
   @@map("team_member")
 }
 
-enum Role {
+enum TeamRole {
   ADMIN
   USER
 }

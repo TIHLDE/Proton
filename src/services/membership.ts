@@ -11,4 +11,16 @@ export async function getTeamMemberships(teamId: string) {
 			user: true,
 		},
 	});
+
+	return memberships;
+}
+
+export async function getTeamMembershipsCount(teamId: string) {
+	const count = await db.teamMember.count({
+		where: {
+			teamId,
+		},
+	});
+
+	return count;
 }

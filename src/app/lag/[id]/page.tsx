@@ -1,6 +1,6 @@
 "use server";
 
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, UsersRound } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -37,14 +37,22 @@ export default async function TeamPage({ params }: TeamPageProps) {
 					<H1>{team.name}</H1>
 				</div>
 
-				{membership === "ADMIN" && (
-					<Button asChild>
-						<Link href={`/lag/${team.id}/admin`}>
-							Administrer lag
-							<ArrowRight />
+				<div className="grid grid-cols-2 gap-x-4">
+					{membership === "ADMIN" && (
+						<Button asChild>
+							<Link href={`/lag/${team.id}/admin`}>
+								Administrer lag
+								<ArrowRight />
+							</Link>
+						</Button>
+					)}
+					<Button asChild variant="outline">
+						<Link href={`/lag/${team.id}/medlemmer`}>
+							<UsersRound />
+							Medlemmer
 						</Link>
 					</Button>
-				)}
+				</div>
 			</div>
 		</div>
 	);

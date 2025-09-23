@@ -167,4 +167,4 @@ export async function getTIHLDEToken(): Promise<string | null> {
 export async function clearTIHLDEToken() {
 	const cookiesStore = await cookies();
 	cookiesStore.delete("tihlde_token");
-};
+}

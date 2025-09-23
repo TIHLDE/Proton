@@ -1,5 +1,6 @@
 "use server";
 
+import type { User } from "@prisma/client";
 import { ArrowRight, UsersRound } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
@@ -22,7 +23,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
 
 	if (!session) notFound();
 
-	const membership = await hasTeamAccess(id, session.user.id);
+	const membership = await hasTeamAccess(id, session.user as User);
 
 	if (!membership) notFound();
 

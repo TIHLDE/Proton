@@ -1,5 +1,6 @@
 "use server";
 
+import type { TeamRole, User } from "@prisma/client";
 import { db } from "~/server/db";
 
 export async function getAllTeams() {
@@ -8,11 +9,16 @@ export async function getAllTeams() {
 	return teams;
 }
 
-export async function hasTeamAccess(teamId: string, userId: string) {
+export async function hasTeamAccess(
+	teamId: string,
+	user: User,
+): Promise<TeamRole | null> {
+	if (user.isAdmin) return "ADMIN";
+
 	const membership = await db.teamMember.findFirst({
 		where: {
 			teamId,
-			userId,
+			userId: user.id,
 		},
 	});
 

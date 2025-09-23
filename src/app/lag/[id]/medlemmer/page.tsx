@@ -1,5 +1,6 @@
 "use server";
 
+import type { User } from "@prisma/client";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import Navigation from "~/components/navigation/navigation";
@@ -33,7 +34,7 @@ export default async function TeamMembersPage({
 
 	if (!session) notFound();
 
-	const membership = await hasTeamAccess(id, session.user.id);
+	const membership = await hasTeamAccess(id, session.user as User);
 
 	if (!membership) notFound();
 
@@ -70,8 +71,8 @@ export default async function TeamMembersPage({
 
 				<div className="md:flex md:justify-end">
 					<Navigation
-						page={Number(page)}
-						nextPage={Number(page) + 1}
+						page={currentPage}
+						nextPage={currentPage + 1}
 						totalPages={Math.ceil(membersCount / 10)}
 					/>
 				</div>

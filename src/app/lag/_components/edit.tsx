@@ -120,7 +120,7 @@ export default function EditTeam({ team }: EditTeamProps) {
 							description="Vi trenger denne for å hente medlemskap"
 						/>
 
-						<div className="flex justify-end gap-2">
+						<div className="grid gap-2 lg:grid-cols-2">
 							<Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
 								<DialogTrigger asChild>
 									<Button type="button" variant="destructive" size="sm">

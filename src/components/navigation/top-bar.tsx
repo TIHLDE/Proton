@@ -1,27 +1,27 @@
 "use client";
 
 import clsx from "clsx";
-import { MoonIcon, SunIcon } from "lucide-react";
+import { Loader2, Moon, MoonIcon, Sun, SunIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { authClient } from "~/lib/auth-client";
 import TihldeLogo from "../logo";
 import { Button } from "../ui/button";
-
-interface NavbarProps {
-	isLoggedIn: boolean;
-}
+import UserAvatar from "./user-avatar";
 
 const navigationItems = [
 	{ id: "home", text: "Hjem", to: "/" },
 	{ id: "teams", text: "Mine lag", to: "/min-oversikt", auth: true },
 ];
 
-const Navbar = ({ isLoggedIn }: NavbarProps) => {
+const Navbar = () => {
 	const [isOnTop, setIsOnTop] = useState(true);
 	const { setTheme, theme } = useTheme();
 	const pathname = usePathname();
+
+	const { data: session, isPending } = authClient.useSession();
 
 	useEffect(() => {
 		const handleScroll = () => setIsOnTop(window.scrollY < 20);
@@ -50,7 +50,7 @@ const Navbar = ({ isLoggedIn }: NavbarProps) => {
 				</Link>
 				<div className="hidden gap-6 justify-self-center sm:flex">
 					{navigationItems.map((item) => {
-						if (item.auth && !isLoggedIn) return null;
+						if (item.auth && !session?.user) return null;
 
 						return (
 							<Link
@@ -68,25 +68,19 @@ const Navbar = ({ isLoggedIn }: NavbarProps) => {
 						);
 					})}
 				</div>
-				<div className="flex w-full items-center justify-end gap-x-4">
-					{!isLoggedIn && (
+				<div className="flex w-full items-center justify-end gap-x-2">
+					{isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+					{!session?.user && !isPending && (
 						<Button variant="outline" asChild>
 							<Link href="/auth/logg-inn">Logg inn</Link>
 						</Button>
 					)}
-					<div className="flex gap-4">
-						<button
-							type="button"
-							onClick={toggleDarkMode}
-							aria-label="Toggle dark mode"
-						>
-							{theme === "dark" ? (
-								<SunIcon className="h-6 w-6 cursor-pointer text-textSecondary" />
-							) : (
-								<MoonIcon className="h-6 w-6 cursor-pointer text-textSecondary" />
-							)}
-						</button>
-					</div>
+					{session?.user && <UserAvatar />}
+					<Button size="icon" onClick={toggleDarkMode}>
+						<Sun className="dark:-rotate-90 h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:scale-0" />
+						<Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+						<span className="sr-only">Toggle theme</span>
+					</Button>
 				</div>
 			</nav>
 		</header>

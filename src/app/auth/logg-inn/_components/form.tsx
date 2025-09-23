@@ -12,6 +12,7 @@ import FormInput from "~/components/form/input";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
 import { Form } from "~/components/ui/form";
+import { authClient } from "~/lib/auth-client";
 import { cn } from "~/lib/utils";
 import { SignInInputSchema } from "~/schemas";
 
@@ -37,7 +38,7 @@ export function LoginForm({
 				formData.append("username", values.username);
 				formData.append("password", values.password);
 				const loginResponse = await login(formData);
-				if (loginResponse.formError) {
+				if (loginResponse.formError || !loginResponse.userData) {
 					toast.error(loginResponse.formError);
 					form.reset({
 						password: "",
@@ -46,8 +47,23 @@ export function LoginForm({
 					return;
 				}
 
-				router.refresh();
+				if (loginResponse.userData.isNewUser) {
+					await authClient.signUp.email({
+						email: loginResponse.userData.email,
+						password: values.password,
+						name: loginResponse.userData.fullName,
+						username: loginResponse.userData.username,
+						isAdmin: false,
+					});
+				} else {
+					await authClient.signIn.email({
+						password: values.password,
+						email: loginResponse.userData.email,
+					});
+				}
+
 				router.replace("/min-oversikt");
+				router.refresh();
 			} catch {
 				toast.error(
 					"Noe gikk galt under innloggingen. Vennligst prøv igjen senere.",

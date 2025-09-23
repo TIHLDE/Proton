@@ -2,7 +2,6 @@
 
 import { cookies } from "next/headers";
 import type { z } from "zod";
-import { auth } from "~/lib/auth";
 import { SignInInputSchema } from "~/schemas";
 import { db } from "~/server/db";
 import type { MembershipResponse, TIHLDEUser } from "~/types";
@@ -10,6 +9,12 @@ import type { MembershipResponse, TIHLDEUser } from "~/types";
 export interface ActionResponse<T> {
 	fieldError?: Partial<Record<keyof T, string | undefined>>;
 	formError?: string;
+	userData?: {
+		fullName: string;
+		email: string;
+		username: string;
+		isNewUser: boolean;
+	};
 }
 
 export async function login(
@@ -50,6 +55,10 @@ export async function login(
 			throw new Error("Kunne ikke hente brukerdata.");
 		}
 
+		// Add token to user in cookies
+		const cookiesStore = await cookies();
+		cookiesStore.set("tihlde_token", data.token, { httpOnly: true, path: "/" });
+
 		// Check if user exists
 		const existingUser = await db.user.findUnique({
 			where: {
@@ -60,31 +69,24 @@ export async function login(
 
 		// If not, create user
 		if (!existingUser) {
-			await auth.api.signUpEmail({
-				body: {
+			return {
+				userData: {
+					fullName: `${userData.first_name} ${userData.last_name}`,
 					email: userData.email,
-					name: `${userData.first_name} ${userData.last_name}`,
-					password,
-					isAdmin: false,
 					username: userData.user_id,
+					isNewUser: true,
 				},
-			});
-			return {};
+			};
 		}
 
-		// If yes, sign in
-		await auth.api.signInEmail({
-			body: {
+		return {
+			userData: {
+				fullName: `${userData.first_name} ${userData.last_name}`,
 				email: userData.email,
-				password,
+				username: userData.user_id,
+				isNewUser: false,
 			},
-		});
-
-		// Add token to user in cookies
-		const cookiesStore = await cookies();
-		cookiesStore.set("tihlde_token", data.token, { httpOnly: true, path: "/" });
-
-		return {};
+		};
 	} catch (e) {
 		if (e instanceof Error) {
 			return {
@@ -161,3 +163,8 @@ export async function getTIHLDEToken(): Promise<string | null> {
 
 	return token || null;
 }
+
+export async function clearTIHLDEToken() {
+	const cookiesStore = await cookies();
+	cookiesStore.delete("tihlde_token");
+};

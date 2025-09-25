@@ -34,6 +34,5 @@ jobs:
           git fetch
           git reset --hard origin/main
           echo "${{ secrets.ENV }}" > .env
-          chmod +x ./deploy.sh
           ./deploy.sh
           ENDSSH

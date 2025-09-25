@@ -19,8 +19,8 @@ export default async function MyOverviewPage() {
 	const memberships = await getMyTeamMemberships(session.user.id);
 
 	return (
-		<div className="mx-auto min-h-screen w-full max-w-7xl space-y-20 px-2 py-32 lg:px-12">
-			<div className="flex items-center justify-between">
+		<div className="mx-auto min-h-screen w-full max-w-7xl space-y-12 px-2 py-24 md:space-y-20 md:py-32 lg:px-12">
+			<div className="space-y-4 md:flex md:items-center md:justify-between md:space-y-0">
 				<div>
 					<H1>Mine medlemskap</H1>
 					<P>

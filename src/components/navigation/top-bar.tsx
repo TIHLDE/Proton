@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx";
-import { Loader2, Moon, MoonIcon, Sun, SunIcon } from "lucide-react";
+import { Loader2, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -14,6 +14,7 @@ import UserAvatar from "./user-avatar";
 const navigationItems = [
 	{ id: "home", text: "Hjem", to: "/" },
 	{ id: "teams", text: "Mine lag", to: "/min-oversikt", auth: true },
+	{ id: "create-team", text: "Opprett lag", to: "/lag", auth: true },
 ];
 
 const Navbar = () => {
@@ -40,15 +41,15 @@ const Navbar = () => {
 				isOnTop ? "bg-transparent" : "bg-background/95 dark:bg-background/60",
 			)}
 		>
-			<nav className="grid w-full grid-cols-3 items-center px-8 py-3">
+			<nav className="flex w-full items-center justify-between px-2 py-3 md:px-8">
 				<Link
 					href="/"
 					aria-label="Til forsiden"
-					className="flex items-center gap-2 justify-self-start font-bold text-2xl text-logo"
+					className="flex items-center gap-2 justify-self-start font-bold text-lg text-logo sm:text-2xl"
 				>
-					<TihldeLogo size="large" className="h-auto w-44" />
+					<TihldeLogo size="large" className="h-auto w-32 sm:w-44" />
 				</Link>
-				<div className="hidden gap-6 justify-self-center sm:flex">
+				<div className="hidden gap-4 lg:flex lg:gap-x-6">
 					{navigationItems.map((item) => {
 						if (item.auth && !session?.user) return null;
 
@@ -68,17 +69,26 @@ const Navbar = () => {
 						);
 					})}
 				</div>
-				<div className="flex w-full items-center justify-end gap-x-2">
+				<div className="flex items-center justify-end gap-x-2">
 					{isPending && <Loader2 className="h-4 w-4 animate-spin" />}
 					{!session?.user && !isPending && (
-						<Button variant="outline" asChild>
+						<Button
+							variant="outline"
+							size="sm"
+							asChild
+							className="text-xs sm:text-sm"
+						>
 							<Link href="/auth/logg-inn">Logg inn</Link>
 						</Button>
 					)}
 					{session?.user && <UserAvatar />}
-					<Button size="icon" onClick={toggleDarkMode}>
-						<Sun className="dark:-rotate-90 h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:scale-0" />
-						<Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+					<Button
+						size="sm"
+						onClick={toggleDarkMode}
+						className="h-8 w-8 sm:h-10 sm:w-10"
+					>
+						<Sun className="dark:-rotate-90 h-[1rem] w-[1rem] rotate-0 scale-100 transition-all sm:h-[1.2rem] sm:w-[1.2rem] dark:scale-0" />
+						<Moon className="absolute h-[1rem] w-[1rem] rotate-90 scale-0 transition-all sm:h-[1.2rem] sm:w-[1.2rem] dark:rotate-0 dark:scale-100" />
 						<span className="sr-only">Toggle theme</span>
 					</Button>
 				</div>

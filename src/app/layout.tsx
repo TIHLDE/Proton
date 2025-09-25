@@ -10,7 +10,7 @@ import Providers from "./_components/providers";
 
 export const metadata: Metadata = {
 	title: "Idrett | TIHLDE",
-	description: "Idrettsplattformen til TIHLDE",
+	description: "Idrettsplattformen til TIHLDE - bli med på lag og aktiviteter",
 };
 
 const inter = Inter({

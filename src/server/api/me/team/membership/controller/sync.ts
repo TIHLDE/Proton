@@ -57,7 +57,7 @@ const handler: Controller<void, void> = async ({ ctx, input }) => {
 							id: existingMembership.id,
 						},
 						data: {
-							role: membership.role,
+							role: membership.role as "ADMIN" | "USER",
 						},
 					});
 				}
@@ -69,7 +69,7 @@ const handler: Controller<void, void> = async ({ ctx, input }) => {
 				data: {
 					userId: ctx.user.id,
 					teamId: team.id,
-					role: membership.role,
+					role: membership.role as "ADMIN" | "USER",
 				},
 			});
 		}),

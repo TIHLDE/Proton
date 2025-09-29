@@ -34,10 +34,7 @@ const handler: Controller<
 				AND: [
 					{ id: { not: input.id } },
 					{
-						OR: [
-							{ name: input.name },
-							{ slug: input.slug },
-						],
+						OR: [{ name: input.name }, { slug: input.slug }],
 					},
 				],
 			},

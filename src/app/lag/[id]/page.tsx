@@ -1,6 +1,7 @@
 "use server";
 
-import { ArrowRight } from "lucide-react";
+import type { User } from "@prisma/client";
+import { ArrowRight, UsersRound } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -22,7 +23,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
 
 	if (!session) notFound();
 
-	const membership = await hasTeamAccess(id, session.user.id);
+	const membership = await hasTeamAccess(id, session.user as User);
 
 	if (!membership) notFound();
 
@@ -31,20 +32,28 @@ export default async function TeamPage({ params }: TeamPageProps) {
 	if (!team) notFound();
 
 	return (
-		<div className="mx-auto min-h-screen w-full max-w-7xl space-y-20 px-2 py-32 lg:px-12">
-			<div className="flex items-center justify-between">
+		<div className="mx-auto min-h-screen w-full max-w-7xl space-y-12 px-2 py-24 md:space-y-20 md:py-32 lg:px-12">
+			<div className="space-y-4 md:flex md:items-center md:justify-between md:space-y-0">
 				<div>
 					<H1>{team.name}</H1>
 				</div>
 
-				{membership === "ADMIN" && (
-					<Button asChild>
-						<Link href={`/lag/${team.id}/admin`}>
-							Administrer lag
-							<ArrowRight />
+				<div className="grid grid-cols-2 gap-x-2">
+					{membership === "ADMIN" && (
+						<Button asChild>
+							<Link href={`/lag/${team.id}/admin`}>
+								Administrer lag
+								<ArrowRight />
+							</Link>
+						</Button>
+					)}
+					<Button asChild variant="outline">
+						<Link href={`/lag/${team.id}/medlemmer`}>
+							<UsersRound />
+							Medlemmer
 						</Link>
 					</Button>
-				)}
+				</div>
 			</div>
 		</div>
 	);

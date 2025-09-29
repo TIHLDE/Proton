@@ -48,7 +48,7 @@
 
 :root {
 	--radius: 0.625rem;
-	--background: oklch(0.906 0.024 254.89);
+	--background: oklch(0.912 0.022 254.44);
 	--foreground-primary: oklch(0.147 0.034 262.82);
 	--foreground-secondary: oklch(0.413 0.032 256.37);
 	--button-background: oklch(0.325 0.095 255.45);
@@ -57,8 +57,8 @@
 	--logo: oklch(0.147 0.034 262.82);
 	--card-background: oklch(0.958 0.026 253.76);
 	--card-foreground: oklch(0.413 0.032 256.37);
-	--card-border: oklch(0.917 0.015 255.17);
-	--accent: oklch(0.421 0.132 254.98);
+	--card-border: oklch(0.847 0.016 253.87);
+	--accent: oklch(0.442 0.132 254.47);
 	--foreground: oklch(0.129 0.042 264.695);
 	--card: oklch(1 0 0);
 	--popover: oklch(1 0 0);
@@ -90,16 +90,16 @@
 }
 
 .dark {
-	--background: oklch(0.024 0.004 256.81);
+	--background: oklch(0.025 0.008 256.23);
 	--foreground-primary: oklch(0.949 0.004 247.06);
 	--foreground-secondary: oklch(0.722 0.015 254.72);
 	--button-background: oklch(0.473 0.103 254.22);
 	--button-foreground: oklch(0.949 0.004 247.06);
-	--button-border: oklch(0.278 0.112 254.85);
+	--button-border: oklch(0.256 0.112 254.47);
 	--logo: oklch(0.95 0.007 248.41);
 	--card-background: oklch(0.053 0.018 257.53);
 	--card-foreground: oklch(0.722 0.015 254.72);
-	--card-border: oklch(0.142 0.005 259.89);
+	--card-border: oklch(0.182 0.005 259.07);
 	--accent: oklch(0.771 0.083 253.94);
 	--foreground: oklch(0.984 0.003 247.858);
 	--card: oklch(0.208 0.042 265.755);

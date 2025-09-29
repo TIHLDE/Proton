@@ -61,4 +61,8 @@ status:
 studio:
 	npx prisma studio
 
-.PHONY: db-create db-start db-stop db-remove db-logs db-connect db-status generate migrate migrate-reset status studio
+# Build from Dockerfile
+build:
+	docker build -t proton .
+
+.PHONY: db-create db-start db-stop db-remove db-logs db-connect db-status generate migrate migrate-reset status studio build

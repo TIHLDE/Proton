@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx";
-import { HomeIcon, Loader2, Trophy, Users } from "lucide-react";
+import { HomeIcon, Loader2, Shield, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { authClient } from "~/lib/auth-client";
@@ -9,17 +9,18 @@ import { authClient } from "~/lib/auth-client";
 const navigationItems = [
 	{ id: "home", text: "Hjem", to: "/", icon: <HomeIcon className="h-5 w-5" /> },
 	{
-		id: "all-teams",
-		text: "Lag",
-		icon: <Trophy className="h-5 w-5" />,
-		to: "/lag",
-	},
-	{
-		id: "my-teams",
+		id: "teams",
 		text: "Mine lag",
 		icon: <Users className="h-5 w-5" />,
 		to: "/min-oversikt",
-		auth: true,
+		auth: "MEMBER",
+	},
+	{
+		id: "superadmin",
+		text: "Admin",
+		icon: <Shield className="h-5 w-5" />,
+		to: "/admin",
+		auth: "SUPERADMIN",
 	},
 ];
 
@@ -44,6 +45,8 @@ const BottomBar: React.FC = () => {
 					}
 
 					if (navigationItem.auth && !session?.user) return null;
+					if (navigationItem.auth === "SUPERADMIN" && !session?.user.isAdmin)
+						return null;
 
 					return (
 						<Link

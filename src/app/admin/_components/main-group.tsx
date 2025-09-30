@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutGrid, type LucideIcon, Users } from "lucide-react";
+import { LayoutGrid, type LucideIcon, Trophy, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -28,6 +28,11 @@ const applicationItems: SidebarItem[] = [
 		title: "Brukere",
 		url: "/admin/brukere",
 		icon: Users,
+	},
+	{
+		title: "Lag",
+		url: "/admin/lag",
+		icon: Trophy,
 	},
 ];
 

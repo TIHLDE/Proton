@@ -1,29 +1,25 @@
 "use server";
 
-import { PackageOpen } from "lucide-react";
-import { headers } from "next/headers";
-import { notFound, redirect } from "next/navigation";
-import { H1, H2, P } from "~/components/ui/typography";
-import { auth } from "~/lib/auth";
+import { ArrowRight, PackageOpen } from "lucide-react";
+import Link from "next/link";
+import { Button } from "~/components/ui/button";
+import { H2, H3, P } from "~/components/ui/typography";
 import { getAllTeams } from "~/services";
+import AdminPageWrapper from "../_components/wrapper/admin-page";
+import PageHeader from "../_components/wrapper/header";
+import ShowSidebarTrigger from "../_components/wrapper/sidebar-trigger";
 import CreateTeam from "./_components/create";
 import EditTeam from "./_components/edit";
 
 export default async function TeamsOverviewPage() {
-	const session = await auth.api.getSession({
-		headers: await headers(),
-	});
-
-	if (!session || !session.user.isAdmin) notFound();
-
 	const teams = await getAllTeams();
 
 	return (
-		<div className="mx-auto min-h-screen w-full max-w-7xl space-y-12 px-2 py-24 md:space-y-20 md:py-32 lg:px-12">
+		<AdminPageWrapper>
 			<div className="space-y-4 md:flex md:items-center md:justify-between md:space-y-0">
-				<div>
-					<H1>Idrettslag</H1>
-					<P>Her kan du se en oversikt over alle idrettslagene til TIHLDE</P>
+				<div className="flex items-center space-x-1">
+					<ShowSidebarTrigger />
+					<PageHeader>Idrettslag</PageHeader>
 				</div>
 
 				<CreateTeam />
@@ -51,16 +47,25 @@ export default async function TeamsOverviewPage() {
 					{teams.map((team) => (
 						<div
 							key={team.id}
-							className="space-y-4 rounded-lg border bg-card p-6 shadow transition-shadow hover:shadow-md"
+							className="space-y-6 rounded-lg border bg-card p-4 shadow transition-shadow hover:shadow-md"
 						>
 							<div className="flex items-center justify-between">
-								<H2>{team.name}</H2>
+								<H3>{team.name}</H3>
 								<EditTeam team={team} />
+							</div>
+
+							<div className="flex justify-end">
+								<Button asChild variant="link">
+									<Link href={`/lag/${team.id}`}>
+										Gå til lag
+										<ArrowRight className="size-4" />
+									</Link>
+								</Button>
 							</div>
 						</div>
 					))}
 				</div>
 			)}
-		</div>
+		</AdminPageWrapper>
 	);
 }

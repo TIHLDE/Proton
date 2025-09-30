@@ -2,7 +2,6 @@
 
 import type { User } from "@prisma/client";
 import { CircleHelp } from "lucide-react";
-import { useRouter } from "next/navigation";
 import Navigation from "~/components/navigation/navigation";
 import SearchInput from "~/components/navigation/search-input";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
@@ -14,6 +13,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "~/components/ui/table";
+import EditRole from "./edit";
 
 interface UsersTableProps {
 	users: User[];
@@ -30,12 +30,6 @@ export default function UsersTable({
 	count,
 	totalPages,
 }: UsersTableProps) {
-	const router = useRouter();
-
-	const handleRedirect = (userId: string) => {
-		router.push(`/admin/users/${userId}`);
-	};
-
 	return (
 		<div className="space-y-8 rounded-lg border bg-card p-4 shadow-sm">
 			<div className="space-y-4 md:flex md:items-start md:justify-between md:space-y-0">
@@ -68,11 +62,7 @@ export default function UsersTable({
 				</TableHeader>
 				<TableBody>
 					{users.map((user) => (
-						<TableRow
-							className="cursor-pointer hover:bg-bong-purple-100"
-							onClick={() => handleRedirect(user.id)}
-							key={user.id}
-						>
+						<TableRow key={user.id}>
 							<TableCell>{user.name}</TableCell>
 							<TableCell>{user.email}</TableCell>
 							<TableCell>{user.isAdmin ? "Admin" : "Medlem"}</TableCell>
@@ -82,6 +72,9 @@ export default function UsersTable({
 									month: "long",
 									day: "numeric",
 								})}
+							</TableCell>
+							<TableCell>
+								<EditRole userId={user.id} isAdmin={user.isAdmin} />
 							</TableCell>
 						</TableRow>
 					))}

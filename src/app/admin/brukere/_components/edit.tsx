@@ -59,7 +59,10 @@ export default function EditRole({ userId, isAdmin }: EditRoleProps) {
 	}, [userId]);
 
 	const onSubmit = async (values: z.infer<typeof UpdateUserRoleInputSchema>) =>
-		updateUser(values);
+		updateUser({
+			...values,
+			isAdmin: !values.isAdmin,
+		});
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>

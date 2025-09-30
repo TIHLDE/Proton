@@ -59,6 +59,19 @@ export async function login(
 		const cookiesStore = await cookies();
 		cookiesStore.set("tihlde_token", data.token, { httpOnly: true, path: "/" });
 
+		// Check if email is taken
+		const emailTaken = await db.user.findUnique({
+			where: {
+				email: userData.email,
+			},
+		});
+
+		if (emailTaken && emailTaken.username !== userData.user_id) {
+			throw new Error(
+				"E-postadressen er allerede i bruk med en annen konto fra TIHLDE.",
+			);
+		}
+
 		// Check if user exists
 		const existingUser = await db.user.findUnique({
 			where: {

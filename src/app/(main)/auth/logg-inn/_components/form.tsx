@@ -48,18 +48,28 @@ export function LoginForm({
 				}
 
 				if (loginResponse.userData.isNewUser) {
-					await authClient.signUp.email({
+					const { error } = await authClient.signUp.email({
 						email: loginResponse.userData.email,
 						password: values.password,
 						name: loginResponse.userData.fullName,
 						username: loginResponse.userData.username,
 						isAdmin: false,
 					});
+
+					if (error) {
+						toast.error(error.message || "Noe gikk galt under innloggingen.");
+						return;
+					}
 				} else {
-					await authClient.signIn.email({
+					const { error } = await authClient.signIn.email({
 						password: values.password,
 						email: loginResponse.userData.email,
 					});
+
+					if (error) {
+						toast.error(error.message || "Noe gikk galt under innloggingen.");
+						return;
+					}
 				}
 
 				router.replace("/min-oversikt");

@@ -123,6 +123,14 @@ export const authorizedProcedure = t.procedure.use(async ({ ctx, next }) => {
 	return result;
 });
 
+export const adminProcedure = t.procedure.use(async ({ ctx, next }) => {
+	if (!ctx.user || !ctx.user.isAdmin) {
+		throw new TRPCError({ code: "UNAUTHORIZED" });
+	}
+	const result = await next();
+	return result;
+});
+
 export type ProcedureCtx = inferProcedureBuilderResolverOptions<
 	typeof authorizedProcedure
 >["ctx"];

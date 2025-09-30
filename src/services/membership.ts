@@ -64,3 +64,14 @@ export async function getTeamMembershipsCount(teamId: string) {
 
 	return count;
 }
+
+export async function getDistinctMembersCount() {
+	const result = await db.teamMember.groupBy({
+		by: ["userId"],
+		_count: {
+			userId: true,
+		},
+	});
+
+	return result.length;
+}

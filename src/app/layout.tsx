@@ -30,10 +30,7 @@ export default async function RootLayout({
 			<body className={`antialiased ${inter.variable}`}>
 				<Providers>
 					<div className="relative min-h-dvh">
-						<Navbar />
 						<main className="w-full">{children}</main>
-						<BottomBar />
-						<Footer />
 					</div>
 				</Providers>
 			</body>

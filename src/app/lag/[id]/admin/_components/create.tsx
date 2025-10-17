@@ -1,11 +1,13 @@
 "use client";
 
 import { Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
+import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -31,19 +33,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
-import { createEventAction } from "~/actions/event";
+import { api } from "~/trpc/react";
 
 const eventSchema = z.object({
   name: z.string().min(1, "Navn er påkrevd"),
   datetime: z.date({
     required_error: "Dato og tid er påkrevd",
   }),
-  type: z.enum(["training", "match", "social"], {
+  type: z.enum(["TRAINING", "MATCH", "SOCIAL", "OTHER"], {
     required_error: "Type er påkrevd",
   }),
-  isPublic: z.boolean(),
   location: z.string().optional(),
   note: z.string().optional(),
 });
@@ -56,65 +56,41 @@ interface CreateEventProps {
 
 export default function CreateEvent({ teamId }: CreateEventProps) {
   const [open, setOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const form = useForm<EventFormData>({
     resolver: zodResolver(eventSchema),
     defaultValues: {
       name: "",
       type: undefined,
-      isPublic: false,
       location: "",
       note: "",
     },
   });
 
-  const onSubmit = async (data: EventFormData) => {
-    if (isLoading) return;
-
-    setIsLoading(true);
-    try {
-      console.log("Creating event:", { ...data, teamId });
-
-      const formData = new FormData();
-      formData.append("teamId", teamId);
-      formData.append("name", data.name);
-      formData.append("datetime", data.datetime.toISOString());
-      formData.append("type", data.type);
-      formData.append("isPublic", data.isPublic.toString());
-      formData.append("location", data.location || "");
-      formData.append("note", data.note || "");
-
-      const result = await createEventAction(formData);
-
-      if (result.formError) {
-        alert(result.formError);
-        return;
-      }
-
-      if (result.fieldError) {
-        // Handle field errors by setting them in the form
-        Object.entries(result.fieldError).forEach(([field, error]) => {
-          if (error) {
-            form.setError(field as keyof EventFormData, { message: error });
-          }
-        });
-        return;
-      }
-
-      if (result.success) {
-        setOpen(false);
-        form.reset();
-        // No need to call router.refresh() as revalidatePath handles it
-      }
-    } catch (error) {
-      console.error("Error creating event:", error);
-      alert(
-        "Det oppstod en feil ved opprettelse av arrangementet. Prøv igjen."
+  const { mutate: createEvent, status } = api.event.create.useMutation({
+    onSuccess: () => {
+      toast.success("Arrangement opprettet");
+      setOpen(false);
+      form.reset();
+      router.refresh();
+    },
+    onError: (error) => {
+      toast.error(
+        error.message || "Det oppstod en feil ved opprettelse av arrangementet"
       );
-    } finally {
-      setIsLoading(false);
-    }
+    },
+  });
+
+  const onSubmit = async (data: EventFormData) => {
+    createEvent({
+      teamId,
+      name: data.name,
+      datetime: data.datetime,
+      type: data.type,
+      location: data.location,
+      note: data.note,
+    });
   };
 
   return (
@@ -191,33 +167,13 @@ export default function CreateEvent({ teamId }: CreateEventProps) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="training">Trening</SelectItem>
-                      <SelectItem value="match">Kamp</SelectItem>
-                      <SelectItem value="social">Sosialt</SelectItem>
+                      <SelectItem value="TRAINING">Trening</SelectItem>
+                      <SelectItem value="MATCH">Kamp</SelectItem>
+                      <SelectItem value="SOCIAL">Sosialt</SelectItem>
+                      <SelectItem value="OTHER">Annet</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="isPublic"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                  <div className="space-y-0.5">
-                    <FormLabel>Offentlig</FormLabel>
-                    <div className="text-sm text-muted-foreground">
-                      Skal arrangementet være synlig for alle?
-                    </div>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
                 </FormItem>
               )}
             />
@@ -262,12 +218,12 @@ export default function CreateEvent({ teamId }: CreateEventProps) {
                 type="button"
                 variant="outline"
                 onClick={() => setOpen(false)}
-                disabled={isLoading}
+                disabled={status === "pending"}
               >
                 Avbryt
               </Button>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Oppretter..." : "Opprett arrangement"}
+              <Button type="submit" disabled={status === "pending"}>
+                {status === "pending" ? "Oppretter..." : "Opprett arrangement"}
               </Button>
             </div>
           </form>

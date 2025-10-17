@@ -1,11 +1,13 @@
 "use client";
 
 import { Pencil } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { format } from "date-fns";
+import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -31,10 +33,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
-import { updateEventAction, deleteEventAction } from "~/actions/event";
 import SubmitButton from "~/components/form/submit-button";
+import { api } from "~/trpc/react";
 
 const eventSchema = z.object({
   id: z.string(),
@@ -42,10 +43,9 @@ const eventSchema = z.object({
   datetime: z.date({
     required_error: "Dato og tid er påkrevd",
   }),
-  type: z.enum(["training", "match", "social"], {
+  type: z.enum(["TRAINING", "MATCH", "SOCIAL", "OTHER"], {
     required_error: "Type er påkrevd",
   }),
-  isPublic: z.boolean(),
   location: z.string().optional(),
   note: z.string().optional(),
 });
@@ -57,8 +57,7 @@ interface EditEventProps {
     id: string;
     name: string;
     datetime: Date;
-    type: "training" | "match" | "social";
-    isPublic: boolean;
+    type: "TRAINING" | "MATCH" | "SOCIAL" | "OTHER";
     location?: string | null;
     note?: string | null;
   };
@@ -68,8 +67,7 @@ interface EditEventProps {
 export default function EditEvent({ event, teamId }: EditEventProps) {
   const [open, setOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const router = useRouter();
 
   const form = useForm<EventFormData>({
     resolver: zodResolver(eventSchema),
@@ -78,82 +76,56 @@ export default function EditEvent({ event, teamId }: EditEventProps) {
       name: event.name,
       datetime: new Date(event.datetime),
       type: event.type,
-      isPublic: event.isPublic,
       location: event.location || "",
       note: event.note || "",
     },
   });
 
-  const onSubmit = async (data: EventFormData) => {
-    if (isLoading) return;
-
-    setIsLoading(true);
-    try {
-      console.log("Updating event:", data);
-
-      const formData = new FormData();
-      formData.append("id", data.id);
-      formData.append("teamId", teamId);
-      formData.append("name", data.name);
-      formData.append("datetime", data.datetime.toISOString());
-      formData.append("type", data.type);
-      formData.append("isPublic", data.isPublic.toString());
-      formData.append("location", data.location || "");
-      formData.append("note", data.note || "");
-
-      const result = await updateEventAction(formData);
-
-      if (result.formError) {
-        alert(result.formError);
-        return;
-      }
-
-      if (result.fieldError) {
-        Object.entries(result.fieldError).forEach(([field, error]) => {
-          if (error) {
-            form.setError(field as keyof EventFormData, { message: error });
-          }
-        });
-        return;
-      }
-
-      if (result.success) {
-        setOpen(false);
-      }
-    } catch (error) {
-      console.error("Error updating event:", error);
-      alert(
-        "Det oppstod en feil ved oppdatering av arrangementet. Prøv igjen."
+  const { mutate: updateEvent, status } = api.event.update.useMutation({
+    onSuccess: () => {
+      toast.success("Arrangement oppdatert");
+      setOpen(false);
+      router.refresh();
+    },
+    onError: (error) => {
+      toast.error(
+        error.message || "Det oppstod en feil ved oppdatering av arrangementet"
       );
-    } finally {
-      setIsLoading(false);
-    }
+    },
+  });
+
+  const { mutate: deleteEvent, status: deleteStatus } =
+    api.event.delete.useMutation({
+      onSuccess: () => {
+        toast.success("Arrangement slettet");
+        setDeleteOpen(false);
+        setOpen(false);
+        router.refresh();
+      },
+      onError: (error) => {
+        toast.error(
+          error.message || "Det oppstod en feil ved sletting av arrangementet"
+        );
+      },
+    });
+
+  const onSubmit = async (data: EventFormData) => {
+    updateEvent({
+      id: data.id,
+      teamId,
+      name: data.name,
+      datetime: data.datetime,
+      type: data.type,
+      location: data.location,
+      note: data.note,
+    });
   };
 
   const onDelete = async () => {
-    if (isDeleting) return;
-
-    setIsDeleting(true);
-    try {
-      console.log("Deleting event:", event.id);
-
-      const result = await deleteEventAction(event.id, teamId);
-
-      if (result.formError) {
-        alert(result.formError);
-        return;
-      }
-
-      if (result.success) {
-        setDeleteOpen(false);
-        setOpen(false);
-      }
-    } catch (error) {
-      console.error("Error deleting event:", error);
-      alert("Det oppstod en feil ved sletting av arrangementet. Prøv igjen.");
-    } finally {
-      setIsDeleting(false);
-    }
+    deleteEvent({
+      id: event.id,
+      teamId,
+    });
   };
 
   return (
@@ -229,33 +201,13 @@ export default function EditEvent({ event, teamId }: EditEventProps) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="training">Trening</SelectItem>
-                      <SelectItem value="match">Kamp</SelectItem>
-                      <SelectItem value="social">Sosialt</SelectItem>
+                      <SelectItem value="TRAINING">Trening</SelectItem>
+                      <SelectItem value="MATCH">Kamp</SelectItem>
+                      <SelectItem value="SOCIAL">Sosialt</SelectItem>
+                      <SelectItem value="OTHER">Annet</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="isPublic"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                  <div className="space-y-0.5">
-                    <FormLabel>Offentlig</FormLabel>
-                    <div className="text-sm text-muted-foreground">
-                      Skal arrangementet være synlig for alle?
-                    </div>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
                 </FormItem>
               )}
             />
@@ -302,7 +254,9 @@ export default function EditEvent({ event, teamId }: EditEventProps) {
                     type="button"
                     variant="destructive"
                     size="sm"
-                    disabled={isLoading || isDeleting}
+                    disabled={
+                      status === "pending" || deleteStatus === "pending"
+                    }
                   >
                     Slett arrangement
                   </Button>
@@ -320,7 +274,7 @@ export default function EditEvent({ event, teamId }: EditEventProps) {
                       type="button"
                       variant="outline"
                       onClick={() => setDeleteOpen(false)}
-                      disabled={isDeleting}
+                      disabled={deleteStatus === "pending"}
                     >
                       Avbryt
                     </Button>
@@ -328,16 +282,18 @@ export default function EditEvent({ event, teamId }: EditEventProps) {
                       type="button"
                       variant="destructive"
                       onClick={onDelete}
-                      disabled={isDeleting}
+                      disabled={deleteStatus === "pending"}
                     >
-                      {isDeleting ? "Sletter..." : "Slett arrangement"}
+                      {deleteStatus === "pending"
+                        ? "Sletter..."
+                        : "Slett arrangement"}
                     </Button>
                   </div>
                 </DialogContent>
               </Dialog>
 
               <SubmitButton
-                status={isLoading ? "pending" : "idle"}
+                status={status}
                 text="Lagre endringer"
                 size="sm"
                 className="md:w-auto"

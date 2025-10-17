@@ -1,4 +1,5 @@
 import { db } from "~/server/db";
+import { type TeamEventType } from "@prisma/client";
 
 export const getAllEventsByTeamId = async (teamId: string) => {
   try {
@@ -16,8 +17,7 @@ export const getAllEventsByTeamId = async (teamId: string) => {
       id: event.id,
       name: event.name,
       datetime: event.startAt,
-      type: event.eventType as "training" | "match" | "social",
-      isPublic: event.isPublic,
+      type: event.eventType,
       location: event.location,
       note: event.note,
     }));
@@ -32,7 +32,6 @@ export const createEvent = async (data: {
   name: string;
   datetime: Date;
   type: string;
-  isPublic?: boolean;
   location?: string;
   note?: string;
 }) => {
@@ -41,10 +40,9 @@ export const createEvent = async (data: {
       data: {
         teamId: data.teamId,
         name: data.name,
-        eventType: data.type,
+        eventType: data.type as TeamEventType,
         startAt: data.datetime,
         endAt: data.datetime, // For now, using same time for start and end
-        isPublic: data.isPublic ?? false,
         location: data.location ?? null,
         note: data.note ?? null,
       },
@@ -54,8 +52,7 @@ export const createEvent = async (data: {
       id: event.id,
       name: event.name,
       datetime: event.startAt,
-      type: event.eventType as "training" | "match" | "social",
-      isPublic: event.isPublic,
+      type: event.eventType,
       location: event.location,
       note: event.note,
     };
@@ -71,7 +68,6 @@ export const updateEvent = async (
     name: string;
     datetime: Date;
     type: string;
-    isPublic?: boolean;
     location?: string;
     note?: string;
   }
@@ -81,10 +77,9 @@ export const updateEvent = async (
       where: { id },
       data: {
         name: data.name,
-        eventType: data.type,
+        eventType: data.type as TeamEventType,
         startAt: data.datetime,
         endAt: data.datetime, // For now, using same time for start and end
-        isPublic: data.isPublic ?? false,
         location: data.location ?? null,
         note: data.note ?? null,
       },
@@ -94,8 +89,7 @@ export const updateEvent = async (
       id: event.id,
       name: event.name,
       datetime: event.startAt,
-      type: event.eventType as "training" | "match" | "social",
-      isPublic: event.isPublic,
+      type: event.eventType,
       location: event.location,
       note: event.note,
     };

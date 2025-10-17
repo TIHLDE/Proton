@@ -111,11 +111,10 @@ enum TeamRole {
 model TeamEvent {
   id        String   @id @default(cuid())
   teamId    String
-  eventType String
+  eventType TeamEventType
   name      String
   startAt   DateTime
   endAt     DateTime?
-  isPublic  Boolean  @default(false)
   location  String?
   note      String?
   team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)

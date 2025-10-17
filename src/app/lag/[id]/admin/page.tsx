@@ -13,6 +13,16 @@ interface EventPageProps {
   params: Promise<{ id: string }>;
 }
 
+const getEventTypeLabel = (type: string): string => {
+  const typeMap: Record<string, string> = {
+    TRAINING: "Trening",
+    MATCH: "Kamp",
+    SOCIAL: "Sosialt",
+    OTHER: "Annet",
+  };
+  return typeMap[type] || type;
+};
+
 export default async function EventsAdminPage({ params }: EventPageProps) {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -60,11 +70,21 @@ export default async function EventsAdminPage({ params }: EventPageProps) {
             >
               <div className="flex items-center justify-between">
                 <H2>{event.name}</H2>
-                <EditEvent event={event} teamId={id} />
+                <EditEvent
+                  event={{
+                    ...event,
+                    type: event.type as
+                      | "TRAINING"
+                      | "MATCH"
+                      | "SOCIAL"
+                      | "OTHER",
+                  }}
+                  teamId={id}
+                />
               </div>
               <div className="space-y-2 text-sm text-muted-foreground">
                 <p>
-                  <strong>Type:</strong> {event.type}
+                  <strong>Type:</strong> {getEventTypeLabel(event.type)}
                 </p>
                 <p>
                   <strong>Dato:</strong>{" "}
@@ -72,9 +92,6 @@ export default async function EventsAdminPage({ params }: EventPageProps) {
                 </p>
                 <p>
                   <strong>Sted:</strong> {event.location || "Ikke oppgitt"}
-                </p>
-                <p>
-                  <strong>Offentlig:</strong> {event.isPublic ? "Ja" : "Nei"}
                 </p>
                 {event.note && (
                   <p>

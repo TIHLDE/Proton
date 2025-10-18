@@ -36,3 +36,8 @@ export async function getTeam(teamId: string) {
 
 	return team;
 }
+
+export async function getTeamCount() {
+	const count = await db.team.count();
+	return count;
+}

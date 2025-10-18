@@ -13,8 +13,8 @@ import UserAvatar from "./user-avatar";
 
 const navigationItems = [
 	{ id: "home", text: "Hjem", to: "/" },
-	{ id: "teams", text: "Mine lag", to: "/min-oversikt", auth: true },
-	{ id: "create-team", text: "Opprett lag", to: "/lag", auth: true },
+	{ id: "teams", text: "Mine lag", to: "/min-oversikt", auth: "MEMBER" },
+	{ id: "superadmin", text: "Admin", to: "/admin", auth: "SUPERADMIN" },
 ];
 
 const Navbar = () => {
@@ -52,6 +52,8 @@ const Navbar = () => {
 				<div className="hidden gap-4 lg:flex lg:gap-x-6">
 					{navigationItems.map((item) => {
 						if (item.auth && !session?.user) return null;
+						if (item.auth === "SUPERADMIN" && !session?.user.isAdmin)
+							return null;
 
 						return (
 							<Link

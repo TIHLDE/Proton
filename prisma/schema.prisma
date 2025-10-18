@@ -83,6 +83,7 @@ model Team {
   updatedAt DateTime @default(now()) @updatedAt
 
   members   TeamMember[]
+  events    TeamEvent[]
   
   @@map("team")
 }
@@ -105,4 +106,28 @@ model TeamMember {
 enum TeamRole {
   ADMIN
   USER
+}
+
+model TeamEvent {
+  id        String   @id @default(cuid())
+  teamId    String
+  eventType TeamEventType
+  name      String
+  startAt   DateTime
+  endAt     DateTime?
+  location  String?
+  note      String?
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@map("team_event")
+}
+
+enum TeamEventType {
+  TRAINING
+  MATCH
+  SOCIAL
+  OTHER
 }

@@ -1,4 +1,5 @@
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
+import { eventRouter } from "./event/router";
 import { meRouter } from "./me/router";
 import { teamRouter } from "./team/router";
 import { userRouter } from "./user/router";
@@ -11,6 +12,7 @@ import { userRouter } from "./user/router";
 export const appRouter = createTRPCRouter({
 	team: teamRouter,
 	me: meRouter,
+	event: eventRouter,
 	user: userRouter,
 });
 

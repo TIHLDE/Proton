@@ -10,11 +10,11 @@ export const CreateEventInputSchema = z.object({
 	location: z
 		.string()
 		.optional()
-		.transform((val) => (val && val.trim() ? val : undefined)),
+		.transform((val) => (val?.trim() ? val : undefined)),
 	note: z
 		.string()
 		.optional()
-		.transform((val) => (val && val.trim() ? val : undefined)),
+		.transform((val) => (val?.trim() ? val : undefined)),
 });
 
 export const UpdateEventInputSchema = z.object({
@@ -28,11 +28,11 @@ export const UpdateEventInputSchema = z.object({
 	location: z
 		.string()
 		.optional()
-		.transform((val) => (val && val.trim() ? val : undefined)),
+		.transform((val) => (val?.trim() ? val : undefined)),
 	note: z
 		.string()
 		.optional()
-		.transform((val) => (val && val.trim() ? val : undefined)),
+		.transform((val) => (val?.trim() ? val : undefined)),
 });
 
 export const DeleteEventInputSchema = z.object({

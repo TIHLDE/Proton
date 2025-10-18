@@ -1,22 +1,20 @@
-import { TRPCError } from "@trpc/server";
+import type { User } from "@prisma/client";
 import type z from "zod";
 import { DeleteEventInputSchema } from "~/schemas";
-import { deleteEvent } from "~/services/event";
+import { db } from "~/server/db";
+import { hasTeamAccess } from "~/services";
 import { type Controller, authorizedProcedure } from "../../trpc";
 
 const handler: Controller<
 	z.infer<typeof DeleteEventInputSchema>,
 	void
 > = async ({ input, ctx }) => {
-	// Check if user is admin
-	if (!ctx.user?.isAdmin) {
-		throw new TRPCError({
-			code: "FORBIDDEN",
-			message: "Du har ikke tilgang til å slette arrangementer.",
-		});
-	}
+	// Check if user has access
+	await hasTeamAccess(input.teamId, ctx.user as User);
 
-	await deleteEvent(input.id);
+	await db.teamEvent.delete({
+		where: { id: input.id },
+	});
 };
 
 export default authorizedProcedure

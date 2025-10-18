@@ -1,28 +1,27 @@
-import { TRPCError } from "@trpc/server";
+import type { User } from "@prisma/client";
 import type z from "zod";
 import { CreateEventInputSchema } from "~/schemas";
-import { createEvent } from "~/services/event";
+import { db } from "~/server/db";
+import { hasTeamAccess } from "~/services";
 import { type Controller, authorizedProcedure } from "../../trpc";
 
 const handler: Controller<
 	z.infer<typeof CreateEventInputSchema>,
 	void
 > = async ({ input, ctx }) => {
-	// Check if user is admin
-	if (!ctx.user?.isAdmin) {
-		throw new TRPCError({
-			code: "FORBIDDEN",
-			message: "Du har ikke tilgang til å opprette arrangementer.",
-		});
-	}
+	// Check if user has access
+	await hasTeamAccess(input.teamId, ctx.user as User);
 
-	await createEvent({
-		teamId: input.teamId,
-		name: input.name,
-		datetime: input.datetime,
-		type: input.type,
-		location: input.location,
-		note: input.note,
+	await db.teamEvent.create({
+		data: {
+			teamId: input.teamId,
+			name: input.name,
+			eventType: input.type,
+			startAt: input.datetime,
+			endAt: input.datetime,
+			location: input.location,
+			note: input.note,
+		},
 	});
 };
 

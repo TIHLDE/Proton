@@ -28,7 +28,7 @@ export default function EventRegistration({
 }: EventRegistrationProps) {
   const [selectedType, setSelectedType] = useState<
     "ATTENDING" | "NOT_ATTENDING" | null
-  >(initialRegistration?.type ?? null);
+  >(null);
 
   const utils = api.useUtils();
 
@@ -75,7 +75,11 @@ export default function EventRegistration({
         <Button
           onClick={() => handleRegistration("ATTENDING")}
           disabled={isPending}
-          variant={selectedType === "ATTENDING" ? "default" : "outline"}
+          variant={
+            (selectedType ?? initialRegistration?.type) === "ATTENDING"
+              ? "default"
+              : "outline"
+          }
           className="flex-1"
           type="button"
         >
@@ -85,7 +89,11 @@ export default function EventRegistration({
         <Button
           onClick={() => handleRegistration("NOT_ATTENDING")}
           disabled={isPending}
-          variant={selectedType === "NOT_ATTENDING" ? "default" : "outline"}
+          variant={
+            (selectedType ?? initialRegistration?.type) === "NOT_ATTENDING"
+              ? "default"
+              : "outline"
+          }
           className="flex-1"
           type="button"
         >

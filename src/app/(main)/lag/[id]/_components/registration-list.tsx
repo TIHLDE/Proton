@@ -1,5 +1,6 @@
 "use client";
 
+import type { RegistrationType } from "@prisma/client";
 import { Users } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import {
@@ -18,6 +19,16 @@ interface RegistrationListProps {
   eventName: string;
 }
 
+type Registration = {
+  id: string;
+  type: RegistrationType;
+  user: {
+    id: string;
+    name: string;
+    image: string | null;
+  };
+};
+
 export default function RegistrationList({
   eventId,
   eventName,
@@ -27,10 +38,11 @@ export default function RegistrationList({
       eventId,
     });
 
-  const attending = registrations?.filter((r) => r.type === "ATTENDING") ?? [];
+  const attending =
+    registrations?.filter((r: Registration) => r.type === "ATTENDING") ?? [];
   const notAttending =
-    registrations?.filter((r) => r.type === "NOT_ATTENDING") ?? [];
-
+    registrations?.filter((r: Registration) => r.type === "NOT_ATTENDING") ??
+    [];
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -51,7 +63,7 @@ export default function RegistrationList({
               <P className="text-muted-foreground">Ingen påmeldte ennå</P>
             ) : (
               <div className="space-y-2">
-                {attending.map((registration) => (
+                {attending.map((registration: Registration) => (
                   <div
                     key={registration.id}
                     className="flex items-center gap-3 rounded-lg border bg-card p-3"
@@ -78,7 +90,7 @@ export default function RegistrationList({
               <P className="text-muted-foreground">Ingen avmeldinger</P>
             ) : (
               <div className="space-y-2">
-                {notAttending.map((registration) => (
+                {notAttending.map((registration: Registration) => (
                   <div
                     key={registration.id}
                     className="flex items-center gap-3 rounded-lg border bg-card p-3"

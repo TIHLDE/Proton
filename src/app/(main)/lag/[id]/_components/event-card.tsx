@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { H2 } from "~/components/ui/typography";
 import { api } from "~/trpc/react";
 import EventRegistration from "./event-registration";
+import RegistrationList from "./registration-list";
 
 interface EventCardProps {
   event: {
@@ -71,15 +72,18 @@ export default function EventCard({
       </div>
 
       {showRegistration && counts && (
-        <div className="flex items-center gap-4 border-t pt-4 text-sm">
-          <div className="flex items-center gap-2 text-green-600">
-            <Users className="h-4 w-4" />
-            <span>{counts.attending} kommer</span>
+        <div className="flex items-center justify-between border-t pt-4 text-sm">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 text-green-600">
+              <Users className="h-4 w-4" />
+              <span>{counts.attending} kommer</span>
+            </div>
+            <div className="flex items-center gap-2 text-red-600">
+              <Users className="h-4 w-4" />
+              <span>{counts.notAttending} kommer ikke</span>
+            </div>
           </div>
-          <div className="flex items-center gap-2 text-red-600">
-            <Users className="h-4 w-4" />
-            <span>{counts.notAttending} kommer ikke</span>
-          </div>
+          <RegistrationList eventId={event.id} eventName={event.name} />
         </div>
       )}
 

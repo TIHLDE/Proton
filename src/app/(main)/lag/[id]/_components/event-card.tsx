@@ -1,5 +1,10 @@
+"use client";
+
+import { Users } from "lucide-react";
 import type { ReactNode } from "react";
 import { H2 } from "~/components/ui/typography";
+import { api } from "~/trpc/react";
+import EventRegistration from "./event-registration";
 
 interface EventCardProps {
   event: {
@@ -11,6 +16,7 @@ interface EventCardProps {
     note: string | null;
   };
   actions?: ReactNode;
+  showRegistration?: boolean;
 }
 
 const getEventTypeLabel = (type: string): string => {
@@ -23,7 +29,21 @@ const getEventTypeLabel = (type: string): string => {
   return typeMap[type] || type;
 };
 
-export default function EventCard({ event, actions }: EventCardProps) {
+export default function EventCard({
+  event,
+  actions,
+  showRegistration = false,
+}: EventCardProps) {
+  const { data: registration } = api.registration.getMyRegistration.useQuery(
+    { eventId: event.id },
+    { enabled: showRegistration }
+  );
+
+  const { data: counts } = api.registration.getCounts.useQuery(
+    { eventId: event.id },
+    { enabled: showRegistration }
+  );
+
   return (
     <div className="space-y-4 rounded-lg border bg-card p-6 shadow transition-shadow hover:shadow-md">
       <div className="flex items-center justify-between">
@@ -41,12 +61,36 @@ export default function EventCard({ event, actions }: EventCardProps) {
         <p>
           <strong>Sted:</strong> {event.location || "Ikke oppgitt"}
         </p>
-        {event.note && (
+        {event.note ? (
           <p>
             <strong>Notat:</strong> {event.note}
           </p>
+        ) : (
+          <p>{"\u00A0"}</p>
         )}
       </div>
+
+      {showRegistration && counts && (
+        <div className="flex items-center gap-4 border-t pt-4 text-sm">
+          <div className="flex items-center gap-2 text-green-600">
+            <Users className="h-4 w-4" />
+            <span>{counts.attending} kommer</span>
+          </div>
+          <div className="flex items-center gap-2 text-red-600">
+            <Users className="h-4 w-4" />
+            <span>{counts.notAttending} kommer ikke</span>
+          </div>
+        </div>
+      )}
+
+      {showRegistration && (
+        <div className="border-t pt-4">
+          <EventRegistration
+            eventId={event.id}
+            initialRegistration={registration}
+          />
+        </div>
+      )}
     </div>
   );
 }

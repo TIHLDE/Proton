@@ -25,8 +25,8 @@ export default function Hero() {
 						size="default"
 						className="flex items-center gap-2 px-6 py-3"
 					>
-						<Link href="/lag">
-							Utforsk lag
+						<Link href="/min-oversikt">
+							Se dine lag
 							<Trophy className="h-4 w-4 stroke-[1.75] sm:h-6 sm:w-6" />
 						</Link>
 					</Button>

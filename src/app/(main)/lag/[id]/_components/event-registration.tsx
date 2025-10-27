@@ -10,6 +10,7 @@ import { Form } from "~/components/ui/form";
 import { createRegistrationSchema } from "~/schemas";
 import { api } from "~/trpc/react";
 import FormTextarea from "~/components/form/textarea";
+import { useRouter } from "next/navigation";
 
 interface EventRegistrationProps {
   eventId: string;
@@ -29,7 +30,7 @@ export default function EventRegistration({
   const [selectedType, setSelectedType] = useState<
     "ATTENDING" | "NOT_ATTENDING" | null
   >(null);
-
+  const router = useRouter();
   const utils = api.useUtils();
 
   const form = useForm<FormValues>({
@@ -45,7 +46,7 @@ export default function EventRegistration({
     onSuccess: () => {
       utils.registration.getMyRegistration.invalidate({ eventId });
       utils.registration.getCounts.invalidate({ eventId });
-      // Don't reset selectedType here - keep the user's selection visible
+      utils.registration.getAllByEvent.invalidate({ eventId });
     },
   });
 

@@ -1,5 +1,7 @@
 import type { User } from "@prisma/client";
 import type z from "zod";
+import { env } from "~/env";
+import { sendEmail } from "~/lib/email";
 import { CreateEventInputSchema } from "~/schemas";
 import { db } from "~/server/db";
 import { hasTeamAccess } from "~/services";
@@ -23,6 +25,40 @@ const handler: Controller<
 			note: input.note,
 		},
 	});
+
+	const userEmails = await db.teamMember.findMany({
+		where: {
+			teamId: input.teamId,
+		},
+		select: {
+			user: {
+				select: {
+					email: true,
+				},
+			},
+		},
+	});
+
+	const emails = userEmails.map((member) => member.user.email);
+
+	await sendEmail(emails, "Nytt arrangement opprettet", [
+		{ type: "title", content: "Nytt arrangement opprettet" },
+		{
+			type: "text",
+			content: `Et nytt arrangement "${input.name}" har blitt opprettet for ditt lag.`,
+		},
+		{
+			type: "text",
+			content: `Dato og tid: ${input.datetime.toLocaleString()}`,
+		},
+		{ type: "text", content: input.location ? `Sted: ${input.location}` : "" },
+		{ type: "text", content: input.note ? `Notat: ${input.note}` : "" },
+		{
+			type: "button",
+			text: "Se arrangementet",
+			url: `${env.NEXT_PUBLIC_URL}/lag/${input.teamId}`,
+		},
+	]);
 };
 
 export default authorizedProcedure

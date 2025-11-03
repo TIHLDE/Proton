@@ -1,34 +1,34 @@
 "use client";
 
+import type { TeamEvent, TeamEventType } from "@prisma/client";
 import { Users } from "lucide-react";
 import type { ReactNode } from "react";
 import { H2 } from "~/components/ui/typography";
+import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 import EventRegistration from "./event-registration";
 import NotifyUnattended from "./notify-unattended";
 import RegistrationList from "./registration-list";
 
 interface EventCardProps {
-	event: {
-		id: string;
-		name: string;
-		type: string;
-		datetime: Date | string;
-		location: string | null;
-		note: string | null;
-	};
+	event: TeamEvent;
 	actions?: ReactNode;
 	showRegistration?: boolean;
 }
 
-const getEventTypeLabel = (type: string): string => {
-	const typeMap: Record<string, string> = {
-		TRAINING: "Trening",
-		MATCH: "Kamp",
-		SOCIAL: "Sosialt",
-		OTHER: "Annet",
-	};
-	return typeMap[type] || type;
+const getEventTypeLabel = (type: TeamEventType): string => {
+	switch (type) {
+		case "MATCH":
+			return "Kamp";
+		case "TRAINING":
+			return "Trening";
+		case "SOCIAL":
+			return "Sosialt";
+		case "OTHER":
+			return "Annet";
+		default:
+			return "Ukjent";
+	}
 };
 
 export default function EventCard({
@@ -47,18 +47,29 @@ export default function EventCard({
 	);
 
 	return (
-		<div className="space-y-4 rounded-lg border bg-card p-6 shadow transition-shadow hover:shadow-md">
+		<div
+			className={cn(
+				"space-y-4 rounded-lg p-6 text-white shadow transition-shadow hover:shadow-md",
+				event.eventType === "MATCH" &&
+					"bg-gradient-to-b from-[#6e2a70] to-[#4c126b]",
+				event.eventType === "OTHER" && "bg-card",
+				event.eventType === "SOCIAL" &&
+					"bg-gradient-to-b from-[#565220] to-[#563A20]",
+				event.eventType === "TRAINING" &&
+					"bg-gradient-to-b from-[#3A2056] to-[#0b0941]",
+			)}
+		>
 			<div className="flex items-center justify-between">
 				<H2>{event.name}</H2>
 				{actions}
 			</div>
-			<div className="space-y-2 text-muted-foreground text-sm">
+			<div className="space-y-2 text-sm">
 				<p>
-					<strong>Type:</strong> {getEventTypeLabel(event.type)}
+					<strong>Type:</strong> {getEventTypeLabel(event.eventType)}
 				</p>
 				<p>
 					<strong>Dato:</strong>{" "}
-					{new Date(event.datetime).toLocaleString("nb-NO")}
+					{new Date(event.startAt).toLocaleString("nb-NO")}
 				</p>
 				<p>
 					<strong>Sted:</strong> {event.location || "Ikke oppgitt"}

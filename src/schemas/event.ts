@@ -4,7 +4,7 @@ export const CreateEventInputSchema = z.object({
 	teamId: z.string().min(1, { message: "Team ID er påkrevd" }),
 	name: z.string().min(1, { message: "Navn er påkrevd" }),
 	datetime: z.date({ required_error: "Dato og tid er påkrevd" }),
-	type: z.enum(["TRAINING", "MATCH", "SOCIAL", "OTHER"], {
+	type: z.string({
 		required_error: "Type er påkrevd",
 	}),
 	location: z

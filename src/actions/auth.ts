@@ -62,7 +62,7 @@ export async function login(
 		// Check if email is taken
 		const emailTaken = await db.user.findUnique({
 			where: {
-				email: userData.email,
+				email: userData.email.toLowerCase(),
 			},
 		});
 
@@ -75,17 +75,18 @@ export async function login(
 		// Check if user exists
 		const existingUser = await db.user.findUnique({
 			where: {
-				email: userData.email,
+				email: userData.email.toLowerCase(),
 				username: userData.user_id,
 			},
 		});
 
 		// If not, create user
 		if (!existingUser) {
+			console.log("Creating new user...");
 			return {
 				userData: {
 					fullName: `${userData.first_name} ${userData.last_name}`,
-					email: userData.email,
+					email: userData.email.toLowerCase(),
 					username: userData.user_id,
 					isNewUser: true,
 				},
@@ -95,7 +96,7 @@ export async function login(
 		return {
 			userData: {
 				fullName: `${userData.first_name} ${userData.last_name}`,
-				email: userData.email,
+				email: userData.email.toLowerCase(),
 				username: userData.user_id,
 				isNewUser: false,
 			},

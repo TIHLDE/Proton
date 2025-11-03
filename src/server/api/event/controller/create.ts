@@ -4,15 +4,15 @@ import { env } from "~/env";
 import { sendEmail } from "~/lib/email";
 import { CreateEventInputSchema } from "~/schemas";
 import { db } from "~/server/db";
-import { hasTeamAccess } from "~/services";
 import { type Controller, authorizedProcedure } from "../../trpc";
+import { hasTeamAccessMiddleware } from "../../util/auth";
 
 const handler: Controller<
 	z.infer<typeof CreateEventInputSchema>,
 	void
 > = async ({ input, ctx }) => {
 	// Check if user has access
-	await hasTeamAccess(input.teamId, ctx.user as User);
+	await hasTeamAccessMiddleware(ctx.user as User, input.teamId, ["ADMIN"]);
 
 	await db.teamEvent.create({
 		data: {

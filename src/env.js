@@ -7,12 +7,12 @@ export const env = createEnv({
 	 * isn't built with invalid env vars.
 	 */
 	server: {
-		DATABASE_URL: z.string().url(),
+		DATABASE_URL: z.string().optional(),
 		NODE_ENV: z
 			.enum(["development", "test", "production"])
 			.default("development"),
-		BETTER_AUTH_SECRET: z.string(),
-		EMAIL_API_KEY: z.string(),
+		BETTER_AUTH_SECRET: z.string().optional(),
+		EMAIL_API_KEY: z.string().optional(),
 	},
 
 	/**
@@ -21,7 +21,7 @@ export const env = createEnv({
 	 * `NEXT_PUBLIC_`.
 	 */
 	client: {
-		NEXT_PUBLIC_URL: z.string().url(),
+		NEXT_PUBLIC_URL: z.string().optional(),
 		// NEXT_PUBLIC_CLIENTVAR: z.string(),
 	},
 

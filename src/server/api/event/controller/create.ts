@@ -1,4 +1,4 @@
-import type { User } from "@prisma/client";
+import type { TeamEventType, User } from "@prisma/client";
 import type z from "zod";
 import { env } from "~/env";
 import { sendEmail } from "~/lib/email";
@@ -18,7 +18,7 @@ const handler: Controller<
 		data: {
 			teamId: input.teamId,
 			name: input.name,
-			eventType: input.type,
+			eventType: input.type as TeamEventType,
 			startAt: input.datetime,
 			endAt: input.datetime,
 			location: input.location,
@@ -51,8 +51,16 @@ const handler: Controller<
 			type: "text",
 			content: `Dato og tid: ${input.datetime.toLocaleString()}`,
 		},
-		{ type: "text", content: input.location ? `Sted: ${input.location}` : "" },
-		{ type: "text", content: input.note ? `Notat: ${input.note}` : "" },
+		{
+			type: "text",
+			content: input.location
+				? `Sted: ${input.location}`
+				: "Sted: ikke oppgitt",
+		},
+		{
+			type: "text",
+			content: input.note ? `Notat: ${input.note}` : "Ingen beskrivelse",
+		},
 		{
 			type: "button",
 			text: "Se arrangementet",

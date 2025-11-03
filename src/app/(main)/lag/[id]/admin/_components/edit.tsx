@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import type { TeamEvent } from "@prisma/client";
 import { format } from "date-fns";
 import { Pencil } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -53,14 +54,7 @@ const eventSchema = z.object({
 type EventFormData = z.infer<typeof eventSchema>;
 
 interface EditEventProps {
-	event: {
-		id: string;
-		name: string;
-		datetime: Date;
-		type: "TRAINING" | "MATCH" | "SOCIAL" | "OTHER";
-		location?: string | null;
-		note?: string | null;
-	};
+	event: TeamEvent;
 	teamId: string;
 }
 
@@ -74,8 +68,8 @@ export default function EditEvent({ event, teamId }: EditEventProps) {
 		defaultValues: {
 			id: event.id,
 			name: event.name,
-			datetime: new Date(event.datetime),
-			type: event.type,
+			datetime: new Date(event.startAt),
+			type: event.eventType,
 			location: event.location || "",
 			note: event.note || "",
 		},
@@ -131,7 +125,7 @@ export default function EditEvent({ event, teamId }: EditEventProps) {
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>
-				<Button size="sm" variant="outline">
+				<Button size="sm">
 					<Pencil className="h-4 w-4" />
 				</Button>
 			</DialogTrigger>

@@ -66,19 +66,7 @@ export default async function EventsAdminPage({ params }: EventPageProps) {
 						<EventCard
 							key={event.id}
 							event={event}
-							actions={
-								<EditEvent
-									event={{
-										...event,
-										type: event.type as
-											| "TRAINING"
-											| "MATCH"
-											| "SOCIAL"
-											| "OTHER",
-									}}
-									teamId={id}
-								/>
-							}
+							actions={<EditEvent event={event} teamId={id} />}
 						/>
 					))}
 				</div>

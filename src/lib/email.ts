@@ -26,6 +26,7 @@ export async function sendEmail(
 				);
 
 				if (!response.ok) {
+					console.log(await response.text());
 					throw new Error(
 						`Failed to send email to ${recipient}: ${response.statusText}`,
 					);

@@ -11,19 +11,20 @@ datasource db {
 }
 
 model User {
-  id            String    @id
+  id            String  @id
   name          String
   email         String
-  emailVerified Boolean   @default(true)
+  emailVerified Boolean @default(true)
   image         String?
-  isAdmin       Boolean   @default(false)
-  username      String?   @unique
+  isAdmin       Boolean @default(false)
+  username      String? @unique
 
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @default(now()) @updatedAt
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @default(now()) @updatedAt
   sessions      Session[]
   accounts      Account[]
   memberships   TeamMember[]
+  registrations Registration[]
 
   @@unique([email])
   @@map("user")
@@ -75,26 +76,26 @@ model Verification {
 }
 
 model Team {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  slug      String?   @unique
+  id   String  @id @default(cuid())
+  name String  @unique
+  slug String? @unique
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  members   TeamMember[]
-  events    TeamEvent[]
-  
+  members TeamMember[]
+  events  TeamEvent[]
+
   @@map("team")
 }
 
 model TeamMember {
-  id        String   @id @default(cuid())
-  role      TeamRole @default(USER)
-  userId    String
-  teamId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  id     String   @id @default(cuid())
+  role   TeamRole @default(USER)
+  userId String
+  teamId String
+  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  team   Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -109,15 +110,16 @@ enum TeamRole {
 }
 
 model TeamEvent {
-  id        String   @id @default(cuid())
-  teamId    String
-  eventType TeamEventType
-  name      String
-  startAt   DateTime
-  endAt     DateTime?
-  location  String?
-  note      String?
-  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  id            String         @id @default(cuid())
+  teamId        String
+  eventType     TeamEventType
+  name          String
+  startAt       DateTime
+  endAt         DateTime?
+  location      String?
+  note          String?
+  team          Team           @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  registrations Registration[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -130,4 +132,25 @@ enum TeamEventType {
   MATCH
   SOCIAL
   OTHER
+}
+
+model Registration {
+  id      String           @id @default(cuid())
+  userId  String
+  eventId String
+  type    RegistrationType
+  comment String?
+  user    User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event   TeamEvent        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@unique([userId, eventId])
+  @@map("registration")
+}
+
+enum RegistrationType {
+  ATTENDING
+  NOT_ATTENDING
 }

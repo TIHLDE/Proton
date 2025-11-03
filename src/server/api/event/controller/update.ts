@@ -2,15 +2,15 @@ import type { User } from "@prisma/client";
 import type z from "zod";
 import { UpdateEventInputSchema } from "~/schemas";
 import { db } from "~/server/db";
-import { hasTeamAccess } from "~/services";
 import { type Controller, authorizedProcedure } from "../../trpc";
+import { hasTeamAccessMiddleware } from "../../util/auth";
 
 const handler: Controller<
 	z.infer<typeof UpdateEventInputSchema>,
 	void
 > = async ({ input, ctx }) => {
 	// Check if the user has access
-	await hasTeamAccess(input.teamId, ctx.user as User);
+	await hasTeamAccessMiddleware(ctx.user as User, input.teamId, ["ADMIN"]);
 
 	await db.teamEvent.update({
 		where: { id: input.id },

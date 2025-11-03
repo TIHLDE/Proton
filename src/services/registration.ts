@@ -131,8 +131,7 @@ export const getRegistrationCountsByEvent = async (eventId: string) => {
 			attending:
 				registrations.find((r) => r.type === "ATTENDING")?._count.type ?? 0,
 			notAttending:
-				registrations.find((r) => r.type === "NOT_ATTENDING")?._count.type ??
-				0,
+				registrations.find((r) => r.type === "NOT_ATTENDING")?._count.type ?? 0,
 		};
 	} catch (error) {
 		console.error("Error fetching registration counts:", error);

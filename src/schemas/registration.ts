@@ -28,3 +28,8 @@ export type GetRegistrationByEventInput = z.infer<
 	typeof getRegistrationByEventSchema
 >;
 export type DeleteRegistrationInput = z.infer<typeof deleteRegistrationSchema>;
+
+export const notifyUnattendedEventRegistrationSchema = z.object({
+	eventId: z.string().min(1, "Event ID er påkrevd"),
+	teamId: z.string().min(1, "Team ID er påkrevd"),
+});

@@ -10,8 +10,8 @@ import MainSidebarGroup from "./main-group";
 
 export default function AdminSidebar() {
 	return (
-		<Sidebar className="bg-gray-50/40">
-			<SidebarHeader className="pt-4 pb-12">
+		<Sidebar className="border-none bg-background">
+			<SidebarHeader className="bg-background pt-4 pb-12">
 				<div className="flex items-center justify-between">
 					<Link href="/">
 						<TihldeLogo size="large" className="h-auto w-32" />
@@ -19,7 +19,7 @@ export default function AdminSidebar() {
 					<SidebarTrigger />
 				</div>
 			</SidebarHeader>
-			<SidebarContent>
+			<SidebarContent className="bg-background">
 				<MainSidebarGroup />
 			</SidebarContent>
 		</Sidebar>

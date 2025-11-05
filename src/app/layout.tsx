@@ -3,9 +3,6 @@ import "~/styles/globals.css";
 import type { Metadata } from "next";
 
 import { Inter } from "next/font/google";
-import BottomBar from "~/components/navigation/bottom-bar";
-import Footer from "~/components/navigation/footer";
-import Navbar from "~/components/navigation/top-bar";
 import Providers from "./_components/providers";
 
 export const metadata: Metadata = {

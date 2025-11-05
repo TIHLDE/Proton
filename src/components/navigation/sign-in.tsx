@@ -3,23 +3,28 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type z from "zod";
 import { login } from "~/actions";
-import FormInput from "~/components/form/input";
-import { Button } from "~/components/ui/button";
-import { Card, CardContent } from "~/components/ui/card";
-import { Form } from "~/components/ui/form";
 import { authClient } from "~/lib/auth-client";
-import { cn } from "~/lib/utils";
 import { SignInInputSchema } from "~/schemas";
+import FormInput from "../form/input";
+import TihldeLogo from "../logo";
+import { Button } from "../ui/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "../ui/dialog";
+import { Form } from "../ui/form";
 
-export function LoginForm({
-	className,
-	...props
-}: React.ComponentProps<"div">) {
+export default function LoginForm() {
+	const [open, setOpen] = useState<boolean>(false);
 	const [isPending, startTransition] = useTransition();
 	const router = useRouter();
 
@@ -83,53 +88,55 @@ export function LoginForm({
 	};
 
 	return (
-		<div className={cn("flex flex-col gap-6", className)} {...props}>
-			<Card className="overflow-hidden p-0">
-				<CardContent className="grid p-0 md:grid-cols-2">
-					<Form {...form}>
-						<form className="p-6 md:p-8" onSubmit={form.handleSubmit(onSubmit)}>
-							<div className="flex flex-col gap-6">
-								<div className="flex flex-col items-center text-center">
-									<h1 className="font-bold text-2xl">Velkommen tilbake</h1>
-									<p className="text-balance text-muted-foreground">
-										Logg inn med din TIHLDE bruker
-									</p>
-								</div>
-								<FormInput
-									form={form}
-									name="username"
-									required
-									label="Brukernavn"
-								/>
-
-								<FormInput
-									form={form}
-									name="password"
-									type="password"
-									required
-									label="Passord"
-								/>
-
-								<Button type="submit" className="w-full" disabled={isPending}>
-									{isPending ? (
-										<Loader2 className="animate-spin" />
-									) : (
-										<span>Logg inn</span>
-									)}
-								</Button>
-							</div>
-						</form>
-					</Form>
-					<div className="relative hidden items-center justify-center bg-card md:flex">
-						{/* <Image
-							src="/images/signin.png"
-							alt="Logg inn"
-							width={300}
-							height={200}
-						/> */}
+		<Dialog open={open} onOpenChange={setOpen}>
+			<DialogTrigger asChild>
+				<Button variant="outline">Logg inn</Button>
+			</DialogTrigger>
+			<DialogContent className="md:max-w-md">
+				<div className="mb-4 flex flex-col items-center gap-2">
+					<div
+						className="flex size-14 shrink-0 items-center justify-center rounded-full border"
+						aria-hidden="true"
+					>
+						<TihldeLogo size="small" className="size-9" />
 					</div>
-				</CardContent>
-			</Card>
-		</div>
+					<DialogHeader>
+						<DialogTitle className="sm:text-center">
+							Velkommen tilbake
+						</DialogTitle>
+						<DialogDescription className="sm:text-center">
+							Bruk din TIHLDE bruker for å logge inn
+						</DialogDescription>
+					</DialogHeader>
+				</div>
+
+				<Form {...form}>
+					<form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
+						<FormInput
+							form={form}
+							name="username"
+							required
+							label="Brukernavn"
+						/>
+
+						<FormInput
+							form={form}
+							name="password"
+							type="password"
+							required
+							label="Passord"
+						/>
+
+						<Button type="submit" className="w-full" disabled={isPending}>
+							{isPending ? (
+								<Loader2 className="animate-spin" />
+							) : (
+								<span>Logg inn</span>
+							)}
+						</Button>
+					</form>
+				</Form>
+			</DialogContent>
+		</Dialog>
 	);
 }

@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { authClient } from "~/lib/auth-client";
 import TihldeLogo from "../logo";
 import { Button } from "../ui/button";
+import LoginForm from "./sign-in";
 import UserAvatar from "./user-avatar";
 
 const navigationItems = [
@@ -73,19 +74,11 @@ const Navbar = () => {
 				</div>
 				<div className="flex items-center justify-end gap-x-2">
 					{isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-					{!session?.user && !isPending && (
-						<Button
-							variant="outline"
-							size="sm"
-							asChild
-							className="text-xs sm:text-sm"
-						>
-							<Link href="/auth/logg-inn">Logg inn</Link>
-						</Button>
-					)}
+					{!session?.user && !isPending && <LoginForm />}
 					{session?.user && <UserAvatar />}
 					<Button
-						size="sm"
+						size="icon"
+						variant="ghost"
 						onClick={toggleDarkMode}
 						className="h-8 w-8 sm:h-10 sm:w-10"
 					>

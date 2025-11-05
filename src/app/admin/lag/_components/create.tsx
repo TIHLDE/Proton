@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus } from "lucide-react";
+import { Award, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -56,19 +56,24 @@ export default function CreateTeam() {
 					Opprett lag
 				</Button>
 			</DialogTrigger>
-			<DialogContent>
-				<DialogHeader>
-					<DialogTitle>Opprett nytt lag</DialogTitle>
-					<DialogDescription>
-						Fyll inn informasjonen under for å opprette et nytt idrettslag.
-					</DialogDescription>
-				</DialogHeader>
+			<DialogContent className="md:max-w-md">
+				<div className="mb-4 flex flex-col items-center gap-2">
+					<div
+						className="flex size-11 shrink-0 items-center justify-center rounded-full border"
+						aria-hidden="true"
+					>
+						<Award className="size-5" />
+					</div>
+					<DialogHeader>
+						<DialogTitle className="sm:text-center">Opprett lag</DialogTitle>
+						<DialogDescription className="sm:text-center">
+							Fyll inn informasjonen under for å opprette et nytt lag.
+						</DialogDescription>
+					</DialogHeader>
+				</div>
 
 				<Form {...form}>
-					<form
-						className="mt-6 space-y-8"
-						onSubmit={form.handleSubmit(onSubmit)}
-					>
+					<form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
 						<FormInput
 							form={form}
 							name="name"
@@ -85,14 +90,11 @@ export default function CreateTeam() {
 							description="Vi trenger denne for å hente medlemskap"
 						/>
 
-						<div className="md:flex md:justify-end">
-							<SubmitButton
-								status={status}
-								text="Opprett lag"
-								size="sm"
-								className="md:w-auto"
-							/>
-						</div>
+						<SubmitButton
+							status={status}
+							text="Opprett lag"
+							className="w-full"
+						/>
 					</form>
 				</Form>
 			</DialogContent>

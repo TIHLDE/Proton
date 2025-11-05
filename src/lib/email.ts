@@ -6,6 +6,8 @@ export async function sendEmail(
 	subject: string,
 	content: EmailContent[],
 ) {
+	if (env.NODE_ENV !== "production") return;
+
 	try {
 		await Promise.all(
 			to.map(async (recipient) => {
@@ -26,7 +28,6 @@ export async function sendEmail(
 				);
 
 				if (!response.ok) {
-					console.log(await response.text());
 					throw new Error(
 						`Failed to send email to ${recipient}: ${response.statusText}`,
 					);

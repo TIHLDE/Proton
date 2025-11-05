@@ -20,12 +20,12 @@ export default async function AdminPage() {
 			</div>
 
 			<div className="grid gap-6 md:grid-cols-2">
-				<div className="space-y-6 rounded-lg bg-card p-4 shadow">
+				<div className="space-y-6 rounded-lg border bg-card p-4 shadow">
 					<H2>Antall lag</H2>
 					<H3>{teamCount}</H3>
 				</div>
 
-				<div className="space-y-6 rounded-lg bg-card p-4 shadow">
+				<div className="space-y-6 rounded-lg border bg-card p-4 shadow">
 					<H2>Antall unike medlemmer</H2>
 					<H3>{membershipsCount}</H3>
 				</div>

@@ -95,7 +95,7 @@ export default function RegistrationList({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-h-[80vh] overflow-y-auto sm:max-w-4xl">
         <DialogHeader>
           <DialogTitle>{eventName}</DialogTitle>
         </DialogHeader>
@@ -114,7 +114,7 @@ export default function RegistrationList({
           {getDialogUsers().length === 0 ? (
             <P className="text-muted-foreground">Ingen personer</P>
           ) : (
-            <div className="space-y-2">
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
               {getDialogUsers().map((item: Registration | NonRespondedUser) => {
                 const isRegistration = "comment" in item;
                 return (

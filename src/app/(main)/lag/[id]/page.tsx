@@ -8,7 +8,12 @@ import { notFound } from "next/navigation";
 import { Button } from "~/components/ui/button";
 import { H1, H2, P } from "~/components/ui/typography";
 import { auth } from "~/lib/auth";
-import { getAllOngoingEventsByTeamId, getTeam, getTeamMembershipRoles, hasTeamAccess } from "~/services";
+import {
+	getAllOngoingEventsByTeamId,
+	getTeam,
+	getTeamMembershipRoles,
+	hasTeamAccess,
+} from "~/services";
 import EventCard from "./_components/event-card";
 
 interface TeamPageProps {
@@ -43,7 +48,9 @@ export default async function TeamPage({ params }: TeamPageProps) {
 				</div>
 
 				<div className="grid grid-cols-2 gap-x-2">
-					{(roles.includes("ADMIN") || roles.includes("SUBADMIN")) && (
+					{(roles.includes("ADMIN") ||
+						roles.includes("SUBADMIN") ||
+						session.user.isAdmin) && (
 						<Button asChild>
 							<Link href={`/lag/${team.id}/admin`}>
 								Administrer lag
@@ -79,7 +86,11 @@ export default async function TeamPage({ params }: TeamPageProps) {
 								key={event.id}
 								event={event}
 								showRegistration={true}
-								isAdmin={session.user.isAdmin || membership === "ADMIN"}
+								isAdmin={
+									session.user.isAdmin ||
+									roles.includes("ADMIN") ||
+									roles.includes("SUBADMIN")
+								}
 							/>
 						))}
 					</div>

@@ -5,6 +5,7 @@ import { Check, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import type { z } from "zod";
 import FormTextarea from "~/components/form/textarea";
 import { Button } from "~/components/ui/button";
@@ -62,6 +63,14 @@ export default function EventRegistration({
 	};
 
 	const handleNotAttendingSubmit = form.handleSubmit((data) => {
+		if (data.type === "NOT_ATTENDING" && data.comment?.trim() === "") {
+			toast.error(
+				"Vennligst oppgi en begrunnelse for hvorfor du ikke kan delta.",
+			);
+			form.setError("comment", { message: "Begrunnelse er påkrevd." });
+			return;
+		}
+
 		register(data, {
 			onSuccess: () => {
 				// Close the comment field after successful submission

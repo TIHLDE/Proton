@@ -33,6 +33,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
 	if (!team) notFound();
 
 	const events = await getAllOngoingEventsByTeamId(id);
+	const roles = await getTeamMembershipRoles(session.user.id, id);
 
 	return (
 		<div className="mx-auto min-h-screen w-full max-w-7xl space-y-12 px-2 py-24 md:space-y-20 md:py-32 lg:px-12">
@@ -42,7 +43,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
 				</div>
 
 				<div className="grid grid-cols-2 gap-x-2">
-					{membership === "ADMIN" && (
+					{(roles.includes("ADMIN") || roles.includes("SUBADMIN")) && (
 						<Button asChild>
 							<Link href={`/lag/${team.id}/admin`}>
 								Administrer lag

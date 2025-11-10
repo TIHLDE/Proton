@@ -11,7 +11,10 @@ const handler: Controller<
 	z.infer<typeof notifyUnattendedEventRegistrationSchema>,
 	void
 > = async ({ input, ctx }) => {
-	await hasTeamAccessMiddleware(ctx.user as User, input.teamId, ["ADMIN"]);
+	await hasTeamAccessMiddleware(ctx.user as User, input.teamId, [
+		"ADMIN",
+		"SUBADMIN",
+	]);
 
 	const event = await ctx.db.teamEvent.findUnique({
 		where: {

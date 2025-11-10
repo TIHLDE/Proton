@@ -3,6 +3,7 @@
 import type { TeamEvent, TeamEventType } from "@prisma/client";
 import { Users } from "lucide-react";
 import type { ReactNode } from "react";
+import { useState } from "react";
 import { H2 } from "~/components/ui/typography";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
@@ -14,6 +15,7 @@ interface EventCardProps {
 	event: TeamEvent;
 	actions?: ReactNode;
 	showRegistration?: boolean;
+	isAdmin?: boolean;
 }
 
 const getEventTypeLabel = (type: TeamEventType): string => {
@@ -35,7 +37,13 @@ export default function EventCard({
 	event,
 	actions,
 	showRegistration = false,
+	isAdmin = false,
 }: EventCardProps) {
+	const [dialogOpen, setDialogOpen] = useState(false);
+	const [selectedStatus, setSelectedStatus] = useState<
+		"attending" | "notAttending" | "notResponded" | null
+	>(null);
+
 	const { data: registration } = api.registration.getMyRegistration.useQuery(
 		{ eventId: event.id },
 		{ enabled: showRegistration },
@@ -45,6 +53,13 @@ export default function EventCard({
 		{ eventId: event.id },
 		{ enabled: showRegistration },
 	);
+
+	const handleStatusClick = (
+		status: "attending" | "notAttending" | "notResponded",
+	) => {
+		setSelectedStatus(status);
+		setDialogOpen(true);
+	};
 
 	return (
 		<div
@@ -84,18 +99,36 @@ export default function EventCard({
 			</div>
 
 			{showRegistration && counts && (
-				<div className="flex items-center justify-between border-t pt-4 text-sm">
-					<div className="flex items-center gap-4">
-						<div className="flex items-center gap-2 text-green-600">
+				<div className="border-t pt-4 text-sm">
+					<div className="grid grid-cols-3 gap-4">
+						<button
+							type="button"
+							onClick={() => handleStatusClick("attending")}
+							className="flex flex-col items-center gap-1 text-green-600 transition-opacity hover:opacity-80"
+						>
 							<Users className="h-4 w-4" />
-							<span>{counts.attending} kommer</span>
-						</div>
-						<div className="flex items-center gap-2 text-red-600">
+							<span className="text-xs">Påmeldt</span>
+							<span className="font-semibold">{counts.attending}</span>
+						</button>
+						<button
+							type="button"
+							onClick={() => handleStatusClick("notAttending")}
+							className="flex flex-col items-center gap-1 text-red-600 transition-opacity hover:opacity-80"
+						>
 							<Users className="h-4 w-4" />
-							<span>{counts.notAttending} kommer ikke</span>
-						</div>
+							<span className="text-xs">Avmeldt</span>
+							<span className="font-semibold">{counts.notAttending}</span>
+						</button>
+						<button
+							type="button"
+							onClick={() => handleStatusClick("notResponded")}
+							className="flex flex-col items-center gap-1 text-yellow-600 transition-opacity hover:opacity-80"
+						>
+							<Users className="h-4 w-4" />
+							<span className="text-xs">Ikke svart</span>
+							<span className="font-semibold">{counts.notResponded}</span>
+						</button>
 					</div>
-					<RegistrationList eventId={event.id} eventName={event.name} />
 				</div>
 			)}
 
@@ -109,6 +142,15 @@ export default function EventCard({
 			)}
 
 			{!showRegistration && <NotifyUnattended eventId={event.id} />}
+
+			<RegistrationList
+				eventId={event.id}
+				eventName={event.name}
+				open={dialogOpen}
+				onOpenChange={setDialogOpen}
+				statusFilter={selectedStatus}
+				isAdmin={isAdmin}
+			/>
 		</div>
 	);
 }

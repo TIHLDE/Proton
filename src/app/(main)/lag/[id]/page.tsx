@@ -75,7 +75,12 @@ export default async function TeamPage({ params }: TeamPageProps) {
 					<H2>Kommende arrangementer</H2>
 					<div className="grid w-full gap-6 md:grid-cols-2 lg:grid-cols-3">
 						{events.map((event) => (
-							<EventCard key={event.id} event={event} showRegistration={true} />
+							<EventCard
+								key={event.id}
+								event={event}
+								showRegistration={true}
+								isAdmin={session.user.isAdmin || membership === "ADMIN"}
+							/>
 						))}
 					</div>
 				</div>

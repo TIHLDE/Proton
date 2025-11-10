@@ -1,27 +1,39 @@
 "use client";
 
 import type { RegistrationType } from "@prisma/client";
-import { Users } from "lucide-react";
-import { Button } from "~/components/ui/button";
 import {
 	Dialog,
 	DialogContent,
 	DialogDescription,
 	DialogHeader,
 	DialogTitle,
-	DialogTrigger,
 } from "~/components/ui/dialog";
 import { H3, P } from "~/components/ui/typography";
+import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 
 interface RegistrationListProps {
 	eventId: string;
 	eventName: string;
+	open: boolean;
+	onOpenChange: (open: boolean) => void;
+	statusFilter: "attending" | "notAttending" | "notResponded" | null;
+	isAdmin?: boolean;
 }
 
 type Registration = {
 	id: string;
 	type: RegistrationType;
+	comment?: string | null;
+	user: {
+		id: string;
+		name: string;
+		image: string | null;
+	};
+};
+
+type NonRespondedUser = {
+	id: string;
 	user: {
 		id: string;
 		name: string;
@@ -32,82 +44,108 @@ type Registration = {
 export default function RegistrationList({
 	eventId,
 	eventName,
+	open,
+	onOpenChange,
+	statusFilter,
+	isAdmin = false,
 }: RegistrationListProps) {
-	const { data: registrations, isLoading } =
-		api.registration.getAllByEvent.useQuery({
-			eventId,
-		});
+	const { data: registrations, isLoading: isLoadingRegistrations } =
+		api.registration.getAllByEvent.useQuery(
+			{ eventId },
+			{ enabled: open && statusFilter !== "notResponded" },
+		);
 
-	const attending =
-		registrations?.filter((r: Registration) => r.type === "ATTENDING") ?? [];
-	const notAttending =
-		registrations?.filter((r: Registration) => r.type === "NOT_ATTENDING") ??
-		[];
+	const { data: nonResponded, isLoading: isLoadingNonResponded } =
+		api.registration.getNonResponded.useQuery(
+			{ eventId },
+			{ enabled: open && statusFilter === "notResponded" },
+		);
+
+	const getDialogTitle = () => {
+		switch (statusFilter) {
+			case "attending":
+				return "Påmeldt";
+			case "notAttending":
+				return "Avmeldt";
+			case "notResponded":
+				return "Ikke svart";
+			default:
+				return "";
+		}
+	};
+
+	const getDialogUsers = () => {
+		if (statusFilter === "notResponded") {
+			return nonResponded || [];
+		}
+
+		if (!registrations) return [];
+
+		return registrations.filter((r: Registration) =>
+			statusFilter === "attending"
+				? r.type === "ATTENDING"
+				: r.type === "NOT_ATTENDING",
+		);
+	};
+
+	const isLoading =
+		statusFilter === "notResponded"
+			? isLoadingNonResponded
+			: isLoadingRegistrations;
+
 	return (
-		<Dialog>
-			<DialogTrigger asChild>
-				<Button variant="ghost" size="sm" className="h-auto p-0">
-					<Users className="h-4 w-4" />
-				</Button>
-			</DialogTrigger>
-			<DialogContent className="max-h-[80vh] overflow-y-auto">
+		<Dialog open={open} onOpenChange={onOpenChange}>
+			<DialogContent className="max-h-[80vh] overflow-y-auto sm:max-w-4xl">
 				<DialogHeader>
 					<DialogTitle>{eventName}</DialogTitle>
-					<DialogDescription>Påmeldingsoversikt</DialogDescription>
 				</DialogHeader>
 
-				<div className="space-y-6">
-					<div>
-						<H3 className="mb-3 text-green-600">Kommer ({attending.length})</H3>
-						{attending.length === 0 ? (
-							<P className="text-muted-foreground">Ingen påmeldte ennå</P>
-						) : (
-							<div className="space-y-2">
-								{attending.map((registration: Registration) => (
-									<div
-										key={registration.id}
-										className="flex items-center gap-3 rounded-lg border bg-card p-3"
-									>
-										{registration.user.image && (
-											<img
-												src={registration.user.image}
-												alt={registration.user.name}
-												className="h-8 w-8 rounded-full"
-											/>
-										)}
-										<span>{registration.user.name}</span>
-									</div>
-								))}
-							</div>
+				<div className="space-y-4">
+					<H3
+						className={cn(
+							"mb-3",
+							statusFilter === "attending" && "text-green-600",
+							statusFilter === "notAttending" && "text-red-600",
+							statusFilter === "notResponded" && "text-yellow-600",
 						)}
-					</div>
-
-					<div>
-						<H3 className="mb-3 text-red-600">
-							Kommer ikke ({notAttending.length})
-						</H3>
-						{notAttending.length === 0 ? (
-							<P className="text-muted-foreground">Ingen avmeldinger</P>
-						) : (
-							<div className="space-y-2">
-								{notAttending.map((registration: Registration) => (
+					>
+						{getDialogTitle()} ({getDialogUsers().length})
+					</H3>
+					{getDialogUsers().length === 0 ? (
+						<P className="text-muted-foreground">Ingen personer</P>
+					) : (
+						<div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
+							{getDialogUsers().map((item: Registration | NonRespondedUser) => {
+								const isRegistration = "comment" in item;
+								return (
 									<div
-										key={registration.id}
-										className="flex items-center gap-3 rounded-lg border bg-card p-3"
+										key={item.id}
+										className="flex flex-col gap-2 rounded-lg border bg-card p-3"
 									>
-										{registration.user.image && (
-											<img
-												src={registration.user.image}
-												alt={registration.user.name}
-												className="h-8 w-8 rounded-full"
-											/>
-										)}
-										<span>{registration.user.name}</span>
+										<div className="flex items-center gap-3">
+											{item.user.image && (
+												<img
+													src={item.user.image}
+													alt={item.user.name}
+													className="h-8 w-8 rounded-full"
+												/>
+											)}
+											<span>{item.user.name}</span>
+										</div>
+										{isAdmin &&
+											statusFilter === "notAttending" &&
+											isRegistration &&
+											(item as Registration).comment && (
+												<div className="text-muted-foreground text-sm">
+													<span className="font-semibold">Grunn: </span>
+													{(item as Registration).comment}
+												</div>
+											)}
 									</div>
-								))}
-							</div>
-						)}
-					</div>
+								);
+							})}
+						</div>
+					)}
 				</div>
 
 				{isLoading && (

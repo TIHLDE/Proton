@@ -8,7 +8,7 @@ import { notFound } from "next/navigation";
 import { Button } from "~/components/ui/button";
 import { H1, H2, P } from "~/components/ui/typography";
 import { auth } from "~/lib/auth";
-import { getAllOngoingEventsByTeamId, getTeam, hasTeamAccess } from "~/services";
+import { getAllOngoingEventsByTeamId, getTeam, getTeamMembershipRoles, hasTeamAccess } from "~/services";
 import EventCard from "./_components/event-card";
 
 interface TeamPageProps {

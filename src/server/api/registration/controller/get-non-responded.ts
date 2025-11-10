@@ -29,41 +29,43 @@ const handler: Controller<
 		"USER",
 	]);
 
-	const registrations = await db.registration.groupBy({
-		by: ["type"],
-		where: {
-			eventId: input.eventId,
-		},
-		_count: {
-			type: true,
-		},
-	});
-
-	// Get total team members count
-	const totalTeamMembers = await db.teamMember.count({
+	// Get all team members
+	const teamMembers = await db.teamMember.findMany({
 		where: {
 			teamId: event.teamId,
 		},
-	});
-
-	// Get total number of users who have responded (either attending or not attending)
-	const totalResponded = await db.registration.count({
-		where: {
-			eventId: input.eventId,
+		include: {
+			user: {
+				select: {
+					id: true,
+					name: true,
+					image: true,
+				},
+			},
 		},
 	});
 
-	const attending =
-		registrations.find((r) => r.type === "ATTENDING")?._count.type ?? 0;
-	const notAttending =
-		registrations.find((r) => r.type === "NOT_ATTENDING")?._count.type ?? 0;
-	const notResponded = totalTeamMembers - totalResponded;
+	// Get all registrations for this event
+	const registrations = await db.registration.findMany({
+		where: {
+			eventId: input.eventId,
+		},
+		select: {
+			userId: true,
+		},
+	});
 
-	return {
-		attending,
-		notAttending,
-		notResponded,
-	};
+	const registeredUserIds = new Set(registrations.map((r) => r.userId));
+
+	// Filter team members who haven't registered
+	const nonResponded = teamMembers
+		.filter((member) => !registeredUserIds.has(member.userId))
+		.map((member) => ({
+			id: member.id,
+			user: member.user,
+		}));
+
+	return nonResponded;
 };
 
 export default authorizedProcedure

@@ -75,3 +75,17 @@ export async function getDistinctMembersCount() {
 
 	return result.length;
 }
+
+export async function getTeamMembershipRoles(userId: string, teamId: string) {
+	const roles = await db.teamMember.findMany({
+		where: {
+			userId,
+			teamId,
+		},
+		select: {
+			role: true,
+		},
+	});
+
+	return roles.map((membership) => membership.role);
+}

@@ -3,7 +3,6 @@ import { TRPCError } from "@trpc/server";
 import type z from "zod";
 import { getRegistrationByEventSchema } from "~/schemas";
 import { db } from "~/server/db";
-import { getRegistrationCountsByEvent } from "~/services";
 import { type Controller, authorizedProcedure } from "../../trpc";
 import { hasTeamAccessMiddleware } from "../../util/auth";
 
@@ -30,7 +29,22 @@ const handler: Controller<
 		"USER",
 	]);
 
-	return await getRegistrationCountsByEvent(input.eventId);
+	const registrations = await db.registration.groupBy({
+		by: ["type"],
+		where: {
+			eventId: input.eventId,
+		},
+		_count: {
+			type: true,
+		},
+	});
+
+	return {
+		attending:
+			registrations.find((r) => r.type === "ATTENDING")?._count.type ?? 0,
+		notAttending:
+			registrations.find((r) => r.type === "NOT_ATTENDING")?._count.type ?? 0,
+	};
 };
 
 export default authorizedProcedure

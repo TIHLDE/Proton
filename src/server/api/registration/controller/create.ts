@@ -3,7 +3,6 @@ import { TRPCError } from "@trpc/server";
 import type z from "zod";
 import { createRegistrationSchema } from "~/schemas";
 import { db } from "~/server/db";
-import { createRegistration } from "~/services";
 import { type Controller, authorizedProcedure } from "../../trpc";
 import { hasTeamAccessMiddleware } from "../../util/auth";
 
@@ -30,12 +29,38 @@ const handler: Controller<
 		"USER",
 	]);
 
-	await createRegistration(
-		ctx.user.id,
-		input.eventId,
-		input.type,
-		input.comment,
-	);
+	// Check if registration already exists
+	const existing = await db.registration.findUnique({
+		where: {
+			userId_eventId: {
+				userId: ctx.user.id,
+				eventId: input.eventId,
+			},
+		},
+	});
+
+	if (existing) {
+		// Update existing registration
+		await db.registration.update({
+			where: {
+				id: existing.id,
+			},
+			data: {
+				type: input.type,
+				comment: input.comment,
+			},
+		});
+	} else {
+		// Create new registration
+		await db.registration.create({
+			data: {
+				userId: ctx.user.id,
+				eventId: input.eventId,
+				type: input.type,
+				comment: input.comment,
+			},
+		});
+	}
 };
 
 export default authorizedProcedure

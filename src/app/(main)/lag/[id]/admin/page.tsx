@@ -7,7 +7,7 @@ import { notFound, redirect } from "next/navigation";
 import { Button } from "~/components/ui/button";
 import { H1, H2, P } from "~/components/ui/typography";
 import { auth } from "~/lib/auth";
-import { getAllEventsByTeamId } from "~/services";
+import { getAllEventsByTeamId, getTeamMembershipRoles } from "~/services";
 import EventCard from "../_components/event-card";
 import CreateEvent from "./_components/create";
 import EditEvent from "./_components/edit";
@@ -21,9 +21,11 @@ export default async function EventsAdminPage({ params }: EventPageProps) {
 		headers: await headers(),
 	});
 
-	if (!session || !session.user.isAdmin) notFound();
+	if (!session) redirect("/");
 
 	const { id } = await params;
+	const roles = await getTeamMembershipRoles(session.user.id, id);
+	if (!roles.includes("ADMIN")) notFound();
 	const events = await getAllEventsByTeamId(id);
 
 	return (

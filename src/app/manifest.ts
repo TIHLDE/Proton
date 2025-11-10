@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
 		description: "TIHLDE sin idrettsplattform",
 		start_url: "/",
 		display: "standalone",
-		background_color: "#000000",
-		theme_color: "#000000",
+		background_color: "#0f182b",
+		theme_color: "#0f182b",
 		icons: [
 			{
 				src: "/icon-192x192.png",

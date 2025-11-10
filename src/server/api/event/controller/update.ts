@@ -10,7 +10,10 @@ const handler: Controller<
 	void
 > = async ({ input, ctx }) => {
 	// Check if the user has access
-	await hasTeamAccessMiddleware(ctx.user as User, input.teamId, ["ADMIN"]);
+	await hasTeamAccessMiddleware(ctx.user as User, input.teamId, [
+		"ADMIN",
+		"SUBADMIN",
+	]);
 
 	await db.teamEvent.update({
 		where: { id: input.id },

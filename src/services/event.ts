@@ -13,3 +13,17 @@ export const getAllEventsByTeamId = async (teamId: string) => {
 
 	return events;
 };
+
+export const getAllOngoingEventsByTeamId = async (teamId: string) => {
+	const events = await db.teamEvent.findMany({
+		where: {
+			teamId: teamId,
+			startAt: { lte: new Date() },
+		},
+		orderBy: {
+			startAt: "asc",
+		},
+	});
+
+	return events;
+};

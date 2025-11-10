@@ -8,7 +8,7 @@ import { notFound } from "next/navigation";
 import { Button } from "~/components/ui/button";
 import { H1, H2, P } from "~/components/ui/typography";
 import { auth } from "~/lib/auth";
-import { getAllEventsByTeamId, getTeam, hasTeamAccess } from "~/services";
+import { getAllOngoingEventsByTeamId, getTeam, hasTeamAccess } from "~/services";
 import EventCard from "./_components/event-card";
 
 interface TeamPageProps {
@@ -32,7 +32,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
 
 	if (!team) notFound();
 
-	const events = await getAllEventsByTeamId(id);
+	const events = await getAllOngoingEventsByTeamId(id);
 
 	return (
 		<div className="mx-auto min-h-screen w-full max-w-7xl space-y-12 px-2 py-24 md:space-y-20 md:py-32 lg:px-12">

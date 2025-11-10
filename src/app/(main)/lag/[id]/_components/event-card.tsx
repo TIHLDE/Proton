@@ -99,8 +99,8 @@ export default function EventCard({
       </div>
 
       {showRegistration && counts && (
-        <div className="flex items-center justify-between border-t pt-4 text-sm">
-          <div className="flex items-center gap-4">
+        <div className="border-t pt-4 text-sm">
+          <div className="grid grid-cols-3 gap-4">
             <button
               type="button"
               onClick={() => handleStatusClick("attending")}

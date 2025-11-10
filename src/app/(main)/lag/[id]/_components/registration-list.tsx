@@ -120,7 +120,7 @@ export default function RegistrationList({
                 return (
                   <div
                     key={item.id}
-                    className="flex items-center justify-between gap-3 rounded-lg border bg-card p-3"
+                    className="flex flex-col gap-2 rounded-lg border bg-card p-3"
                   >
                     <div className="flex items-center gap-3">
                       {item.user.image && (

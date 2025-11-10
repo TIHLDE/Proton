@@ -106,6 +106,7 @@ model TeamMember {
 
 enum TeamRole {
   ADMIN
+  SUBADMIN
   USER
 }
 

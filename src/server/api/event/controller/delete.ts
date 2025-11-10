@@ -10,7 +10,10 @@ const handler: Controller<
 	void
 > = async ({ input, ctx }) => {
 	// Check if user has access
-	await hasTeamAccessMiddleware(ctx.user as User, input.teamId, ["ADMIN"]);
+	await hasTeamAccessMiddleware(ctx.user as User, input.teamId, [
+		"ADMIN",
+		"SUBADMIN",
+	]);
 
 	await db.teamEvent.delete({
 		where: { id: input.id },

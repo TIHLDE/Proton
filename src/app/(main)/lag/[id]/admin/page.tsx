@@ -25,7 +25,12 @@ export default async function EventsAdminPage({ params }: EventPageProps) {
 
 	const { id } = await params;
 	const roles = await getTeamMembershipRoles(session.user.id, id);
-	if (!roles.includes("ADMIN")) notFound();
+	if (
+		!roles.includes("ADMIN") &&
+		!session.user.isAdmin &&
+		!roles.includes("SUBADMIN")
+	)
+		notFound();
 	const events = await getAllEventsByTeamId(id);
 
 	return (

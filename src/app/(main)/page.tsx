@@ -1,8 +1,36 @@
+"use server";
+
+import { headers } from "next/headers";
 import Image from "next/image";
 import TihldeLogo from "~/components/logo";
+import { auth } from "~/lib/auth";
+import { getAllMyEvents } from "~/services";
 import Hero from "../_components/hero";
+import MyCalendar from "./_components/calendar";
 
-export default function Home() {
+interface HomeProps {
+	params: Promise<{
+		month: string;
+		year: string;
+	}>;
+}
+
+export default async function Home({ params }: HomeProps) {
+	const session = await auth.api.getSession({
+		headers: await headers(),
+	});
+
+	const { month, year } = await params;
+
+	if (session) {
+		const queryMonth = Number.parseInt(month) || new Date().getMonth() + 1;
+		const queryYear = Number.parseInt(year) || new Date().getFullYear();
+
+		const events = await getAllMyEvents(session.user.id, queryMonth, queryYear);
+
+		return <MyCalendar events={events} />;
+	}
+
 	return (
 		<div className="relative flex flex-col items-center justify-center">
 			<div

@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { z } from "zod";
+import type { z } from "zod";
 import SubmitButton from "~/components/form/submit-button";
 import { Button } from "~/components/ui/button";
 import {
@@ -36,22 +36,8 @@ import {
 	SelectValue,
 } from "~/components/ui/select";
 import { Textarea } from "~/components/ui/textarea";
+import { UpdateEventInputSchema } from "~/schemas";
 import { api } from "~/trpc/react";
-
-const eventSchema = z.object({
-	id: z.string(),
-	name: z.string().min(1, "Navn er påkrevd"),
-	datetime: z.date({
-		required_error: "Dato og tid er påkrevd",
-	}),
-	type: z.enum(["TRAINING", "MATCH", "SOCIAL", "OTHER"], {
-		required_error: "Type er påkrevd",
-	}),
-	location: z.string().optional(),
-	note: z.string().optional(),
-});
-
-type EventFormData = z.infer<typeof eventSchema>;
 
 interface EditEventProps {
 	event: TeamEvent;
@@ -63,8 +49,8 @@ export default function EditEvent({ event, teamId }: EditEventProps) {
 	const [deleteOpen, setDeleteOpen] = useState(false);
 	const router = useRouter();
 
-	const form = useForm<EventFormData>({
-		resolver: zodResolver(eventSchema),
+	const form = useForm<z.infer<typeof UpdateEventInputSchema>>({
+		resolver: zodResolver(UpdateEventInputSchema),
 		defaultValues: {
 			id: event.id,
 			name: event.name,
@@ -103,17 +89,8 @@ export default function EditEvent({ event, teamId }: EditEventProps) {
 			},
 		});
 
-	const onSubmit = async (data: EventFormData) => {
-		updateEvent({
-			id: data.id,
-			teamId,
-			name: data.name,
-			datetime: data.datetime,
-			type: data.type,
-			location: data.location,
-			note: data.note,
-		});
-	};
+	const onSubmit = async (data: z.infer<typeof UpdateEventInputSchema>) =>
+		updateEvent(data);
 
 	const onDelete = async () => {
 		deleteEvent({
@@ -129,7 +106,7 @@ export default function EditEvent({ event, teamId }: EditEventProps) {
 					<Pencil className="h-4 w-4" />
 				</Button>
 			</DialogTrigger>
-			<DialogContent className="sm:max-w-[425px]">
+			<DialogContent className="sm:max-w-[425px] md:w-full md:max-w-xl">
 				<DialogHeader>
 					<DialogTitle>Rediger arrangement</DialogTitle>
 					<DialogDescription>
@@ -152,76 +129,106 @@ export default function EditEvent({ event, teamId }: EditEventProps) {
 							)}
 						/>
 
-						<FormField
-							control={form.control}
-							name="datetime"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Dato og tid</FormLabel>
-									<FormControl>
-										<Input
-											type="datetime-local"
-											value={
-												field.value
-													? format(field.value, "yyyy-MM-dd'T'HH:mm")
-													: ""
-											}
-											onChange={(e) => {
-												const value = e.target.value;
-												if (value) {
-													field.onChange(new Date(value));
-												}
-											}}
-										/>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-
-						<FormField
-							control={form.control}
-							name="type"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Type</FormLabel>
-									<Select
-										onValueChange={field.onChange}
-										defaultValue={field.value}
-									>
+						<div className="grid items-start gap-6 md:grid-cols-2">
+							<FormField
+								control={form.control}
+								name="datetime"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Starttid</FormLabel>
 										<FormControl>
-											<SelectTrigger>
-												<SelectValue placeholder="Velg type arrangement" />
-											</SelectTrigger>
+											<Input
+												type="datetime-local"
+												value={
+													field.value
+														? format(field.value, "yyyy-MM-dd'T'HH:mm")
+														: ""
+												}
+												onChange={(e) => {
+													const value = e.target.value;
+													if (value) {
+														field.onChange(new Date(value));
+													}
+												}}
+											/>
 										</FormControl>
-										<SelectContent>
-											<SelectItem value="TRAINING">Trening</SelectItem>
-											<SelectItem value="MATCH">Kamp</SelectItem>
-											<SelectItem value="SOCIAL">Sosialt</SelectItem>
-											<SelectItem value="OTHER">Annet</SelectItem>
-										</SelectContent>
-									</Select>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="endAt"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Sluttid</FormLabel>
+										<FormControl>
+											<Input
+												type="datetime-local"
+												value={
+													field.value
+														? format(field.value, "yyyy-MM-dd'T'HH:mm")
+														: ""
+												}
+												onChange={(e) => {
+													const value = e.target.value;
+													if (value) {
+														field.onChange(new Date(value));
+													}
+												}}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						</div>
 
-						<FormField
-							control={form.control}
-							name="location"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Sted</FormLabel>
-									<FormControl>
-										<Input
-											placeholder="Hvor skal arrangementet være?"
-											{...field}
-										/>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
+						<div className="grid items-start gap-6 md:grid-cols-2">
+							<FormField
+								control={form.control}
+								name="type"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Type</FormLabel>
+										<Select
+											onValueChange={field.onChange}
+											defaultValue={field.value}
+										>
+											<FormControl>
+												<SelectTrigger className="bg-card">
+													<SelectValue placeholder="Velg type arrangement" />
+												</SelectTrigger>
+											</FormControl>
+											<SelectContent>
+												<SelectItem value="TRAINING">Trening</SelectItem>
+												<SelectItem value="MATCH">Kamp</SelectItem>
+												<SelectItem value="SOCIAL">Sosialt</SelectItem>
+												<SelectItem value="OTHER">Annet</SelectItem>
+											</SelectContent>
+										</Select>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
+							<FormField
+								control={form.control}
+								name="location"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Sted</FormLabel>
+										<FormControl>
+											<Input
+												placeholder="Hvor skal arrangementet være?"
+												{...field}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						</div>
 
 						<FormField
 							control={form.control}

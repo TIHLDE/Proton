@@ -21,7 +21,7 @@ const handler: Controller<
 			name: input.name,
 			eventType: input.type,
 			startAt: input.datetime,
-			endAt: input.datetime,
+			endAt: input.endAt,
 			location: input.location,
 			note: input.note,
 		},

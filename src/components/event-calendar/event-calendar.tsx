@@ -315,7 +315,7 @@ export function EventCalendar({
 								</DropdownMenuItem>
 							</DropdownMenuContent>
 						</DropdownMenu>
-						<Button
+						{/* <Button
 							className="max-[479px]:aspect-square max-[479px]:p-0!"
 							onClick={() => {
 								setSelectedEvent(null); // Ensure we're creating a new event
@@ -328,7 +328,7 @@ export function EventCalendar({
 								aria-hidden="true"
 							/>
 							<span className="max-sm:sr-only">Ny hendelse</span>
-						</Button>
+						</Button> */}
 					</div>
 				</div>
 

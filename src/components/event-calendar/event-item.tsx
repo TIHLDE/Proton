@@ -7,6 +7,7 @@ import { useMemo } from "react";
 
 import type { TeamEvent } from "@prisma/client";
 import { nb } from "date-fns/locale";
+import { useRouter } from "next/navigation";
 import {
 	getBorderRadiusClasses,
 	getEventColorClasses,
@@ -51,6 +52,8 @@ function EventWrapper({
 	onMouseDown,
 	onTouchStart,
 }: EventWrapperProps) {
+	const router = useRouter();
+
 	// Always use the currentTime (if provided) to determine if the event is in the past
 	const displayEnd = currentTime
 		? new Date(
@@ -65,14 +68,15 @@ function EventWrapper({
 	return (
 		<button
 			className={cn(
-				"flex h-full w-full select-none overflow-hidden px-1 text-left font-medium outline-none backdrop-blur-md transition focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 data-dragging:cursor-grabbing data-past-event:line-through data-dragging:shadow-lg sm:px-2",
+				"flex h-full w-full cursor-pointer select-none overflow-hidden px-1 text-left font-medium outline-none backdrop-blur-md transition focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 data-dragging:cursor-grabbing data-past-event:line-through data-dragging:shadow-lg sm:px-2",
 				getEventColorClasses("sky"),
 				getBorderRadiusClasses(isFirstDay, isLastDay),
 				className,
 			)}
 			data-dragging={isDragging || undefined}
 			data-past-event={isEventInPast || undefined}
-			onClick={onClick}
+			// onClick={onClick}
+			onClick={() => router.replace(`/lag/${event.teamId}`)}
 			onMouseDown={onMouseDown}
 			onTouchStart={onTouchStart}
 			{...dndListeners}

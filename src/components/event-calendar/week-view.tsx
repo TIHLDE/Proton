@@ -223,9 +223,9 @@ export function WeekView({
 		<div data-slot="week-view" className="flex h-full flex-col">
 			<div className="sticky top-0 z-30 grid grid-cols-8 border-border/70 border-b bg-background/80 backdrop-blur-md">
 				<div className="py-2 text-center text-muted-foreground/70 text-sm">
-					<span className="max-[479px]:sr-only">
+					{/* <span className="max-[479px]:sr-only">
 						{format(new Date(), "O", { locale: nb })}
-					</span>
+					</span> */}
 				</div>
 				{days.map((day) => (
 					<div

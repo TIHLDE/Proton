@@ -16,7 +16,7 @@ const handler: Controller<
 		select: {
 			userId: true,
 			event: {
-				select: { teamId: true },
+				select: { teamId: true, registrationDeadline: true },
 			},
 		},
 	});
@@ -33,6 +33,34 @@ const handler: Controller<
 		"ADMIN",
 		"USER",
 	]);
+
+	// Check user's role in the team
+	const userMembership = await db.teamMember.findUnique({
+		where: {
+			userId_teamId: {
+				userId: ctx.user.id,
+				teamId: registration.event.teamId,
+			},
+		},
+		select: {
+			role: true,
+		},
+	});
+
+	const isAdmin = userMembership?.role === "ADMIN" || userMembership?.role === "SUBADMIN";
+
+	// Check if registration deadline has passed (allow admin/subadmin to bypass)
+	if (
+		!isAdmin &&
+		registration.event.registrationDeadline &&
+		new Date() > registration.event.registrationDeadline
+	) {
+		throw new TRPCError({
+			code: "BAD_REQUEST",
+			message:
+				"Påmeldingsfristen har passert, du kan ikke lenger endre påmelding",
+		});
+	}
 
 	// Verify the registration belongs to the user
 	if (registration.userId !== ctx.user.id) {

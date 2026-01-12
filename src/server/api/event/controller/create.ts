@@ -26,6 +26,7 @@ const handler: Controller<
 			endAt: input.datetime,
 			location: input.location,
 			note: input.note,
+			registrationDeadline: input.registrationDeadline,
 		},
 	});
 

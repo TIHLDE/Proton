@@ -13,7 +13,7 @@ const handler: Controller<
 	// Get the event to check team access
 	const event = await db.teamEvent.findUnique({
 		where: { id: input.eventId },
-		select: { teamId: true },
+		select: { teamId: true, registrationDeadline: true },
 	});
 
 	if (!event) {
@@ -28,6 +28,33 @@ const handler: Controller<
 		"ADMIN",
 		"USER",
 	]);
+
+	// Check user's role in the team
+	const userMembership = await db.teamMember.findUnique({
+		where: {
+			userId_teamId: {
+				userId: ctx.user.id,
+				teamId: event.teamId,
+			},
+		},
+		select: {
+			role: true,
+		},
+	});
+
+	const isAdmin = userMembership?.role === "ADMIN" || userMembership?.role === "SUBADMIN";
+
+	// Check if registration deadline has passed (allow admin/subadmin to bypass)
+	if (
+		!isAdmin &&
+		event.registrationDeadline &&
+		new Date() > event.registrationDeadline
+	) {
+		throw new TRPCError({
+			code: "BAD_REQUEST",
+			message: "Påmeldingsfristen for dette arrangementet har passert",
+		});
+	}
 
 	// Check if registration already exists
 	const existing = await db.registration.findUnique({

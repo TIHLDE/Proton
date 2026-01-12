@@ -15,6 +15,7 @@ export const CreateEventInputSchema = z.object({
 		.string()
 		.optional()
 		.transform((val) => (val?.trim() ? val : undefined)),
+	registrationDeadline: z.date().optional(),
 });
 
 export const UpdateEventInputSchema = z.object({
@@ -33,6 +34,7 @@ export const UpdateEventInputSchema = z.object({
 		.string()
 		.optional()
 		.transform((val) => (val?.trim() ? val : undefined)),
+	registrationDeadline: z.date().optional(),
 });
 
 export const DeleteEventInputSchema = z.object({

@@ -114,7 +114,7 @@ export function MonthView({
 						className="grid grid-cols-7 [&:last-child>*]:border-b-0"
 					>
 						{week.map((day, dayIndex) => {
-							if (!day) return null; // Skip if day is undefined
+							if (!day) return null; // Shouldn't happen with full interval
 
 							const dayEvents = getEventsForDay(events, day);
 							const spanningEvents = getSpanningEventsForDay(events, day);
@@ -155,7 +155,7 @@ export function MonthView({
 										</div>
 										<div
 											ref={isReferenceCell ? contentRef : null}
-											className="min-h-[calc((var(--event-height)+var(--event-gap))*2)] sm:min-h-[calc((var(--event-height)+var(--event-gap))*3)] lg:min-h-[calc((var(--event-height)+var(--event-gap))*4)]"
+											className="min-h-[calc((var(--event-height)+var(--event-gap))*1.5)] sm:min-h-[calc((var(--event-height)+var(--event-gap))*2)] lg:min-h-[calc((var(--event-height)+var(--event-gap))*2.5)]"
 										>
 											{sortEvents(allDayEvents).map((event, index) => {
 												const eventStart = new Date(event.startAt);

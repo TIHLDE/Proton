@@ -6,6 +6,7 @@ import {
 	addHours,
 	addMonths,
 	addWeeks,
+	endOfMonth,
 	endOfWeek,
 	format,
 	isSameMonth,
@@ -54,6 +55,8 @@ export interface EventCalendarProps {
 	onEventDelete?: (eventId: string) => void;
 	className?: string;
 	initialView?: CalendarView;
+	initialDate?: Date;
+	onRangeChange?: (start: Date, end: Date, view: CalendarView) => void;
 }
 
 export function EventCalendar({
@@ -63,11 +66,42 @@ export function EventCalendar({
 	onEventDelete,
 	className,
 	initialView = "month",
+	initialDate,
+	onRangeChange,
 }: EventCalendarProps) {
-	const [currentDate, setCurrentDate] = useState(new Date());
+	const [currentDate, setCurrentDate] = useState(initialDate || new Date());
 	const [view, setView] = useState<CalendarView>(initialView);
 	const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
 	const [selectedEvent, setSelectedEvent] = useState<TeamEvent | null>(null);
+
+	const getRangeForView = (date: Date, currentView: CalendarView) => {
+		switch (currentView) {
+			case "week": {
+				const start = startOfWeek(date, { weekStartsOn: 1 });
+				const end = addDays(start, 7);
+				return { start, end };
+			}
+			case "day": {
+				const start = new Date(date);
+				start.setHours(0, 0, 0, 0);
+				const end = addDays(start, 1);
+				return { start, end };
+			}
+			case "agenda": {
+				const start = new Date(date);
+				start.setHours(0, 0, 0, 0);
+				const end = addDays(start, AgendaDaysToShow);
+				return { start, end };
+			}
+			case "month":
+			default: {
+				const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
+				const start = startOfWeek(monthStart, { weekStartsOn: 0 });
+				const end = endOfWeek(endOfMonth(monthStart), { weekStartsOn: 0 });
+				return { start, end };
+			}
+		}
+	};
 
 	// Add keyboard shortcuts for view switching
 	useEffect(() => {
@@ -106,34 +140,44 @@ export function EventCalendar({
 		};
 	}, [isEventDialogOpen]);
 
+	useEffect(() => {
+		const { start, end } = getRangeForView(currentDate, view);
+		onRangeChange?.(start, end, view);
+	}, [currentDate, view, onRangeChange]);
+
 	const handlePrevious = () => {
+		let newDate: Date;
 		if (view === "month") {
-			setCurrentDate(subMonths(currentDate, 1));
+			newDate = subMonths(currentDate, 1);
 		} else if (view === "week") {
-			setCurrentDate(subWeeks(currentDate, 1));
+			newDate = subWeeks(currentDate, 1);
 		} else if (view === "day") {
-			setCurrentDate(addDays(currentDate, -1));
-		} else if (view === "agenda") {
-			// For agenda view, go back 30 days (a full month)
-			setCurrentDate(addDays(currentDate, -AgendaDaysToShow));
+			newDate = addDays(currentDate, -1);
+		} else {
+			// agenda
+			newDate = addDays(currentDate, -AgendaDaysToShow);
 		}
+		setCurrentDate(newDate);
 	};
 
 	const handleNext = () => {
+		let newDate: Date;
 		if (view === "month") {
-			setCurrentDate(addMonths(currentDate, 1));
+			newDate = addMonths(currentDate, 1);
 		} else if (view === "week") {
-			setCurrentDate(addWeeks(currentDate, 1));
+			newDate = addWeeks(currentDate, 1);
 		} else if (view === "day") {
-			setCurrentDate(addDays(currentDate, 1));
-		} else if (view === "agenda") {
-			// For agenda view, go forward 30 days (a full month)
-			setCurrentDate(addDays(currentDate, AgendaDaysToShow));
+			newDate = addDays(currentDate, 1);
+		} else {
+			// agenda
+			newDate = addDays(currentDate, AgendaDaysToShow);
 		}
+		setCurrentDate(newDate);
 	};
 
 	const handleToday = () => {
-		setCurrentDate(new Date());
+		const today = new Date();
+		setCurrentDate(today);
 	};
 
 	const handleEventSelect = (event: TeamEvent) => {

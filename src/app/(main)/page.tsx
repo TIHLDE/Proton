@@ -9,26 +9,49 @@ import Hero from "../_components/hero";
 import MyCalendar from "./_components/calendar";
 
 interface HomeProps {
-	params: Promise<{
-		month: string;
-		year: string;
+	searchParams?: Promise<{
+		start?: string;
+		end?: string;
+		view?: string;
 	}>;
 }
 
-export default async function Home({ params }: HomeProps) {
+export default async function Home({ searchParams }: HomeProps) {
 	const session = await auth.api.getSession({
 		headers: await headers(),
 	});
 
-	const { month, year } = await params;
+	const resolvedSearchParams = (await searchParams) || {};
+	const startParam = resolvedSearchParams.start;
+	const endParam = resolvedSearchParams.end;
 
 	if (session) {
-		const queryMonth = Number.parseInt(month) || new Date().getMonth() + 1;
-		const queryYear = Number.parseInt(year) || new Date().getFullYear();
+		const now = new Date();
+		const fallbackStart = new Date(now.getFullYear(), now.getMonth(), 1);
+		const fallbackEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
-		const events = await getAllMyEvents(session.user.id, queryMonth, queryYear);
+		const startDate =
+			startParam && !Number.isNaN(Date.parse(startParam))
+				? new Date(startParam)
+				: fallbackStart;
+		const endDate =
+			endParam && !Number.isNaN(Date.parse(endParam))
+				? new Date(endParam)
+				: fallbackEnd;
 
-		return <MyCalendar events={events} />;
+		const events = await getAllMyEvents(session.user.id, startDate, endDate);
+		const initialDate = startDate;
+		const allowedViews = ["month", "week", "day", "agenda"] as const;
+		const viewParam = resolvedSearchParams.view;
+		const initialView = allowedViews.find((v) => v === viewParam);
+
+		return (
+			<MyCalendar
+				events={events}
+				initialDate={initialDate}
+				initialView={initialView}
+			/>
+		);
 	}
 
 	return (

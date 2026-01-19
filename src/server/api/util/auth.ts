@@ -6,8 +6,9 @@ export async function hasTeamAccessMiddleware(
 	user: User,
 	teamId: string,
 	roles: TeamRole[],
+	allowSuperAdmin = true,
 ) {
-	if (user.isAdmin) return;
+	if (user.isAdmin && allowSuperAdmin) return;
 
 	const membership = await db.teamMember.findFirst({
 		where: {

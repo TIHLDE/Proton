@@ -120,18 +120,14 @@ export function EventsPopup({
 						const isLastDay = isSameDay(date, eventEnd);
 
 						return (
-							<div
+							<EventItem
 								key={event.id}
-								className="cursor-pointer"
+								event={event}
+								view="agenda"
+								isFirstDay={isFirstDay}
+								isLastDay={isLastDay}
 								onClick={() => handleEventClick(event)}
-							>
-								<EventItem
-									event={event}
-									view="agenda"
-									isFirstDay={isFirstDay}
-									isLastDay={isLastDay}
-								/>
-							</div>
+							/>
 						);
 					})
 				)}

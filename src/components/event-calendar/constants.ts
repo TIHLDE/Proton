@@ -1,4 +1,4 @@
-export const EventHeight = 24;
+export const EventHeight = 48;
 
 // Vertical gap between events in pixels - controls spacing in month view
 export const EventGap = 4;
@@ -9,8 +9,8 @@ export const WeekCellsHeight = 72;
 // Number of days to show in the agenda view
 export const AgendaDaysToShow = 30;
 
-// Start and end hours for the week and day views
-export const StartHour = 0;
+// Start and end hours for the week and day views (limit visible timeline)
+export const StartHour = 6;
 export const EndHour = 24;
 
 // Default start and end times

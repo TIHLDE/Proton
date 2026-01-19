@@ -7,7 +7,6 @@ import { useMemo } from "react";
 
 import type { TeamEvent } from "@prisma/client";
 import { nb } from "date-fns/locale";
-import { useRouter } from "next/navigation";
 import {
 	getBorderRadiusClasses,
 	getEventColorClasses,
@@ -52,8 +51,6 @@ function EventWrapper({
 	onMouseDown,
 	onTouchStart,
 }: EventWrapperProps) {
-	const router = useRouter();
-
 	// Always use the currentTime (if provided) to determine if the event is in the past
 	const displayEnd = currentTime
 		? new Date(
@@ -75,8 +72,7 @@ function EventWrapper({
 			)}
 			data-dragging={isDragging || undefined}
 			data-past-event={isEventInPast || undefined}
-			// onClick={onClick}
-			onClick={() => router.replace(`/lag/${event.teamId}`)}
+			onClick={onClick}
 			onMouseDown={onMouseDown}
 			onTouchStart={onTouchStart}
 			{...dndListeners}
@@ -161,7 +157,7 @@ export function EventItem({
 				isDragging={isDragging}
 				onClick={onClick}
 				className={cn(
-					"mt-[var(--event-gap)] h-[var(--event-height)] items-center text-[10px] sm:text-xs",
+					"mt-[var(--event-gap)] h-[var(--event-height)] flex-col items-start justify-center gap-0.5 px-1 py-0.5 text-[7px] leading-tight sm:px-2 sm:py-1 sm:text-xs",
 					className,
 				)}
 				currentTime={currentTime}
@@ -171,12 +167,14 @@ export function EventItem({
 				onTouchStart={onTouchStart}
 			>
 				{children || (
-					<span className="truncate">
-						<span className="truncate font-normal opacity-70 sm:text-[11px]">
-							{formatTimeWithOptionalMinutes(displayStart)}{" "}
+					<div className="flex w-full flex-col gap-0.5 overflow-hidden">
+						<span className="truncate font-normal text-[6px] opacity-70 sm:text-[9px]">
+							{formatTimeWithOptionalMinutes(displayStart)}
 						</span>
-						{event.name}
-					</span>
+						<span className="line-clamp-2 break-words font-medium text-[7px] leading-tight sm:text-xs">
+							{event.name}
+						</span>
+					</div>
 				)}
 			</EventWrapper>
 		);

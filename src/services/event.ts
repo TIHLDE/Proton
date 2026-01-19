@@ -29,8 +29,8 @@ export const getAllOngoingEventsByTeamId = async (teamId: string) => {
 
 export const getAllMyEvents = async (
 	userId: string,
-	month: number,
-	year: number,
+	startDate: Date,
+	endDate: Date,
 ) => {
 	const events = await db.teamEvent.findMany({
 		where: {
@@ -42,8 +42,8 @@ export const getAllMyEvents = async (
 				},
 			},
 			startAt: {
-				gte: new Date(year, month - 1, 1),
-				lt: new Date(year, month, 1),
+				gte: startDate,
+				lt: endDate,
 			},
 		},
 		orderBy: {

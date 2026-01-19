@@ -1,4 +1,5 @@
 import { createTRPCRouter } from "../trpc";
+import adminUpdate from "./controller/admin-update";
 import create from "./controller/create";
 import deleteRegistration from "./controller/delete";
 import getAllByEvent from "./controller/get-all-by-event";
@@ -13,4 +14,5 @@ export const registrationRouter = createTRPCRouter({
 	getAllByEvent,
 	getCounts,
 	getNonResponded,
+	adminUpdate,
 });

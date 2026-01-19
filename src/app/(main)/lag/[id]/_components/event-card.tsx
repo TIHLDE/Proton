@@ -79,22 +79,28 @@ export default function EventCard({
 				{actions}
 			</div>
 			<div className="space-y-2 text-sm">
-				<p>
+				<p key="type">
 					<strong>Type:</strong> {getEventTypeLabel(event.eventType)}
 				</p>
-				<p>
+				<p key="date">
 					<strong>Dato:</strong>{" "}
 					{new Date(event.startAt).toLocaleString("nb-NO")}
 				</p>
-				<p>
+				<p key="location">
 					<strong>Sted:</strong> {event.location || "Ikke oppgitt"}
 				</p>
+				{event.registrationDeadline && (
+					<p key="deadline">
+						<strong>Påmeldingsfrist:</strong>{" "}
+						{new Date(event.registrationDeadline).toLocaleString("nb-NO")}
+					</p>
+				)}
 				{event.note ? (
-					<p>
+					<p key="note">
 						<strong>Notat:</strong> {event.note}
 					</p>
 				) : (
-					<p>{"\u00A0"}</p>
+					<p key="note-empty">{"\u00A0"}</p>
 				)}
 			</div>
 
@@ -137,6 +143,7 @@ export default function EventCard({
 					<EventRegistration
 						eventId={event.id}
 						initialRegistration={registration}
+						registrationDeadline={event.registrationDeadline}
 					/>
 				</div>
 			)}

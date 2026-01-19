@@ -111,16 +111,17 @@ enum TeamRole {
 }
 
 model TeamEvent {
-  id            String         @id @default(cuid())
-  teamId        String
-  eventType     TeamEventType
-  name          String
-  startAt       DateTime
-  endAt         DateTime?
-  location      String?
-  note          String?
-  team          Team           @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  registrations Registration[]
+  id                   String         @id @default(cuid())
+  teamId               String
+  eventType            TeamEventType
+  name                 String
+  startAt              DateTime
+  endAt                DateTime?
+  location             String?
+  note                 String?
+  registrationDeadline DateTime?
+  team                 Team           @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  registrations        Registration[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt

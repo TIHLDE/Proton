@@ -1,6 +1,9 @@
 "use client";
 
 import type { RegistrationType } from "@prisma/client";
+import { Check, X } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "~/components/ui/button";
 import {
 	Dialog,
 	DialogContent,
@@ -49,6 +52,8 @@ export default function RegistrationList({
 	statusFilter,
 	isAdmin = false,
 }: RegistrationListProps) {
+	const utils = api.useUtils();
+
 	const { data: registrations, isLoading: isLoadingRegistrations } =
 		api.registration.getAllByEvent.useQuery(
 			{ eventId },
@@ -60,6 +65,19 @@ export default function RegistrationList({
 			{ eventId },
 			{ enabled: open && statusFilter === "notResponded" },
 		);
+
+	const { mutate: adminUpdateRegistration, isPending } =
+		api.registration.adminUpdate.useMutation({
+			onSuccess: () => {
+				toast.success("Påmelding oppdatert");
+				utils.registration.getAllByEvent.invalidate({ eventId });
+				utils.registration.getCounts.invalidate({ eventId });
+				utils.registration.getNonResponded.invalidate({ eventId });
+			},
+			onError: (error) => {
+				toast.error(error.message || "Kunne ikke oppdatere påmelding");
+			},
+		});
 
 	const getDialogTitle = () => {
 		switch (statusFilter) {
@@ -117,6 +135,10 @@ export default function RegistrationList({
 						<div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
 							{getDialogUsers().map((item: Registration | NonRespondedUser) => {
 								const isRegistration = "comment" in item;
+								const registration = isRegistration
+									? (item as Registration)
+									: null;
+
 								return (
 									<div
 										key={item.id}
@@ -130,17 +152,64 @@ export default function RegistrationList({
 													className="h-8 w-8 rounded-full"
 												/>
 											)}
-											<span>{item.user.name}</span>
+											<span className="flex-1">{item.user.name}</span>
 										</div>
 										{isAdmin &&
 											statusFilter === "notAttending" &&
-											isRegistration &&
-											(item as Registration).comment && (
+											registration?.comment && (
 												<div className="text-muted-foreground text-sm">
 													<span className="font-semibold">Grunn: </span>
-													{(item as Registration).comment}
+													{registration.comment}
 												</div>
 											)}
+										{isAdmin && (
+											<div className="flex gap-2 pt-2">
+												<Button
+													size="sm"
+													variant={
+														registration?.type === "ATTENDING"
+															? "default"
+															: "outline"
+													}
+													className="flex-1"
+													onClick={() =>
+														adminUpdateRegistration({
+															userId: item.user.id,
+															eventId,
+															type: "ATTENDING",
+														})
+													}
+													disabled={
+														isPending || registration?.type === "ATTENDING"
+													}
+												>
+													<Check className="h-3 w-3" />
+													Kommer
+												</Button>
+												<Button
+													size="sm"
+													variant={
+														registration?.type === "NOT_ATTENDING"
+															? "default"
+															: "outline"
+													}
+													className="flex-1"
+													onClick={() =>
+														adminUpdateRegistration({
+															userId: item.user.id,
+															eventId,
+															type: "NOT_ATTENDING",
+														})
+													}
+													disabled={
+														isPending || registration?.type === "NOT_ATTENDING"
+													}
+												>
+													<X className="h-3 w-3" />
+													Kommer ikke
+												</Button>
+											</div>
+										)}
 									</div>
 								);
 							})}

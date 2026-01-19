@@ -28,6 +28,7 @@ import {
 	FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 import {
 	Select,
 	SelectContent,
@@ -35,6 +36,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "~/components/ui/select";
+import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
 import { UpdateEventInputSchema } from "~/schemas";
 import { api } from "~/trpc/react";
@@ -47,6 +49,7 @@ interface EditEventProps {
 export default function EditEvent({ event, teamId }: EditEventProps) {
 	const [open, setOpen] = useState(false);
 	const [deleteOpen, setDeleteOpen] = useState(false);
+	const [hasDeadline, setHasDeadline] = useState(!!event.registrationDeadline);
 	const router = useRouter();
 
 	const form = useForm<z.infer<typeof UpdateEventInputSchema>>({
@@ -58,6 +61,9 @@ export default function EditEvent({ event, teamId }: EditEventProps) {
 			type: event.eventType,
 			location: event.location || "",
 			note: event.note || "",
+			registrationDeadline: event.registrationDeadline
+				? new Date(event.registrationDeadline)
+				: undefined,
 		},
 	});
 
@@ -158,7 +164,7 @@ export default function EditEvent({ event, teamId }: EditEventProps) {
 							/>
 							<FormField
 								control={form.control}
-								name="endAt"
+								name="datetime"
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>Sluttid</FormLabel>
@@ -247,7 +253,55 @@ export default function EditEvent({ event, teamId }: EditEventProps) {
 								</FormItem>
 							)}
 						/>
+						<div className="flex items-center justify-between space-x-2">
+							<Label htmlFor="has-deadline-edit">Påmeldingsfrist</Label>
+							<Switch
+								id="has-deadline-edit"
+								checked={hasDeadline}
+								onCheckedChange={(checked) => {
+									setHasDeadline(checked);
+									if (!checked) {
+										form.setValue("registrationDeadline", undefined);
+									}
+								}}
+							/>
+						</div>
 
+						{hasDeadline && (
+							<FormField
+								control={form.control}
+								name="registrationDeadline"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Frist for påmelding</FormLabel>
+										<FormControl>
+											<Input
+												type="datetime-local"
+												value={
+													field.value
+														? format(field.value, "yyyy-MM-dd'T'HH:mm")
+														: ""
+												}
+												onChange={(e) => {
+													if (e.target.value) {
+														field.onChange(new Date(e.target.value));
+													}
+												}}
+												max={
+													form.getValues("datetime")
+														? format(
+																form.getValues("datetime"),
+																"yyyy-MM-dd'T'HH:mm",
+															)
+														: undefined
+												}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						)}
 						<div className="flex justify-end gap-2">
 							<Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
 								<DialogTrigger asChild>

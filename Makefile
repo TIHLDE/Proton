@@ -61,8 +61,12 @@ status:
 studio:
 	npx prisma studio
 
+# Seed the database with test data
+seed:
+	npx prisma db seed
+
 # Build from Dockerfile
 build:
 	docker build -t proton .
 
-.PHONY: db-create db-start db-stop db-remove db-logs db-connect db-status generate migrate migrate-reset status studio build
+.PHONY: db-create db-start db-stop db-remove db-logs db-connect db-status generate migrate migrate-reset status studio seed build

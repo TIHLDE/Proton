@@ -187,7 +187,7 @@ async function main() {
 
 			return prisma.teamEvent.create({
 				data: {
-					teamId: team!.id,
+					teamId: team?.id,
 					eventType,
 					name: `${baseName} #${i + 1}`,
 					startAt,

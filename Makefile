@@ -69,4 +69,8 @@ seed:
 build:
 	docker build -t proton .
 
-.PHONY: db-create db-start db-stop db-remove db-logs db-connect db-status generate migrate migrate-reset status studio seed build
+# Format code
+format:
+	pnpm check:write
+
+.PHONY: db-create db-start db-stop db-remove db-logs db-connect db-status generate migrate migrate-reset status studio seed build format

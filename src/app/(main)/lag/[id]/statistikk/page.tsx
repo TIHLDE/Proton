@@ -8,7 +8,7 @@ import { notFound } from "next/navigation";
 import { Button } from "~/components/ui/button";
 import { H1 } from "~/components/ui/typography";
 import { auth } from "~/lib/auth";
-import { getTeam, hasTeamAccess } from "~/services";
+import { getTeam, getTeamMembershipRoles, hasTeamAccess } from "~/services";
 import AttendanceStats from "./_components/attendance-stats";
 
 interface TeamStatistikkPageProps {
@@ -34,6 +34,12 @@ export default async function TeamStatistikkPage({
 
 	if (!team) notFound();
 
+	const roles = await getTeamMembershipRoles(session.user.id, id);
+	const isAdmin =
+		session.user.isAdmin ||
+		roles.includes("ADMIN") ||
+		roles.includes("SUBADMIN");
+
 	return (
 		<div className="mx-auto min-h-screen w-full max-w-7xl space-y-12 px-2 py-24 md:space-y-20 md:py-32 lg:px-12">
 			<div className="space-y-4">
@@ -46,7 +52,7 @@ export default async function TeamStatistikkPage({
 				<H1>Oppmøtestatistikk - {team.name}</H1>
 			</div>
 
-			<AttendanceStats teamId={id} />
+			<AttendanceStats teamId={id} isAdmin={isAdmin} />
 		</div>
 	);
 }

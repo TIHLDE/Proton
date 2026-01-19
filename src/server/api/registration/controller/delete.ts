@@ -47,7 +47,8 @@ const handler: Controller<
 		},
 	});
 
-	const isAdmin = userMembership?.role === "ADMIN" || userMembership?.role === "SUBADMIN";
+	const isAdmin =
+		userMembership?.role === "ADMIN" || userMembership?.role === "SUBADMIN";
 
 	// Check if registration deadline has passed (allow admin/subadmin to bypass)
 	if (

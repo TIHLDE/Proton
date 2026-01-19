@@ -1,7 +1,7 @@
 "use server";
 
 import type { User } from "@prisma/client";
-import { ArrowRight, PackageOpen, UsersRound } from "lucide-react";
+import { ArrowRight, BarChart3, PackageOpen, UsersRound } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -47,7 +47,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
 					<H1>{team.name}</H1>
 				</div>
 
-				<div className="grid grid-cols-2 gap-x-2">
+				<div className="grid grid-cols-2 gap-x-2 md:grid-cols-3">
 					{(roles.includes("ADMIN") ||
 						roles.includes("SUBADMIN") ||
 						session.user.isAdmin) && (
@@ -62,6 +62,12 @@ export default async function TeamPage({ params }: TeamPageProps) {
 						<Link href={`/lag/${team.id}/medlemmer`}>
 							<UsersRound />
 							Medlemmer
+						</Link>
+					</Button>
+					<Button asChild variant="outline">
+						<Link href={`/lag/${team.id}/statistikk`}>
+							<BarChart3 />
+							Statistikk
 						</Link>
 					</Button>
 				</div>

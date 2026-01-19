@@ -15,6 +15,7 @@ import { api } from "~/trpc/react";
 
 interface EventRegistrationProps {
 	eventId: string;
+	registrationDeadline?: Date | null;
 	initialRegistration?: {
 		id: string;
 		type: "ATTENDING" | "NOT_ATTENDING";
@@ -26,6 +27,7 @@ type FormValues = z.infer<typeof createRegistrationSchema>;
 
 export default function EventRegistration({
 	eventId,
+	registrationDeadline,
 	initialRegistration,
 }: EventRegistrationProps) {
 	const [selectedType, setSelectedType] = useState<
@@ -33,6 +35,10 @@ export default function EventRegistration({
 	>(null);
 	const router = useRouter();
 	const utils = api.useUtils();
+
+	const isDeadlinePassed = registrationDeadline
+		? new Date() > new Date(registrationDeadline)
+		: false;
 
 	const form = useForm<FormValues>({
 		resolver: zodResolver(createRegistrationSchema),
@@ -81,10 +87,15 @@ export default function EventRegistration({
 
 	return (
 		<div className="space-y-4">
+			{isDeadlinePassed && (
+				<div className="rounded-md bg-yellow-500/10 p-3 text-sm text-yellow-600">
+					Påmeldingsfristen har passert. Du kan ikke lenger endre påmeldingen.
+				</div>
+			)}
 			<div className="flex gap-2">
 				<Button
 					onClick={() => handleRegistration("ATTENDING")}
-					disabled={isPending}
+					disabled={isPending || isDeadlinePassed}
 					variant={
 						(selectedType ?? initialRegistration?.type) === "ATTENDING"
 							? "default"
@@ -98,7 +109,7 @@ export default function EventRegistration({
 				</Button>
 				<Button
 					onClick={() => handleRegistration("NOT_ATTENDING")}
-					disabled={isPending}
+					disabled={isPending || isDeadlinePassed}
 					variant={
 						(selectedType ?? initialRegistration?.type) === "NOT_ATTENDING"
 							? "default"
@@ -123,7 +134,11 @@ export default function EventRegistration({
 							description="Vennligst gi en kort begrunnelse for hvorfor du ikke kan delta."
 							maxLength={500}
 						/>
-						<Button type="submit" disabled={isPending} className="w-full">
+						<Button
+							type="submit"
+							disabled={isPending || isDeadlinePassed}
+							className="w-full"
+						>
 							Lagre svar
 						</Button>
 					</form>

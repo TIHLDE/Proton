@@ -23,7 +23,7 @@ export default async function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="no-NO">
+		<html lang="no-NO" suppressHydrationWarning>
 			<body className={`antialiased ${inter.variable}`}>
 				<Providers>
 					<div className="relative min-h-dvh">

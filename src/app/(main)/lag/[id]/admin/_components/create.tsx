@@ -26,6 +26,7 @@ import {
 	FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 import {
 	Select,
 	SelectContent,
@@ -33,6 +34,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "~/components/ui/select";
+import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
 import { api } from "~/trpc/react";
 
@@ -46,6 +48,7 @@ const eventSchema = z.object({
 	}),
 	location: z.string().optional(),
 	note: z.string().optional(),
+	registrationDeadline: z.date().optional(),
 });
 
 type EventFormData = z.infer<typeof eventSchema>;
@@ -56,6 +59,7 @@ interface CreateEventProps {
 
 export default function CreateEvent({ teamId }: CreateEventProps) {
 	const [open, setOpen] = useState(false);
+	const [hasDeadline, setHasDeadline] = useState(false);
 	const router = useRouter();
 
 	const form = useForm<EventFormData>({
@@ -90,6 +94,7 @@ export default function CreateEvent({ teamId }: CreateEventProps) {
 			type: data.type,
 			location: data.location,
 			note: data.note,
+			registrationDeadline: hasDeadline ? data.registrationDeadline : undefined,
 		});
 	};
 
@@ -212,6 +217,56 @@ export default function CreateEvent({ teamId }: CreateEventProps) {
 								</FormItem>
 							)}
 						/>
+
+						<div className="flex items-center justify-between space-x-2">
+							<Label htmlFor="has-deadline">Påmeldingsfrist</Label>
+							<Switch
+								id="has-deadline"
+								checked={hasDeadline}
+								onCheckedChange={(checked) => {
+									setHasDeadline(checked);
+									if (!checked) {
+										form.setValue("registrationDeadline", undefined);
+									}
+								}}
+							/>
+						</div>
+
+						{hasDeadline && (
+							<FormField
+								control={form.control}
+								name="registrationDeadline"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Frist for påmelding</FormLabel>
+										<FormControl>
+											<Input
+												type="datetime-local"
+												value={
+													field.value
+														? format(field.value, "yyyy-MM-dd'T'HH:mm")
+														: ""
+												}
+												onChange={(e) => {
+													if (e.target.value) {
+														field.onChange(new Date(e.target.value));
+													}
+												}}
+												max={
+													form.getValues("datetime")
+														? format(
+																form.getValues("datetime"),
+																"yyyy-MM-dd'T'HH:mm",
+															)
+														: undefined
+												}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+						)}
 
 						<div className="flex justify-end space-x-2 pt-4">
 							<Button

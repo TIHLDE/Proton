@@ -1,19 +1,19 @@
 import type { User } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import type z from "zod";
-import { createRegistrationSchema } from "~/schemas";
+import { adminUpdateRegistrationSchema } from "~/schemas";
 import { db } from "~/server/db";
 import { type Controller, authorizedProcedure } from "../../trpc";
 import { hasTeamAccessMiddleware } from "../../util/auth";
 
 const handler: Controller<
-	z.infer<typeof createRegistrationSchema>,
+	z.infer<typeof adminUpdateRegistrationSchema>,
 	void
 > = async ({ input, ctx }) => {
 	// Get the event to check team access
 	const event = await db.teamEvent.findUnique({
 		where: { id: input.eventId },
-		select: { teamId: true, registrationDeadline: true },
+		select: { teamId: true },
 	});
 
 	if (!event) {
@@ -23,37 +23,26 @@ const handler: Controller<
 		});
 	}
 
-	// Check if user has access to the team
+	// Check if user is admin or subadmin
 	await hasTeamAccessMiddleware(ctx.user as User, event.teamId, [
 		"ADMIN",
-		"USER",
+		"SUBADMIN",
 	]);
 
-	// Check user's role in the team
-	const userMembership = await db.teamMember.findUnique({
+	// Check if the target user is a member of the team
+	const targetUserMembership = await db.teamMember.findUnique({
 		where: {
 			userId_teamId: {
-				userId: ctx.user.id,
+				userId: input.userId,
 				teamId: event.teamId,
 			},
 		},
-		select: {
-			role: true,
-		},
 	});
 
-	const isAdmin =
-		userMembership?.role === "ADMIN" || userMembership?.role === "SUBADMIN";
-
-	// Check if registration deadline has passed (allow admin/subadmin to bypass)
-	if (
-		!isAdmin &&
-		event.registrationDeadline &&
-		new Date() > event.registrationDeadline
-	) {
+	if (!targetUserMembership) {
 		throw new TRPCError({
-			code: "BAD_REQUEST",
-			message: "Påmeldingsfristen for dette arrangementet har passert",
+			code: "NOT_FOUND",
+			message: "Brukeren er ikke medlem av laget",
 		});
 	}
 
@@ -61,7 +50,7 @@ const handler: Controller<
 	const existing = await db.registration.findUnique({
 		where: {
 			userId_eventId: {
-				userId: ctx.user.id,
+				userId: input.userId,
 				eventId: input.eventId,
 			},
 		},
@@ -70,9 +59,7 @@ const handler: Controller<
 	if (existing) {
 		// Update existing registration
 		await db.registration.update({
-			where: {
-				id: existing.id,
-			},
+			where: { id: existing.id },
 			data: {
 				type: input.type,
 				comment: input.comment,
@@ -82,7 +69,7 @@ const handler: Controller<
 		// Create new registration
 		await db.registration.create({
 			data: {
-				userId: ctx.user.id,
+				userId: input.userId,
 				eventId: input.eventId,
 				type: input.type,
 				comment: input.comment,
@@ -92,5 +79,5 @@ const handler: Controller<
 };
 
 export default authorizedProcedure
-	.input(createRegistrationSchema)
+	.input(adminUpdateRegistrationSchema)
 	.mutation(handler);

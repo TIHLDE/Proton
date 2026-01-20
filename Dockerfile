@@ -23,6 +23,8 @@ COPY . .
 
 ENV TZ="Europe/Oslo"
 ENV SKIP_ENV_VALIDATION=1
+ENV NODE_ENV=production
+ENV NEXT_PUBLIC_URL=https://sporty.tihlde.org/
 
 RUN pnpm build
 

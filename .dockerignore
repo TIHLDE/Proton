@@ -97,3 +97,6 @@ temp/
 # Local development database
 *.db
 *.sqlite
+
+# Prisma seed file
+prisma/seed.ts

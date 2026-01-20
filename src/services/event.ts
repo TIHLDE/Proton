@@ -26,3 +26,30 @@ export const getAllOngoingEventsByTeamId = async (teamId: string) => {
 
 	return events;
 };
+
+export const getAllMyEvents = async (
+	userId: string,
+	startDate: Date,
+	endDate: Date,
+) => {
+	const events = await db.teamEvent.findMany({
+		where: {
+			team: {
+				members: {
+					some: {
+						userId: userId,
+					},
+				},
+			},
+			startAt: {
+				gte: startDate,
+				lt: endDate,
+			},
+		},
+		orderBy: {
+			startAt: "asc",
+		},
+	});
+
+	return events;
+};

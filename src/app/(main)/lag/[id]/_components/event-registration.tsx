@@ -54,6 +54,10 @@ export default function EventRegistration({
 			utils.registration.getMyRegistration.invalidate({ eventId });
 			utils.registration.getCounts.invalidate({ eventId });
 			utils.registration.getAllByEvent.invalidate({ eventId });
+			router.refresh();
+		},
+		onError: (error) => {
+			toast.error(error.message);
 		},
 	});
 

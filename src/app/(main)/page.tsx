@@ -1,8 +1,59 @@
+"use server";
+
+import { headers } from "next/headers";
 import Image from "next/image";
 import TihldeLogo from "~/components/logo";
+import { auth } from "~/lib/auth";
+import { getAllMyEvents } from "~/services";
 import Hero from "../_components/hero";
+import MyCalendar from "./_components/calendar";
 
-export default function Home() {
+interface HomeProps {
+	searchParams?: Promise<{
+		start?: string;
+		end?: string;
+		view?: string;
+	}>;
+}
+
+export default async function Home({ searchParams }: HomeProps) {
+	const session = await auth.api.getSession({
+		headers: await headers(),
+	});
+
+	const resolvedSearchParams = (await searchParams) || {};
+	const startParam = resolvedSearchParams.start;
+	const endParam = resolvedSearchParams.end;
+
+	if (session) {
+		const now = new Date();
+		const fallbackStart = new Date(now.getFullYear(), now.getMonth(), 1);
+		const fallbackEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+		const startDate =
+			startParam && !Number.isNaN(Date.parse(startParam))
+				? new Date(startParam)
+				: fallbackStart;
+		const endDate =
+			endParam && !Number.isNaN(Date.parse(endParam))
+				? new Date(endParam)
+				: fallbackEnd;
+
+		const events = await getAllMyEvents(session.user.id, startDate, endDate);
+		const initialDate = startDate;
+		const allowedViews = ["month", "week", "day", "agenda"] as const;
+		const viewParam = resolvedSearchParams.view;
+		const initialView = allowedViews.find((v) => v === viewParam);
+
+		return (
+			<MyCalendar
+				events={events}
+				initialDate={initialDate}
+				initialView={initialView}
+			/>
+		);
+	}
+
 	return (
 		<div className="relative flex flex-col items-center justify-center">
 			<div

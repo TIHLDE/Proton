@@ -77,7 +77,7 @@ export default function LoginForm() {
 					}
 				}
 
-				router.replace("/min-oversikt");
+				setOpen(false);
 				router.refresh();
 			} catch {
 				toast.error(

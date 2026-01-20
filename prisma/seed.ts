@@ -193,7 +193,7 @@ async function main() {
 					startAt,
 					endAt,
 					location: `Sted ${Math.floor(Math.random() * 10) + 1}`,
-					note: "Dette er en kommentar på at jeg ikke kommer på arrangementet akkurat nå.",
+					note: "Dette er en beskrivelse av arrangementet.",
 					registrationDeadline,
 				},
 			});

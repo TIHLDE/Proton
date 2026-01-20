@@ -24,10 +24,12 @@ const handler: Controller<
 	}
 
 	// Check if user has access to the team
-	await hasTeamAccessMiddleware(ctx.user as User, event.teamId, [
-		"ADMIN",
-		"USER",
-	]);
+	await hasTeamAccessMiddleware(
+		ctx.user as User,
+		event.teamId,
+		["ADMIN", "USER"],
+		false,
+	);
 
 	// Check user's role in the team
 	const userMembership = await db.teamMember.findUnique({
@@ -41,6 +43,8 @@ const handler: Controller<
 			role: true,
 		},
 	});
+
+	console.log("User membership:", userMembership);
 
 	const isAdmin =
 		userMembership?.role === "ADMIN" || userMembership?.role === "SUBADMIN";

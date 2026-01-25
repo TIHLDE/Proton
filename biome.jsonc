@@ -10,6 +10,11 @@
 	"organizeImports": { "enabled": true },
 	"linter": {
 		"enabled": true,
+		"ignore": [
+			"src/components/event-calendar/**/*",
+			"prisma/seed.ts",
+			"src/components/ui/chart.tsx"
+		],
 		"rules": {
 			"nursery": {
 				"useSortedClasses": {

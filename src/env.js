@@ -13,6 +13,7 @@ export const env = createEnv({
 			.default("development"),
 		BETTER_AUTH_SECRET: z.string().optional(),
 		EMAIL_API_KEY: z.string().optional(),
+		VAPID_PRIVATE_KEY: z.string().optional(),
 	},
 
 	/**
@@ -22,7 +23,7 @@ export const env = createEnv({
 	 */
 	client: {
 		NEXT_PUBLIC_URL: z.string().optional(),
-		// NEXT_PUBLIC_CLIENTVAR: z.string(),
+		NEXT_PUBLIC_VAPID_PUBLIC_KEY: z.string().optional(),
 	},
 
 	/**
@@ -35,7 +36,8 @@ export const env = createEnv({
 		BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
 		NEXT_PUBLIC_URL: process.env.NEXT_PUBLIC_URL,
 		EMAIL_API_KEY: process.env.EMAIL_API_KEY,
-		// NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
+		VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY,
+		NEXT_PUBLIC_VAPID_PUBLIC_KEY: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
 	},
 	/**
 	 * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

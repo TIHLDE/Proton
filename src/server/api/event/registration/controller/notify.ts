@@ -2,7 +2,7 @@ import type { User } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import type z from "zod";
 import { env } from "~/env";
-import { sendEmail } from "~/lib/email";
+import { sendNotification } from "~/lib/notify";
 import { notifyUnattendedEventRegistrationSchema } from "~/schemas";
 import { type Controller, authorizedProcedure } from "~/server/api/trpc";
 import { hasTeamAccessMiddleware } from "~/server/api/util/auth";
@@ -56,26 +56,40 @@ const handler: Controller<
 			),
 	);
 
+	const userIds = unattendedMembers.map((member) => member.userId);
 	const emails = unattendedMembers.map((member) => member.user.email);
 
-	await sendEmail(emails, "Husk å melde deg på arrangement", [
-		{ type: "title", content: "Du har ikke meldt deg på" },
-		{
-			type: "text",
-			content: `Du har ikke meldt deg på "${event.name}". Vennligst gå til laget ditt for å melde oppmøtet på arrangementet.`,
-		},
-		{
-			type: "text",
-			content: `Dato og tid: ${event.startAt.toLocaleString()}`,
-		},
-		{ type: "text", content: event.location ? `Sted: ${event.location}` : "" },
-		{ type: "text", content: event.note ? `Notat: ${event.note}` : "" },
-		{
-			type: "button",
-			text: "Se arrangementet",
+	await sendNotification({
+		userIds,
+		emails,
+		subject: "Husk å melde deg på arrangement",
+		emailContent: [
+			{ type: "title", content: "Du har ikke meldt deg på" },
+			{
+				type: "text",
+				content: `Du har ikke meldt deg på "${event.name}". Vennligst gå til laget ditt for å melde oppmøtet på arrangementet.`,
+			},
+			{
+				type: "text",
+				content: `Dato og tid: ${event.startAt.toLocaleString()}`,
+			},
+			{
+				type: "text",
+				content: event.location ? `Sted: ${event.location}` : "",
+			},
+			{ type: "text", content: event.note ? `Notat: ${event.note}` : "" },
+			{
+				type: "button",
+				text: "Se arrangementet",
+				url: `${env.NEXT_PUBLIC_URL}/lag/${input.teamId}`,
+			},
+		],
+		pushPayload: {
+			title: "Husk å melde deg på",
+			body: `Du har ikke meldt deg på "${event.name}"`,
 			url: `${env.NEXT_PUBLIC_URL}/lag/${input.teamId}`,
 		},
-	]);
+	});
 };
 
 export default authorizedProcedure

@@ -14,7 +14,7 @@ const handler: Controller<
 	});
 
 	if (input.isAdmin) {
-		await sendNotification({
+		void sendNotification({
 			userIds: [user.id],
 			emails: [user.email],
 			subject: "Du har blitt superadmin",

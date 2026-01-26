@@ -47,7 +47,7 @@ const handler: Controller<
 	const userIds = teamMembers.map((member) => member.userId);
 	const emails = teamMembers.map((member) => member.user.email);
 
-	await sendNotification({
+	void sendNotification({
 		userIds,
 		emails,
 		subject: "Nytt arrangement opprettet",

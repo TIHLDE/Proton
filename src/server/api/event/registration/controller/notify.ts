@@ -59,7 +59,7 @@ const handler: Controller<
 	const userIds = unattendedMembers.map((member) => member.userId);
 	const emails = unattendedMembers.map((member) => member.user.email);
 
-	await sendNotification({
+	void sendNotification({
 		userIds,
 		emails,
 		subject: "Husk å melde deg på arrangement",

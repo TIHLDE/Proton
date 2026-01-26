@@ -10,6 +10,7 @@ import { authClient } from "~/lib/auth-client";
 import TihldeLogo from "../logo";
 import { Button } from "../ui/button";
 import LoginForm from "./sign-in";
+import UnansweredEventsDropdown from "./unanswered-events-dropdown";
 import UserAvatar from "./user-avatar";
 
 const navigationItems = [
@@ -76,6 +77,7 @@ const Navbar = () => {
 					{isPending && <Loader2 className="h-4 w-4 animate-spin" />}
 					{!session?.user && !isPending && <LoginForm />}
 					{session?.user && <UserAvatar />}
+					{session?.user && <UnansweredEventsDropdown />}
 					<Button
 						size="icon"
 						variant="ghost"

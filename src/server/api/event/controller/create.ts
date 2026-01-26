@@ -22,8 +22,8 @@ const handler: Controller<
 			teamId: input.teamId,
 			name: input.name,
 			eventType: input.type as TeamEventType,
-			startAt: input.datetime,
-			endAt: input.datetime,
+			startAt: input.startDatetime,
+			endAt: input.endDatetime,
 			location: input.location,
 			note: input.note,
 			registrationDeadline: input.registrationDeadline,
@@ -59,7 +59,7 @@ const handler: Controller<
 			},
 			{
 				type: "text",
-				content: `Dato og tid: ${input.datetime.toLocaleString()}`,
+				content: `Dato og tid: ${input.startDatetime.toLocaleString()} - ${input.endDatetime.toLocaleString()}`,
 			},
 			{
 				type: "text",
@@ -79,7 +79,7 @@ const handler: Controller<
 		],
 		pushPayload: {
 			title: "Nytt arrangement opprettet",
-			body: `"${input.name}" - ${input.datetime.toLocaleString()}`,
+			body: `"${input.name}" - ${input.startDatetime.toLocaleString()}`,
 			url: `${env.NEXT_PUBLIC_URL}/lag/${input.teamId}`,
 		},
 	});

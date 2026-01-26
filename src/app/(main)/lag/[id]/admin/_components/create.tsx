@@ -51,6 +51,7 @@ export default function CreateEvent({ teamId }: CreateEventProps) {
 	const form = useForm<z.infer<typeof CreateEventInputSchema>>({
 		resolver: zodResolver(CreateEventInputSchema),
 		defaultValues: {
+			teamId,
 			name: "",
 			type: undefined,
 			location: "",
@@ -109,7 +110,7 @@ export default function CreateEvent({ teamId }: CreateEventProps) {
 						<div className="grid items-start gap-6 md:grid-cols-2">
 							<FormField
 								control={form.control}
-								name="datetime"
+								name="startDatetime"
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>Starttid</FormLabel>
@@ -136,7 +137,7 @@ export default function CreateEvent({ teamId }: CreateEventProps) {
 
 							<FormField
 								control={form.control}
-								name="datetime"
+								name="endDatetime"
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>Sluttid</FormLabel>
@@ -261,9 +262,9 @@ export default function CreateEvent({ teamId }: CreateEventProps) {
 													}
 												}}
 												max={
-													form.getValues("datetime")
+													form.getValues("endDatetime")
 														? format(
-																form.getValues("datetime"),
+																form.getValues("endDatetime"),
 																"yyyy-MM-dd'T'HH:mm",
 															)
 														: undefined

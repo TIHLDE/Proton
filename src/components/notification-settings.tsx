@@ -1,6 +1,7 @@
 "use client";
 
-import { Bell, BellOff, Send } from "lucide-react";
+import { Bell, BellOff, Mail, MailOff, Send } from "lucide-react";
+import { useEffect, useState } from "react";
 import { usePushNotifications } from "~/hooks/use-push-notifications";
 import { api } from "~/trpc/react";
 import { Button } from "./ui/button";
@@ -17,9 +18,24 @@ export function NotificationSettings() {
 	const { isSupported, isSubscribed, isLoading, subscribe, unsubscribe } =
 		usePushNotifications();
 
+	const [emailNotificationsEnabled, setEmailNotificationsEnabled] =
+		useState(true);
+	const [isLoadingEmail, setIsLoadingEmail] = useState(true);
+
+	const getEmailStatusQuery = api.email.getStatus.useQuery();
+	const updateEmailStatusMutation = api.email.updateStatus.useMutation();
 	const sendTestMutation = api.push.sendTest.useMutation();
 
-	const handleToggle = async () => {
+	useEffect(() => {
+		if (getEmailStatusQuery.data) {
+			setEmailNotificationsEnabled(
+				getEmailStatusQuery.data.emailNotificationsEnabled,
+			);
+		}
+		setIsLoadingEmail(getEmailStatusQuery.isLoading);
+	}, [getEmailStatusQuery.data, getEmailStatusQuery.isLoading]);
+
+	const handleTogglePush = async () => {
 		if (isSubscribed) {
 			await unsubscribe();
 		} else {
@@ -27,66 +43,109 @@ export function NotificationSettings() {
 		}
 	};
 
+	const handleToggleEmail = async () => {
+		setIsLoadingEmail(true);
+		try {
+			await updateEmailStatusMutation.mutateAsync({
+				emailNotificationsEnabled: !emailNotificationsEnabled,
+			});
+			setEmailNotificationsEnabled(!emailNotificationsEnabled);
+		} finally {
+			setIsLoadingEmail(false);
+		}
+	};
+
 	const handleSendTest = () => {
 		sendTestMutation.mutate();
 	};
 
-	if (!isSupported) {
-		return (
+	return (
+		<div className="space-y-6">
+			{isSupported && (
+				<Card>
+					<CardHeader>
+						<CardTitle className="flex items-center gap-2">
+							<Bell className="h-5 w-5" />
+							Push-varsler
+						</CardTitle>
+						<CardDescription>
+							Motta varsler om nye arrangementer og påminnelser direkte i
+							nettleseren din.
+						</CardDescription>
+					</CardHeader>
+					<CardContent className="space-y-4">
+						<div className="flex items-center justify-between">
+							<div className="space-y-0.5">
+								<p className="font-medium text-sm">Aktiver push-varsler</p>
+								<p className="text-muted-foreground text-sm">
+									{isSubscribed
+										? "Du mottar push-varsler"
+										: "Du mottar ikke push-varsler"}
+								</p>
+							</div>
+							<Switch
+								checked={isSubscribed}
+								onCheckedChange={handleTogglePush}
+								disabled={isLoading}
+							/>
+						</div>
+
+						{isSubscribed && (
+							<Button
+								variant="outline"
+								onClick={handleSendTest}
+								disabled={sendTestMutation.isPending}
+							>
+								<Send className="mr-2 h-4 w-4" />
+								Send test-varsel
+							</Button>
+						)}
+					</CardContent>
+				</Card>
+			)}
+
+			{!isSupported && (
+				<Card>
+					<CardHeader>
+						<CardTitle className="flex items-center gap-2">
+							<BellOff className="h-5 w-5" />
+							Push-varsler
+						</CardTitle>
+						<CardDescription>
+							Push-varsler støttes ikke i denne nettleseren.
+						</CardDescription>
+					</CardHeader>
+				</Card>
+			)}
+
 			<Card>
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2">
-						<BellOff className="h-5 w-5" />
-						Push-varsler
+						<Mail className="h-5 w-5" />
+						E-postvarsler
 					</CardTitle>
 					<CardDescription>
-						Push-varsler støttes ikke i denne nettleseren.
+						Motta varsler om nye arrangementer og påminnelser på e-posten din.
 					</CardDescription>
 				</CardHeader>
-			</Card>
-		);
-	}
-
-	return (
-		<Card>
-			<CardHeader>
-				<CardTitle className="flex items-center gap-2">
-					<Bell className="h-5 w-5" />
-					Push-varsler
-				</CardTitle>
-				<CardDescription>
-					Motta varsler om nye arrangementer og påminnelser direkte i
-					nettleseren din.
-				</CardDescription>
-			</CardHeader>
-			<CardContent className="space-y-4">
-				<div className="flex items-center justify-between">
-					<div className="space-y-0.5">
-						<p className="font-medium text-sm">Aktiver push-varsler</p>
-						<p className="text-muted-foreground text-sm">
-							{isSubscribed
-								? "Du mottar push-varsler"
-								: "Du mottar ikke push-varsler"}
-						</p>
+				<CardContent className="space-y-4">
+					<div className="flex items-center justify-between">
+						<div className="space-y-0.5">
+							<p className="font-medium text-sm">Aktiver e-postvarsler</p>
+							<p className="text-muted-foreground text-sm">
+								{emailNotificationsEnabled
+									? "Du mottar e-postvarsler"
+									: "Du mottar ikke e-postvarsler"}
+							</p>
+						</div>
+						<Switch
+							checked={emailNotificationsEnabled}
+							onCheckedChange={handleToggleEmail}
+							disabled={isLoadingEmail}
+						/>
 					</div>
-					<Switch
-						checked={isSubscribed}
-						onCheckedChange={handleToggle}
-						disabled={isLoading}
-					/>
-				</div>
-
-				{isSubscribed && (
-					<Button
-						variant="outline"
-						onClick={handleSendTest}
-						disabled={sendTestMutation.isPending}
-					>
-						<Send className="mr-2 h-4 w-4" />
-						Send test-varsel
-					</Button>
-				)}
-			</CardContent>
-		</Card>
+				</CardContent>
+			</Card>
+		</div>
 	);
 }

@@ -1,4 +1,5 @@
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
+import { emailRouter } from "./email/router";
 import { eventRouter } from "./event/router";
 import { meRouter } from "./me/router";
 import { pushRouter } from "./push/router";
@@ -18,6 +19,7 @@ export const appRouter = createTRPCRouter({
 	user: userRouter,
 	registration: registrationRouter,
 	push: pushRouter,
+	email: emailRouter,
 });
 
 // export type definition of API

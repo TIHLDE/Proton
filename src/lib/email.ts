@@ -8,6 +8,8 @@ export async function sendEmail(
 ) {
 	if (env.NODE_ENV !== "production") return;
 
+	if (to.length === 0) return;
+
 	try {
 		await Promise.all(
 			to.map(async (recipient) => {

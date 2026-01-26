@@ -56,8 +56,10 @@ export default function EditEvent({ event, teamId }: EditEventProps) {
 		resolver: zodResolver(UpdateEventInputSchema),
 		defaultValues: {
 			id: event.id,
+			teamId,
 			name: event.name,
-			datetime: new Date(event.startAt),
+			startDatetime: new Date(event.startAt),
+			endDatetime: new Date(event.endAt || new Date()),
 			type: event.eventType,
 			location: event.location || "",
 			note: event.note || "",
@@ -138,7 +140,7 @@ export default function EditEvent({ event, teamId }: EditEventProps) {
 						<div className="grid items-start gap-6 md:grid-cols-2">
 							<FormField
 								control={form.control}
-								name="datetime"
+								name="startDatetime"
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>Starttid</FormLabel>
@@ -164,7 +166,7 @@ export default function EditEvent({ event, teamId }: EditEventProps) {
 							/>
 							<FormField
 								control={form.control}
-								name="datetime"
+								name="endDatetime"
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>Sluttid</FormLabel>
@@ -288,9 +290,9 @@ export default function EditEvent({ event, teamId }: EditEventProps) {
 													}
 												}}
 												max={
-													form.getValues("datetime")
+													form.getValues("endDatetime")
 														? format(
-																form.getValues("datetime"),
+																form.getValues("endDatetime"),
 																"yyyy-MM-dd'T'HH:mm",
 															)
 														: undefined

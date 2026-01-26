@@ -48,11 +48,26 @@ export function usePushNotifications() {
 	}, []);
 
 	const subscribe = useCallback(async () => {
-		if (!registration || !env.NEXT_PUBLIC_VAPID_PUBLIC_KEY) return false;
+		if (!registration) {
+			return {
+				status: false,
+				message: "Service Worker registration missing",
+			}
+		}
+
+		if (!env.NEXT_PUBLIC_VAPID_PUBLIC_KEY) {
+			return {
+				status: false,
+				message: "VAPID public key missing",
+			}
+		}
 
 		try {
 			const permission = await Notification.requestPermission();
-			if (permission !== "granted") return false;
+			if (permission !== "granted") return {
+				status: false,
+				message: "Notification permission not granted",
+			};
 
 			const subscription = await registration.pushManager.subscribe({
 				userVisibleOnly: true,
@@ -75,15 +90,24 @@ export function usePushNotifications() {
 			});
 
 			setIsSubscribed(true);
-			return true;
+			return {
+				status: true,
+				message: "Subscribed successfully",
+			}
 		} catch (error) {
 			console.error("Failed to subscribe to push notifications:", error);
-			return false;
+			return {
+				status: false,
+				message: "Subscription failed: " + (error instanceof Error ? error.message : String(error)),
+			}
 		}
 	}, [registration, subscribeMutation]);
 
 	const unsubscribe = useCallback(async () => {
-		if (!registration) return false;
+		if (!registration) return {
+			status: false,
+			message: "Service Worker registration missing",
+		}
 
 		try {
 			const subscription = await registration.pushManager.getSubscription();
@@ -95,10 +119,13 @@ export function usePushNotifications() {
 			}
 
 			setIsSubscribed(false);
-			return true;
+			return { status: true, message: "Unsubscribed successfully"};
 		} catch (error) {
 			console.error("Failed to unsubscribe from push notifications:", error);
-			return false;
+			return {
+				status: false,
+				message: "Unsubscription failed: " + (error instanceof Error ? error.message : String(error)),
+			};
 		}
 	}, [registration, unsubscribeMutation]);
 

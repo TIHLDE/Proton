@@ -16,6 +16,7 @@ import { Switch } from "./ui/switch";
 
 export function NotificationSettings() {
 	const [status, setStatus] = useState<"subscribing" | "unsubscribing" | "failedSubscribing" | "failedUnsubscribing" | "idle" | "unsubscribed" | "subscribed">("idle");
+	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 	const { isSupported, isSubscribed, isLoading, registration, subscribe, unsubscribe } =
 		usePushNotifications();
 
@@ -37,16 +38,26 @@ export function NotificationSettings() {
 	}, [getEmailStatusQuery.data, getEmailStatusQuery.isLoading]);
 
 	const handleTogglePush = async () => {
+		setStatus("idle");
+		setErrorMessage(null);
 		if (isSubscribed) {
 			setStatus("unsubscribing");
 			const t = await unsubscribe();
-			if (t) setStatus("unsubscribed");
-			else setStatus("failedUnsubscribing");
+			if (t.status) {
+				setStatus("unsubscribed");
+			} else {
+				setStatus("failedUnsubscribing");
+				setErrorMessage(t.message);
+			}
 		} else {
 			setStatus("subscribing");
 			const t = await subscribe();
-			if (t) setStatus("subscribed");
-			else setStatus("failedSubscribing");
+			if (t.status) {
+				setStatus("subscribed");
+			} else {
+				setStatus("failedSubscribing");
+				setErrorMessage(t.message);
+			}
 		}
 	};
 
@@ -92,6 +103,9 @@ export function NotificationSettings() {
 								<p>
 									{status}
 								</p>
+								{errorMessage && (
+									<p className="text-red-500 text-sm">{errorMessage}</p>
+								)}
 							</div>
 							<Switch
 								checked={isSubscribed}

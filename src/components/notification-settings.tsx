@@ -15,7 +15,8 @@ import {
 import { Switch } from "./ui/switch";
 
 export function NotificationSettings() {
-	const { isSupported, isSubscribed, isLoading, subscribe, unsubscribe } =
+	const [status, setStatus] = useState<"subscribing" | "unsubscribing" | "failedSubscribing" | "failedUnsubscribing" | "idle" | "unsubscribed" | "subscribed">("idle");
+	const { isSupported, isSubscribed, isLoading, registration, subscribe, unsubscribe } =
 		usePushNotifications();
 
 	const [emailNotificationsEnabled, setEmailNotificationsEnabled] =
@@ -37,9 +38,15 @@ export function NotificationSettings() {
 
 	const handleTogglePush = async () => {
 		if (isSubscribed) {
-			await unsubscribe();
+			setStatus("unsubscribing");
+			const t = await unsubscribe();
+			if (t) setStatus("unsubscribed");
+			else setStatus("failedUnsubscribing");
 		} else {
-			await subscribe();
+			setStatus("subscribing");
+			const t = await subscribe();
+			if (t) setStatus("subscribed");
+			else setStatus("failedSubscribing");
 		}
 	};
 
@@ -82,12 +89,27 @@ export function NotificationSettings() {
 										? "Du mottar push-varsler"
 										: "Du mottar ikke push-varsler"}
 								</p>
+								<p>
+									{status}
+								</p>
 							</div>
 							<Switch
 								checked={isSubscribed}
 								onCheckedChange={handleTogglePush}
 								disabled={isLoading}
 							/>
+						</div>
+
+						<div>
+							{registration ? (
+								<p className="text-muted-foreground text-sm">
+									Service Worker registrert med scope: {registration.scope}
+								</p>
+							) : (
+								<p className="text-muted-foreground text-sm">
+									Ingen Service Worker registrert.
+								</p>
+							)}
 						</div>
 
 						{isSubscribed && (

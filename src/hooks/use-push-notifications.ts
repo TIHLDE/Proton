@@ -106,6 +106,7 @@ export function usePushNotifications() {
 		isSupported,
 		isSubscribed,
 		isLoading,
+		registration,
 		subscribe,
 		unsubscribe,
 	};

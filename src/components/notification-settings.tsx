@@ -15,21 +15,10 @@ import {
 import { Switch } from "./ui/switch";
 
 export function NotificationSettings() {
-	const [status, setStatus] = useState<
-		| "subscribing"
-		| "unsubscribing"
-		| "failedSubscribing"
-		| "failedUnsubscribing"
-		| "idle"
-		| "unsubscribed"
-		| "subscribed"
-	>("idle");
-	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 	const {
 		isSupported,
 		isSubscribed,
 		isLoading,
-		registration,
 		subscribe,
 		unsubscribe,
 	} = usePushNotifications();
@@ -53,26 +42,10 @@ export function NotificationSettings() {
 	}, [getEmailStatusQuery.data, getEmailStatusQuery.isLoading]);
 
 	const handleTogglePush = async () => {
-		setStatus("idle");
-		setErrorMessage(null);
 		if (isSubscribed) {
-			setStatus("unsubscribing");
-			const t = await unsubscribe();
-			if (t.status) {
-				setStatus("unsubscribed");
-			} else {
-				setStatus("failedUnsubscribing");
-				setErrorMessage(t.message);
-			}
+			await unsubscribe();
 		} else {
-			setStatus("subscribing");
-			const t = await subscribe();
-			if (t.status) {
-				setStatus("subscribed");
-			} else {
-				setStatus("failedSubscribing");
-				setErrorMessage(t.message);
-			}
+			await subscribe();
 		}
 	};
 
@@ -119,28 +92,12 @@ export function NotificationSettings() {
 										? "Du mottar push-varsler"
 										: "Du mottar ikke push-varsler"}
 								</p>
-								<p>{status}</p>
-								{errorMessage && (
-									<p className="text-red-500 text-sm">{errorMessage}</p>
-								)}
 							</div>
 							<Switch
 								checked={isSubscribed}
 								onCheckedChange={handleTogglePush}
 								disabled={isLoading}
 							/>
-						</div>
-
-						<div>
-							{registration ? (
-								<p className="text-muted-foreground text-sm">
-									Service Worker registrert med scope: {registration.scope}
-								</p>
-							) : (
-								<p className="text-muted-foreground text-sm">
-									Ingen Service Worker registrert.
-								</p>
-							)}
 						</div>
 
 						{isSubscribed && (

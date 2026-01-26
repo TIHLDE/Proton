@@ -46,7 +46,7 @@ export default function MyCalendar({
 			<div className="mx-auto w-full max-w-7xl">
 				<EventCalendar
 					events={events}
-					initialView={initialView || "week"}
+					initialView={initialView || "agenda"}
 					initialDate={initialDate}
 					onRangeChange={handleRangeChange}
 				/>

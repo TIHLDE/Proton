@@ -19,7 +19,7 @@ export default function Logout() {
 					toast.error(res.error.message);
 				} else {
 					await clearTIHLDEToken();
-					router.replace("/auth/logg-inn");
+					router.replace("/");
 				}
 			} catch {
 				toast.error(

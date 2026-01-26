@@ -15,10 +15,24 @@ import {
 import { Switch } from "./ui/switch";
 
 export function NotificationSettings() {
-	const [status, setStatus] = useState<"subscribing" | "unsubscribing" | "failedSubscribing" | "failedUnsubscribing" | "idle" | "unsubscribed" | "subscribed">("idle");
+	const [status, setStatus] = useState<
+		| "subscribing"
+		| "unsubscribing"
+		| "failedSubscribing"
+		| "failedUnsubscribing"
+		| "idle"
+		| "unsubscribed"
+		| "subscribed"
+	>("idle");
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
-	const { isSupported, isSubscribed, isLoading, registration, subscribe, unsubscribe } =
-		usePushNotifications();
+	const {
+		isSupported,
+		isSubscribed,
+		isLoading,
+		registration,
+		subscribe,
+		unsubscribe,
+	} = usePushNotifications();
 
 	const [emailNotificationsEnabled, setEmailNotificationsEnabled] =
 		useState(true);
@@ -27,6 +41,7 @@ export function NotificationSettings() {
 	const getEmailStatusQuery = api.email.getStatus.useQuery();
 	const updateEmailStatusMutation = api.email.updateStatus.useMutation();
 	const sendTestMutation = api.push.sendTest.useMutation();
+	const sendEmailTestMutation = api.email.sendTest.useMutation();
 
 	useEffect(() => {
 		if (getEmailStatusQuery.data) {
@@ -77,6 +92,10 @@ export function NotificationSettings() {
 		sendTestMutation.mutate();
 	};
 
+	const handleSendEmailTest = () => {
+		sendEmailTestMutation.mutate();
+	};
+
 	return (
 		<div className="space-y-6">
 			{isSupported && (
@@ -100,9 +119,7 @@ export function NotificationSettings() {
 										? "Du mottar push-varsler"
 										: "Du mottar ikke push-varsler"}
 								</p>
-								<p>
-									{status}
-								</p>
+								<p>{status}</p>
 								{errorMessage && (
 									<p className="text-red-500 text-sm">{errorMessage}</p>
 								)}
@@ -180,6 +197,17 @@ export function NotificationSettings() {
 							disabled={isLoadingEmail}
 						/>
 					</div>
+
+					{emailNotificationsEnabled && (
+						<Button
+							variant="outline"
+							onClick={handleSendEmailTest}
+							disabled={sendEmailTestMutation.isPending}
+						>
+							<Send className="mr-2 h-4 w-4" />
+							Send test-e-post
+						</Button>
+					)}
 				</CardContent>
 			</Card>
 		</div>

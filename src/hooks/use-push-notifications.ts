@@ -52,22 +52,23 @@ export function usePushNotifications() {
 			return {
 				status: false,
 				message: "Service Worker registration missing",
-			}
+			};
 		}
 
 		if (!env.NEXT_PUBLIC_VAPID_PUBLIC_KEY) {
 			return {
 				status: false,
 				message: "VAPID public key missing",
-			}
+			};
 		}
 
 		try {
 			const permission = await Notification.requestPermission();
-			if (permission !== "granted") return {
-				status: false,
-				message: "Notification permission not granted",
-			};
+			if (permission !== "granted")
+				return {
+					status: false,
+					message: "Notification permission not granted",
+				};
 
 			const subscription = await registration.pushManager.subscribe({
 				userVisibleOnly: true,
@@ -93,21 +94,24 @@ export function usePushNotifications() {
 			return {
 				status: true,
 				message: "Subscribed successfully",
-			}
+			};
 		} catch (error) {
 			console.error("Failed to subscribe to push notifications:", error);
 			return {
 				status: false,
-				message: "Subscription failed: " + (error instanceof Error ? error.message : String(error)),
-			}
+				message:
+					"Subscription failed: " +
+					(error instanceof Error ? error.message : String(error)),
+			};
 		}
 	}, [registration, subscribeMutation]);
 
 	const unsubscribe = useCallback(async () => {
-		if (!registration) return {
-			status: false,
-			message: "Service Worker registration missing",
-		}
+		if (!registration)
+			return {
+				status: false,
+				message: "Service Worker registration missing",
+			};
 
 		try {
 			const subscription = await registration.pushManager.getSubscription();
@@ -119,12 +123,14 @@ export function usePushNotifications() {
 			}
 
 			setIsSubscribed(false);
-			return { status: true, message: "Unsubscribed successfully"};
+			return { status: true, message: "Unsubscribed successfully" };
 		} catch (error) {
 			console.error("Failed to unsubscribe from push notifications:", error);
 			return {
 				status: false,
-				message: "Unsubscription failed: " + (error instanceof Error ? error.message : String(error)),
+				message:
+					"Unsubscription failed: " +
+					(error instanceof Error ? error.message : String(error)),
 			};
 		}
 	}, [registration, unsubscribeMutation]);

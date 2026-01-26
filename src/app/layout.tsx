@@ -3,6 +3,7 @@ import "~/styles/globals.css";
 import type { Metadata } from "next";
 
 import { Inter } from "next/font/google";
+import { ServiceWorkerRegistration } from "~/components/service-worker-registration";
 import Providers from "./_components/providers";
 
 export const metadata: Metadata = {
@@ -26,6 +27,7 @@ export default async function RootLayout({
 		<html lang="no-NO" suppressHydrationWarning>
 			<body className={`antialiased ${inter.variable}`}>
 				<Providers>
+					<ServiceWorkerRegistration />
 					<div className="relative min-h-dvh">
 						<main className="w-full">{children}</main>
 					</div>

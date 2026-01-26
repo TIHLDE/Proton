@@ -83,8 +83,14 @@ export default function EventCard({
 					<strong>Type:</strong> {getEventTypeLabel(event.eventType)}
 				</p>
 				<p key="date">
-					<strong>Dato:</strong>{" "}
+					<strong>Fra:</strong>{" "}
 					{new Date(event.startAt).toLocaleString("nb-NO")}
+				</p>
+				<p key="date-end">
+					<strong>Til:</strong>{" "}
+					{event.endAt
+						? new Date(event.endAt).toLocaleString("nb-NO")
+						: "Ubestemt"}
 				</p>
 				<p key="location">
 					<strong>Sted:</strong> {event.location || "Ikke oppgitt"}

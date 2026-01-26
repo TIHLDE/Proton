@@ -18,13 +18,15 @@ model User {
   image         String?
   isAdmin       Boolean @default(false)
   username      String? @unique
+  emailNotificationsEnabled Boolean @default(true)
 
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @default(now()) @updatedAt
-  sessions      Session[]
-  accounts      Account[]
-  memberships   TeamMember[]
-  registrations Registration[]
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @default(now()) @updatedAt
+  sessions          Session[]
+  accounts          Account[]
+  memberships       TeamMember[]
+  registrations     Registration[]
+  pushSubscriptions PushSubscription[]
 
   @@unique([email])
   @@map("user")
@@ -155,4 +157,17 @@ model Registration {
 enum RegistrationType {
   ATTENDING
   NOT_ATTENDING
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@map("push_subscription")
 }

@@ -27,7 +27,7 @@ export default async function Home({ searchParams }: HomeProps) {
 
 	if (session) {
 		const now = new Date();
-		const fallbackStart = new Date(now.getFullYear(), now.getMonth(), 1);
+		const fallbackStart = now;
 		const fallbackEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
 		const startDate =

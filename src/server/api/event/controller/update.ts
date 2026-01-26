@@ -20,8 +20,8 @@ const handler: Controller<
 		data: {
 			name: input.name,
 			eventType: input.type,
-			startAt: input.datetime,
-			endAt: input.datetime,
+			startAt: input.startDatetime,
+			endAt: input.endDatetime,
 			location: input.location,
 			note: input.note,
 			registrationDeadline: input.registrationDeadline,

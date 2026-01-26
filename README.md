@@ -154,3 +154,9 @@ Prosjektet bruker PostgreSQL som database med Prisma som ORM. Database-skjemaet 
 Applikasjonen bruker Better Auth for autentisering med støtte for:
 - E-post/passord pålogging med TIHLDE bruker
 - Lag-basert tilgangskontroll
+
+## PWA
+
+Applikasjonen kan lastes ned som en PWA. For å opprette nøkler for web pushvarsler kjør følgende kommando:
+- npx web-push generate-vapid-keys
+- Fyll inn returnerte verdier i .env filen din

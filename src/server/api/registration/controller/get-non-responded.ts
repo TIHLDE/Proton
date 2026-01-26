@@ -26,6 +26,7 @@ const handler: Controller<
 	// Check if user has access to the team
 	await hasTeamAccessMiddleware(ctx.user as User, event.teamId, [
 		"ADMIN",
+		"SUBADMIN",
 		"USER",
 	]);
 

@@ -118,7 +118,7 @@ export default function EditRole({ userId, isAdmin }: EditRoleProps) {
 									className="order-1 after:absolute after:inset-0"
 								/>
 								<div className="grid grow gap-1">
-									<Label htmlFor="true">Administrator</Label>
+									<Label htmlFor="true">Superadministrator</Label>
 									<p
 										id="true-description"
 										className="text-muted-foreground text-xs"

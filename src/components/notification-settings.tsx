@@ -15,13 +15,8 @@ import {
 import { Switch } from "./ui/switch";
 
 export function NotificationSettings() {
-	const {
-		isSupported,
-		isSubscribed,
-		isLoading,
-		subscribe,
-		unsubscribe,
-	} = usePushNotifications();
+	const { isSupported, isSubscribed, isLoading, subscribe, unsubscribe } =
+		usePushNotifications();
 
 	const [emailNotificationsEnabled, setEmailNotificationsEnabled] =
 		useState(true);

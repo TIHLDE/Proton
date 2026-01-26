@@ -99,9 +99,9 @@ export function usePushNotifications() {
 			console.error("Failed to subscribe to push notifications:", error);
 			return {
 				status: false,
-				message:
-					"Subscription failed: " +
-					(error instanceof Error ? error.message : String(error)),
+				message: `Subscription failed: ${
+					error instanceof Error ? error.message : String(error)
+				}`,
 			};
 		}
 	}, [registration, subscribeMutation]);
@@ -128,9 +128,9 @@ export function usePushNotifications() {
 			console.error("Failed to unsubscribe from push notifications:", error);
 			return {
 				status: false,
-				message:
-					"Unsubscription failed: " +
-					(error instanceof Error ? error.message : String(error)),
+				message: `Unsubscription failed: ${
+					error instanceof Error ? error.message : String(error)
+				}`,
 			};
 		}
 	}, [registration, unsubscribeMutation]);

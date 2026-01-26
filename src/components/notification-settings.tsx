@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, BellOff, Mail, MailOff, Send } from "lucide-react";
+import { Bell, BellOff, Mail, Send } from "lucide-react";
 import { useEffect, useState } from "react";
 import { usePushNotifications } from "~/hooks/use-push-notifications";
 import { api } from "~/trpc/react";

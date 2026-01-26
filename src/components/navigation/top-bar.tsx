@@ -14,9 +14,32 @@ import UserAvatar from "./user-avatar";
 
 const navigationItems = [
 	{ id: "home", text: "Hjem", to: "/" },
-	{ id: "teams", text: "Mine lag", to: "/min-oversikt", auth: "MEMBER" },
-	{ id: "superadmin", text: "Admin", to: "/admin", auth: "SUPERADMIN" },
+	{
+		id: "teams",
+		text: "Mine lag",
+		to: "/min-oversikt",
+		auth: "MEMBER",
+		activePatterns: ["/min-oversikt", "/lag"],
+	},
+	{
+		id: "superadmin",
+		text: "Admin",
+		to: "/admin",
+		auth: "SUPERADMIN",
+		activePatterns: ["/admin"],
+	},
 ];
+
+function isActiveRoute(
+	pathname: string,
+	to: string,
+	activePatterns?: string[],
+): boolean {
+	if (activePatterns) {
+		return activePatterns.some((pattern) => pathname.startsWith(pattern));
+	}
+	return pathname === to;
+}
 
 const Navbar = () => {
 	const [isOnTop, setIsOnTop] = useState(true);
@@ -56,15 +79,19 @@ const Navbar = () => {
 						if (item.auth === "SUPERADMIN" && !session?.user.isAdmin)
 							return null;
 
+						const isActive = isActiveRoute(
+							pathname,
+							item.to,
+							item.activePatterns,
+						);
+
 						return (
 							<Link
 								key={item.id}
 								href={item.to}
 								className={clsx(
-									"font-medium text-foreground-secondary text-sm transition-colors hover:text-foreground-primary",
-									pathname === item.to
-										? "font-bold text-foreground-primary"
-										: "",
+									"font-medium text-foreground-secondary text-sm transition-colors hover:text-primary",
+									isActive && "font-bold text-primary",
 								)}
 							>
 								{item.text}

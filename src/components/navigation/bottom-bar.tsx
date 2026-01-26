@@ -14,6 +14,7 @@ const navigationItems = [
 		icon: <Users className="h-5 w-5" />,
 		to: "/min-oversikt",
 		auth: "MEMBER",
+		activePatterns: ["/min-oversikt", "/lag"],
 	},
 	{
 		id: "superadmin",
@@ -21,8 +22,20 @@ const navigationItems = [
 		icon: <Shield className="h-5 w-5" />,
 		to: "/admin",
 		auth: "SUPERADMIN",
+		activePatterns: ["/admin"],
 	},
 ];
+
+function isActiveRoute(
+	pathname: string,
+	to: string,
+	activePatterns?: string[],
+): boolean {
+	if (activePatterns) {
+		return activePatterns.some((pattern) => pathname.startsWith(pattern));
+	}
+	return pathname === to;
+}
 
 const BottomBar: React.FC = () => {
 	const pathname = usePathname();
@@ -48,15 +61,21 @@ const BottomBar: React.FC = () => {
 					if (navigationItem.auth === "SUPERADMIN" && !session?.user.isAdmin)
 						return null;
 
+					const isActive = isActiveRoute(
+						pathname,
+						navigationItem.to,
+						navigationItem.activePatterns,
+					);
+
 					return (
 						<Link
 							key={navigationItem.id}
 							href={navigationItem.to}
 							className={clsx(
-								"flex flex-col items-center font-medium text-xs transition-colors",
-								pathname === navigationItem.to
-									? "font-bold text-foreground-primary"
-									: "",
+								"flex flex-col items-center rounded-lg px-3 py-1 font-medium text-xs transition-colors",
+								isActive
+									? "bg-primary/10 font-bold text-primary"
+									: "text-foreground-secondary",
 							)}
 						>
 							{navigationItem.icon}

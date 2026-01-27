@@ -27,7 +27,7 @@ const handler: Controller<
 	await hasTeamAccessMiddleware(
 		ctx.user as User,
 		event.teamId,
-		["ADMIN", "USER"],
+		["ADMIN", "SUBADMIN", "USER"],
 		false,
 	);
 

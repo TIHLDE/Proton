@@ -54,6 +54,7 @@ export default function EventRegistration({
 			utils.registration.getMyRegistration.invalidate({ eventId });
 			utils.registration.getCounts.invalidate({ eventId });
 			utils.registration.getAllByEvent.invalidate({ eventId });
+			utils.event.getUnanswered.invalidate();
 			router.refresh();
 		},
 		onError: (error) => {

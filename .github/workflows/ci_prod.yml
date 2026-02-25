@@ -3,14 +3,8 @@ name: "CI - Build and push with reusable workflow (Production)"
 on:
   push:
     branches: [main]
-    paths:
-      - ./**
-      - .github/workflows/ci_prod.yml
   pull_request:
     branches: [main]
-    paths:
-      - ./**
-      - .github/workflows/ci_prod.yml
   workflow_dispatch:
 
 permissions:

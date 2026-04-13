@@ -10,8 +10,8 @@ import {
 	type AttendanceStatusFilter,
 	type EventOverviewSurface,
 	attendanceStatusOrder,
-	getAttendanceStatusAccentClassName,
 	getAttendanceStatusLabel,
+	getAttendanceStatusTextClassName,
 	getEventDateTime,
 	getEventTypeBadgeClassName,
 	getEventTypeLabel,
@@ -41,7 +41,6 @@ interface AttendanceSummaryItemProps {
 	count: number;
 	label: string;
 	onClick?: () => void;
-	surface: EventOverviewSurface;
 	status: AttendanceStatusFilter;
 }
 
@@ -68,36 +67,20 @@ function AttendanceSummaryItem({
 	count,
 	label,
 	onClick,
-	surface,
 	status,
 }: AttendanceSummaryItemProps) {
 	const isInteractive = typeof onClick === "function";
-	const summaryCardClassName =
-		surface === "inverse"
-			? "border-white/10 bg-white/5 text-white"
-			: "border-border bg-muted/30 text-foreground";
-	const summaryLabelClassName =
-		surface === "inverse" ? "text-white/70" : "text-muted-foreground";
-
-	const content = (
-		<>
-			<div className="flex items-center gap-2 font-medium text-xs">
-				<Users
-					className={cn(
-						"h-3.5 w-3.5",
-						getAttendanceStatusAccentClassName(status, surface),
-					)}
-				/>
-				<span className={summaryLabelClassName}>{label}</span>
-			</div>
-			<p className="mt-2 font-semibold text-2xl leading-none">{count}</p>
-		</>
+	const summaryClassName = cn(
+		"flex flex-col items-center gap-1",
+		getAttendanceStatusTextClassName(status),
 	);
 
 	if (!isInteractive) {
 		return (
-			<div className={cn("rounded-lg border p-3", summaryCardClassName)}>
-				{content}
+			<div className={summaryClassName}>
+				<Users className="h-4 w-4" />
+				<span className="text-xs">{label}</span>
+				<span className="font-semibold">{count}</span>
 			</div>
 		);
 	}
@@ -107,12 +90,13 @@ function AttendanceSummaryItem({
 			type="button"
 			onClick={onClick}
 			className={cn(
-				"rounded-lg border p-3 text-left transition-colors focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
-				surface === "inverse" ? "hover:bg-white/10" : "hover:bg-muted/50",
-				summaryCardClassName,
+				summaryClassName,
+				"transition-opacity hover:opacity-80 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
 			)}
 		>
-			{content}
+			<Users className="h-4 w-4" />
+			<span className="text-xs">{label}</span>
+			<span className="font-semibold">{count}</span>
 		</button>
 	);
 }
@@ -221,7 +205,7 @@ export function EventOverview({
 
 			{showAttendanceSummary && counts && (
 				<div className={cn("border-t pt-6", sectionBorderClassName)}>
-					<div className="grid grid-cols-3 gap-3">
+					<div className="grid grid-cols-3 gap-4 text-sm">
 						{attendanceStatusOrder.map((status) => (
 							<AttendanceSummaryItem
 								key={status}
@@ -232,7 +216,6 @@ export function EventOverview({
 										? () => onAttendanceStatusClick(status)
 										: undefined
 								}
-								surface={surface}
 								status={status}
 							/>
 						))}

@@ -7,11 +7,15 @@ import { Button } from "~/components/ui/button";
 import {
 	Dialog,
 	DialogContent,
-	DialogDescription,
 	DialogHeader,
 	DialogTitle,
 } from "~/components/ui/dialog";
 import { H3, P } from "~/components/ui/typography";
+import {
+	type AttendanceStatusFilter,
+	getAttendanceStatusLabel,
+	getAttendanceStatusTextClassName,
+} from "~/lib/event-presentation";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 
@@ -20,7 +24,7 @@ interface RegistrationListProps {
 	eventName: string;
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
-	statusFilter: "attending" | "notAttending" | "notResponded" | null;
+	statusFilter: AttendanceStatusFilter | null;
 	isAdmin?: boolean;
 }
 
@@ -79,20 +83,7 @@ export default function RegistrationList({
 			},
 		});
 
-	const getDialogTitle = () => {
-		switch (statusFilter) {
-			case "attending":
-				return "Påmeldt";
-			case "notAttending":
-				return "Avmeldt";
-			case "notResponded":
-				return "Ikke svart";
-			default:
-				return "";
-		}
-	};
-
-	const getDialogUsers = () => {
+	const dialogUsers = (() => {
 		if (statusFilter === "notResponded") {
 			return nonResponded || [];
 		}
@@ -104,12 +95,15 @@ export default function RegistrationList({
 				? r.type === "ATTENDING"
 				: r.type === "NOT_ATTENDING",
 		);
-	};
+	})();
 
 	const isLoading =
 		statusFilter === "notResponded"
 			? isLoadingNonResponded
 			: isLoadingRegistrations;
+	const dialogTitle = statusFilter
+		? getAttendanceStatusLabel(statusFilter)
+		: "";
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
@@ -122,18 +116,16 @@ export default function RegistrationList({
 					<H3
 						className={cn(
 							"mb-3",
-							statusFilter === "attending" && "text-green-600",
-							statusFilter === "notAttending" && "text-red-600",
-							statusFilter === "notResponded" && "text-yellow-600",
+							statusFilter && getAttendanceStatusTextClassName(statusFilter),
 						)}
 					>
-						{getDialogTitle()} ({getDialogUsers().length})
+						{dialogTitle} ({dialogUsers.length})
 					</H3>
-					{getDialogUsers().length === 0 ? (
+					{dialogUsers.length === 0 ? (
 						<P className="text-muted-foreground">Ingen personer</P>
 					) : (
 						<div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
-							{getDialogUsers().map((item: Registration | NonRespondedUser) => {
+							{dialogUsers.map((item: Registration | NonRespondedUser) => {
 								const isRegistration = "comment" in item;
 								const registration = isRegistration
 									? (item as Registration)

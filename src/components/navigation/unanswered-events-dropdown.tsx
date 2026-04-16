@@ -15,22 +15,8 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import { getEventTypeLabel } from "~/lib/event-presentation";
 import { api } from "~/trpc/react";
-
-const getEventTypeLabel = (type: string): string => {
-	switch (type) {
-		case "MATCH":
-			return "Kamp";
-		case "TRAINING":
-			return "Trening";
-		case "SOCIAL":
-			return "Sosialt";
-		case "OTHER":
-			return "Annet";
-		default:
-			return type;
-	}
-};
 
 export default function UnansweredEventsDropdown() {
 	const { data: unansweredEvents } = api.event.getUnanswered.useQuery();

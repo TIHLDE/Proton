@@ -24,46 +24,49 @@ async function main() {
 	await prisma.teamEvent.deleteMany();
 	await prisma.teamMember.deleteMany();
 	await prisma.team.deleteMany();
-	await prisma.account.deleteMany();
-	await prisma.session.deleteMany();
-	await prisma.user.deleteMany();
 
-	// Create 100 users
-	console.log("👥 Creating 100 users...");
-	const users = await Promise.all(
-		Array.from({ length: 100 }, async (_, i) => {
-			const userId = `user_${i + 1}_${Date.now()}`;
-			return prisma.user.create({
-				data: {
-					id: userId,
-					name: `User ${i + 1}`,
-					email: `user${i + 1}@example.com`,
-					username: `user${i + 1}`,
-					emailVerified: true,
-					isAdmin: i === 0, // First user is admin
-					image: `https://api.dicebear.com/7.x/avatars/svg?seed=${i}`,
-				},
-			});
-		}),
-	);
-	console.log(`✅ Created ${users.length} users`);
+	// Keep existing users untouched, create defaults only if none exist
+	let users = await prisma.user.findMany();
+	if (users.length === 0) {
+		console.log("👥 No users found, creating 100 users...");
+		users = await Promise.all(
+			Array.from({ length: 100 }, async (_, i) => {
+				const userId = `user_${i + 1}_${Date.now()}`;
+				return prisma.user.create({
+					data: {
+						id: userId,
+						name: `User ${i + 1}`,
+						email: `user${i + 1}@example.com`,
+						username: `user${i + 1}`,
+						emailVerified: true,
+						isAdmin: i === 0, // First user is admin
+						image: `https://api.dicebear.com/7.x/avatars/svg?seed=${i}`,
+					},
+				});
+			}),
+		);
+		console.log(`✅ Created ${users.length} users`);
+	} else {
+		console.log(`👥 Found ${users.length} existing users`);
+	}
 
-	// Create 5 teams
-	console.log("🏆 Creating 5 teams...");
-	const teamNames = [
-		"Pythons herrer",
-		"Pythons damer",
-		"Volleyball",
-		"Spring",
-		"Håndball",
+	// Create teams
+	console.log("🏆 Creating teams...");
+	const teamData = [
+		{ name: "Pythons Volley", slug: "volley" },
+		{ name: "Pythons Håndball", slug: "handball" },
+		{ name: "Pythons Fotball Herrer", slug: "pythons-gutter-a" },
+		{ name: "Pythons Fotball Damer", slug: "pythons-jenter" },
+		{ name: "TIHLDE Spring", slug: "spring" },
+		{ name: "TIHLDE Ski", slug: "tihldeski" },
 	];
 
 	const teams = await Promise.all(
-		teamNames.map((name, i) =>
+		teamData.map((team) =>
 			prisma.team.create({
 				data: {
-					name,
-					slug: name.toLowerCase().replace(/\s+/g, "-"),
+					name: team.name,
+					slug: team.slug,
 				},
 			}),
 		),

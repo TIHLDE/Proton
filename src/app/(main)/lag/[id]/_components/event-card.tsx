@@ -76,7 +76,7 @@ export default function EventCard({
 						)}
 						onClick={() => setConfirmAttendanceOpen(true)}
 					>
-						Se oppmøte
+						{isAdmin ? "Bekreft oppmøte" : "Se oppmøte"}
 					</Button>
 				</div>
 			)}
@@ -86,6 +86,7 @@ export default function EventCard({
 				eventName={event.name}
 				open={confirmAttendanceOpen}
 				onOpenChange={setConfirmAttendanceOpen}
+				isAdmin={isAdmin}
 			/>
 
 			<RegistrationList

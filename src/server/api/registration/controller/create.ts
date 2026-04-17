@@ -44,8 +44,6 @@ const handler: Controller<
 		},
 	});
 
-	console.log("User membership:", userMembership);
-
 	const isAdmin =
 		userMembership?.role === "ADMIN" || userMembership?.role === "SUBADMIN";
 

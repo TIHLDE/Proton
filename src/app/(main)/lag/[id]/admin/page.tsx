@@ -74,6 +74,7 @@ export default async function EventsAdminPage({ params }: EventPageProps) {
 							key={event.id}
 							event={event}
 							actions={<EditEvent event={event} teamId={id} />}
+							isAdmin
 						/>
 					))}
 				</div>

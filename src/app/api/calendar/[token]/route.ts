@@ -1,4 +1,4 @@
-import ical, { ICalCalendarMethod } from "ical-generator";
+import ical, { ICalCalendarMethod, ICalEventStatus } from "ical-generator";
 import { env } from "~/env";
 import { getEventTypeLabel } from "~/lib/event-presentation";
 import { db } from "~/server/db";
@@ -26,6 +26,7 @@ export async function GET(
 					id: true,
 					name: true,
 					events: {
+						orderBy: { startAt: "asc" },
 						select: {
 							id: true,
 							name: true,
@@ -49,21 +50,15 @@ export async function GET(
 
 	const calendar = ical({
 		name: `TIHLDE Idrett – ${user.name}`,
-		timezone: "Europe/Oslo",
 		prodId: { company: "TIHLDE", product: "Sporty", language: "NO" },
 		method: ICalCalendarMethod.PUBLISH,
 	});
-	calendar.x("X-PUBLISHED-TTL", "PT15M");
 
 	for (const membership of memberships) {
 		const { team } = membership;
 
 		for (const event of team.events) {
-			const myRegistration = event.registrations[0];
-
-			if (myRegistration?.type === "NOT_ATTENDING") {
-				continue;
-			}
+			if (event.registrations[0]?.type === "NOT_ATTENDING") continue;
 
 			const typeLabel = getEventTypeLabel(event.eventType);
 			const start = event.startAt;
@@ -78,6 +73,7 @@ export async function GET(
 				summary: `${typeLabel}: ${event.name} – ${team.name}`,
 				start,
 				end,
+				status: ICalEventStatus.CONFIRMED,
 				location: event.location ?? undefined,
 				description: descriptionParts.join("\n\n"),
 				url: baseUrl,
@@ -85,7 +81,14 @@ export async function GET(
 		}
 	}
 
-	return new Response(calendar.toString(), {
+	const icsOutput = calendar
+		.toString()
+		.replace(
+			"BEGIN:VEVENT",
+			"X-PUBLISHED-TTL:PT15M\r\nREFRESH-INTERVAL;VALUE=DURATION:PT15M\r\nBEGIN:VEVENT",
+		);
+
+	return new Response(icsOutput, {
 		status: 200,
 		headers: {
 			"Content-Type": "text/calendar; charset=utf-8",

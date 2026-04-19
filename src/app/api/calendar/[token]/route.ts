@@ -4,7 +4,7 @@ import { getEventTypeLabel } from "~/lib/event-presentation";
 import { db } from "~/server/db";
 
 export async function GET(
-	_request: Request,
+	request: Request,
 	{ params }: { params: Promise<{ token: string }> },
 ) {
 	const { token } = await params;
@@ -33,6 +33,7 @@ export async function GET(
 							eventType: true,
 							startAt: true,
 							endAt: true,
+							updatedAt: true,
 							location: true,
 							note: true,
 							registrations: {
@@ -47,6 +48,7 @@ export async function GET(
 	});
 
 	const baseUrl = env.NEXT_PUBLIC_URL ?? "https://sporty.tihlde.org";
+	const rsvpTokenBase = `${baseUrl}/api/rsvp/${token}`;
 
 	const calendar = ical({
 		name: `TIHLDE Idrett – ${user.name}`,
@@ -58,25 +60,44 @@ export async function GET(
 		const { team } = membership;
 
 		for (const event of team.events) {
-			if (event.registrations[0]?.type === "NOT_ATTENDING") continue;
+			const registration = event.registrations[0];
+
+			if (registration?.type === "NOT_ATTENDING") continue;
 
 			const typeLabel = getEventTypeLabel(event.eventType);
 			const start = event.startAt;
 			const end = event.endAt ?? new Date(start.getTime() + 60 * 60 * 1000);
+			const eventUrl = `${baseUrl}/lag/${team.id}`;
+			const rsvpBase = `${rsvpTokenBase}/${event.id}`;
 
 			const descriptionParts: string[] = [];
 			if (event.note) descriptionParts.push(event.note);
-			descriptionParts.push(`Registrer oppmøte her: ${baseUrl}`);
+
+			let summary: string;
+			if (registration?.type === "ATTENDING") {
+				summary = `✅ ${typeLabel}: ${event.name} – ${team.name}`;
+				descriptionParts.push(
+					`Status: ✅ Du er påmeldt!\n\n❌ Meld deg av her:\n${rsvpBase}/NOT_ATTENDING`,
+				);
+			} else {
+				summary = `❓ ${typeLabel}: ${event.name} – ${team.name}`;
+				descriptionParts.push(
+					`Status: ❓ Du har ikke svart ennå.\n\n✅ Jeg skal:\n${rsvpBase}/ATTENDING\n\n❌ Jeg skal ikke:\n${rsvpBase}/NOT_ATTENDING`,
+				);
+			}
+
+			descriptionParts.push(`Se detaljer:\n${eventUrl}`);
 
 			calendar.createEvent({
 				id: `${event.id}@sporty.tihlde.org`,
-				summary: `${typeLabel}: ${event.name} – ${team.name}`,
+				summary,
 				start,
 				end,
+				stamp: event.updatedAt,
 				status: ICalEventStatus.CONFIRMED,
 				location: event.location ?? undefined,
 				description: descriptionParts.join("\n\n"),
-				url: baseUrl,
+				url: eventUrl,
 			});
 		}
 	}
@@ -84,8 +105,8 @@ export async function GET(
 	const icsOutput = calendar
 		.toString()
 		.replace(
-			"BEGIN:VEVENT",
-			"X-PUBLISHED-TTL:PT15M\r\nREFRESH-INTERVAL;VALUE=DURATION:PT15M\r\nBEGIN:VEVENT",
+			"METHOD:PUBLISH",
+			"METHOD:PUBLISH\r\nX-PUBLISHED-TTL:PT15M\r\nREFRESH-INTERVAL;VALUE=DURATION:PT15M",
 		);
 
 	return new Response(icsOutput, {

@@ -4,7 +4,7 @@ import type { User } from "@prisma/client";
 import { ArrowRight, BarChart3, PackageOpen, UsersRound } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { Button } from "~/components/ui/button";
 import { H1, H2, P } from "~/components/ui/typography";
 import { auth } from "~/lib/auth";
@@ -35,7 +35,7 @@ export default async function TeamPage({
 		headers: await headers(),
 	});
 
-	if (!session) notFound();
+	if (!session) redirect("/");
 
 	const membership = await hasTeamAccess(id, session.user as User);
 

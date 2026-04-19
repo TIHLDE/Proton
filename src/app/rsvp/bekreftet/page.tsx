@@ -56,7 +56,7 @@ export default async function BekreftedPage({
 				</div>
 
 				<Button asChild className="w-full">
-					<Link href="/">Gå til appen</Link>
+					<Link href="/">Gå til hovedsiden</Link>
 				</Button>
 			</div>
 		</div>

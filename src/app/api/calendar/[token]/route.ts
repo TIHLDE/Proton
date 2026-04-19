@@ -75,12 +75,12 @@ export async function GET(
 
 			let summary: string;
 			if (registration?.type === "ATTENDING") {
-				summary = `✅ ${typeLabel}: ${event.name} – ${team.name}`;
+				summary = `✅ ${team.name} – ${typeLabel}: ${event.name}`;
 				descriptionParts.push(
 					`Status: ✅ Du er påmeldt!\n\n❌ Meld deg av her:\n${rsvpBase}/NOT_ATTENDING`,
 				);
 			} else {
-				summary = `❓ ${typeLabel}: ${event.name} – ${team.name}`;
+				summary = `❓ ${team.name} – ${typeLabel}: ${event.name}`;
 				descriptionParts.push(
 					`Status: ❓ Du har ikke svart ennå.\n\n✅ Jeg skal:\n${rsvpBase}/ATTENDING\n\n❌ Jeg skal ikke:\n${rsvpBase}/NOT_ATTENDING`,
 				);

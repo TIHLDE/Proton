@@ -3,6 +3,7 @@
 import type { TeamEvent } from "@prisma/client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { type CalendarView, EventCalendar } from "~/components/event-calendar";
+import { CalendarSubscribeDialog } from "./calendar-subscribe-dialog";
 
 interface MyCalendarProps {
 	events: TeamEvent[];
@@ -44,6 +45,9 @@ export default function MyCalendar({
 	return (
 		<div className="w-full px-2 py-20 md:px-6 md:py-32 lg:px-12">
 			<div className="mx-auto w-full max-w-7xl">
+				<div className="mb-4 flex justify-end">
+					<CalendarSubscribeDialog />
+				</div>
 				<EventCalendar
 					events={events}
 					initialView={initialView || "agenda"}

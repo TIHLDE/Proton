@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
 import BottomBar from "~/components/navigation/bottom-bar";
 import Footer from "~/components/navigation/footer";
 import Navbar from "~/components/navigation/top-bar";
+import { RsvpToast } from "./_components/rsvp-toast";
 
 export const metadata: Metadata = {
 	title: "Idrett | TIHLDE",
@@ -16,6 +18,9 @@ export default async function RootLayout({
 }>) {
 	return (
 		<div className="relative min-h-dvh">
+			<Suspense>
+				<RsvpToast />
+			</Suspense>
 			<Navbar />
 			<main className="w-full">{children}</main>
 			<BottomBar />

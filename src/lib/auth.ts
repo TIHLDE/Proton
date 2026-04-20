@@ -28,6 +28,11 @@ export const auth = betterAuth({
 				required: true,
 				default: false,
 			},
+			calendarToken: {
+				type: "string",
+				required: false,
+				unique: true,
+			}
 		},
 	},
 	trustedOrigins: ["*"],

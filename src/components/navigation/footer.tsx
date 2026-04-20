@@ -24,7 +24,7 @@ const Footer = () => {
 	];
 
 	return (
-		<div className="mx-auto w-full max-w-7xl px-4 py-16 md:px-20 md:py-16">
+		<div className="mx-auto w-full max-w-7xl px-4 py-16 md:px-20 md:py-16 [@media(display-mode:standalone)]:hidden">
 			<div className="flex w-full flex-col items-center space-y-12 md:flex-row md:items-start md:justify-between md:space-y-0">
 				{/* Left side - Tihlde logo with social icons */}
 				<div className="flex flex-col items-center space-y-6 md:items-start">

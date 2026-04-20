@@ -74,14 +74,6 @@ export default function EventRegistration({
 	};
 
 	const handleNotAttendingSubmit = form.handleSubmit((data) => {
-		if (data.type === "NOT_ATTENDING" && data.comment?.trim() === "") {
-			toast.error(
-				"Vennligst oppgi en begrunnelse for hvorfor du ikke kan delta.",
-			);
-			form.setError("comment", { message: "Begrunnelse er påkrevd." });
-			return;
-		}
-
 		register(data, {
 			onSuccess: () => {
 				// Close the comment field after successful submission

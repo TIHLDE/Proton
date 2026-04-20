@@ -63,7 +63,7 @@ export default async function TeamPage({
 						session.user.isAdmin) && (
 						<Button asChild>
 							<Link href={`/lag/${team.id}/admin`}>
-								Administrer lag
+								Administrer arrangementer
 								<ArrowRight />
 							</Link>
 						</Button>

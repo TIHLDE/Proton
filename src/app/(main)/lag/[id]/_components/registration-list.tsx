@@ -146,8 +146,7 @@ export default function RegistrationList({
 											)}
 											<span className="flex-1">{item.user.name}</span>
 										</div>
-										{isAdmin &&
-											statusFilter === "notAttending" &&
+										{statusFilter === "notAttending" &&
 											registration?.comment && (
 												<div className="text-muted-foreground text-sm">
 													<span className="font-semibold">Grunn: </span>

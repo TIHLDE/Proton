@@ -11,13 +11,13 @@ datasource db {
 }
 
 model User {
-  id            String  @id
-  name          String
-  email         String
-  emailVerified Boolean @default(true)
-  image         String?
-  isAdmin       Boolean @default(false)
-  username      String? @unique
+  id                        String  @id
+  name                      String
+  email                     String
+  emailVerified             Boolean @default(true)
+  image                     String?
+  isAdmin                   Boolean @default(false)
+  username                  String? @unique
   emailNotificationsEnabled Boolean @default(true)
 
   createdAt         DateTime           @default(now())
@@ -26,6 +26,7 @@ model User {
   accounts          Account[]
   memberships       TeamMember[]
   registrations     Registration[]
+  attendances       Attendance[]
   pushSubscriptions PushSubscription[]
 
   @@unique([email])
@@ -124,6 +125,7 @@ model TeamEvent {
   registrationDeadline DateTime?
   team                 Team           @relation(fields: [teamId], references: [id], onDelete: Cascade)
   registrations        Registration[]
+  attendances          Attendance[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -157,6 +159,32 @@ model Registration {
 enum RegistrationType {
   ATTENDING
   NOT_ATTENDING
+}
+
+model Attendance {
+  id      String           @id @default(cuid())
+  userId  String
+  eventId String
+  status  AttendanceStatus
+  source  AttendanceSource @default(RSVP)
+  user    User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event   TeamEvent        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@unique([userId, eventId])
+  @@map("attendance")
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+}
+
+enum AttendanceSource {
+  RSVP
+  MANUAL
 }
 
 model PushSubscription {

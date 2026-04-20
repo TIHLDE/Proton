@@ -43,3 +43,18 @@ export const notifyUnattendedEventRegistrationSchema = z.object({
 	eventId: z.string().min(1, "Event ID er påkrevd"),
 	teamId: z.string().min(1, "Team ID er påkrevd"),
 });
+
+export const addAttendanceWithoutRsvpSchema = z.object({
+	eventId: z.string().min(1, "Event ID er påkrevd"),
+	userId: z.string().min(1, "User ID er påkrevd"),
+});
+
+export const setConfirmedAbsentSchema = z.object({
+	eventId: z.string().min(1, "Event ID er påkrevd"),
+	userId: z.string().min(1, "User ID er påkrevd"),
+	confirmedAbsent: z.boolean(),
+});
+
+export const getEligibleWithoutRsvpSchema = z.object({
+	eventId: z.string().min(1, "Event ID er påkrevd"),
+});

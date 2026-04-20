@@ -52,7 +52,5 @@ EXPOSE 3000
 ENV PORT=3000
 ENV NEXT_TELEMETRY_DISABLED=1
 
-CMD ["node", "server.js"]
-
-# Kjør migreringer før app starter (idempotent / pending only) - Dette legger vi til senere. 
-# CMD ["sh", "-c", "./node_modules/.bin/prisma migrate deploy --schema=./prisma/schema.prisma && node server.js"]
+# Kjør migreringer før app starter (idempotent / pending only).
+CMD ["sh", "-c", "./node_modules/.bin/prisma migrate deploy --schema=./prisma/schema.prisma && node server.js"]

@@ -5,6 +5,7 @@ import Image from "next/image";
 import TihldeLogo from "~/components/logo";
 import { NotificationPrompt } from "~/components/notification-prompt";
 import { PWAInstallPrompt } from "~/components/pwa-install-prompt";
+import { UnansweredEventsBanner } from "~/components/unanswered-events-banner";
 import { auth } from "~/lib/auth";
 import { getAllMyEvents } from "~/services";
 import Hero from "../_components/hero";
@@ -51,6 +52,7 @@ export default async function Home({ searchParams }: HomeProps) {
 			<>
 				<PWAInstallPrompt isLoggedIn={true} />
 				<NotificationPrompt isLoggedIn={true} />
+				<UnansweredEventsBanner />
 				<MyCalendar
 					events={events}
 					initialDate={initialDate}

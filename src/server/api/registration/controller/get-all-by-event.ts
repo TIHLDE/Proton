@@ -28,7 +28,7 @@ const handler: Controller<
 		"USER",
 	]);
 
-	const [registrations, attendances] = await Promise.all([
+	const [registrations, attendances, teamMembers] = await Promise.all([
 		db.registration.findMany({
 			where: { eventId: input.eventId },
 			include: {
@@ -42,6 +42,12 @@ const handler: Controller<
 				user: { select: { id: true, name: true, image: true } },
 			},
 		}),
+		db.teamMember.findMany({
+			where: { teamId: event.teamId },
+			include: {
+				user: { select: { id: true, name: true, image: true } },
+			},
+		}),
 	]);
 
 	const absentUserIds = new Set(
@@ -50,12 +56,24 @@ const handler: Controller<
 	const attendingUserIds = new Set(
 		registrations.filter((r) => r.type === "ATTENDING").map((r) => r.userId),
 	);
+	const registeredUserIds = new Set(registrations.map((r) => r.userId));
+	const manualAttendanceUserIds = new Set(
+		attendances.filter((a) => a.source === "MANUAL").map((a) => a.userId),
+	);
+
+	const now = new Date();
 
 	return [
 		...registrations.map((reg) => ({
 			...reg,
 			confirmedAbsent: absentUserIds.has(reg.userId),
 			attendedWithoutRsvp: false,
+			absenceReason:
+				reg.type === "NOT_ATTENDING"
+					? ("not_attending" as const)
+					: absentUserIds.has(reg.userId)
+						? ("overridden" as const)
+						: null,
 		})),
 		...attendances
 			.filter((a) => a.source === "MANUAL" && !attendingUserIds.has(a.userId))
@@ -64,12 +82,32 @@ const handler: Controller<
 				type: "ATTENDING" as const,
 				confirmedAbsent: a.status === "ABSENT",
 				attendedWithoutRsvp: true,
+				absenceReason: null as null,
 				userId: a.userId,
 				eventId: a.eventId,
 				comment: null,
 				user: a.user,
 				createdAt: a.createdAt,
 				updatedAt: a.updatedAt,
+			})),
+		...teamMembers
+			.filter(
+				(m) =>
+					!registeredUserIds.has(m.userId) &&
+					!manualAttendanceUserIds.has(m.userId),
+			)
+			.map((m) => ({
+				id: m.id,
+				type: "NOT_ATTENDING" as const,
+				confirmedAbsent: false,
+				attendedWithoutRsvp: false,
+				absenceReason: "no_response" as const,
+				userId: m.userId,
+				eventId: input.eventId,
+				comment: null,
+				user: m.user,
+				createdAt: now,
+				updatedAt: now,
 			})),
 	].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 };

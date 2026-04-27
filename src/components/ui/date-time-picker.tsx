@@ -87,9 +87,21 @@ export function DateTimePicker({
 						onSelect={handleDaySelect}
 						disabled={
 							minDate || maxDate
-								? (day) =>
-										(minDate ? day < minDate : false) ||
-										(maxDate ? day > maxDate : false)
+								? (day) => {
+										const dayStart = new Date(day);
+										dayStart.setHours(0, 0, 0, 0);
+										if (minDate) {
+											const minStart = new Date(minDate);
+											minStart.setHours(0, 0, 0, 0);
+											if (dayStart < minStart) return true;
+										}
+										if (maxDate) {
+											const maxStart = new Date(maxDate);
+											maxStart.setHours(0, 0, 0, 0);
+											if (dayStart > maxStart) return true;
+										}
+										return false;
+									}
 								: undefined
 						}
 						initialFocus

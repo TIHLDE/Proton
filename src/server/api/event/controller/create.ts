@@ -17,9 +17,10 @@ const handler: Controller<
 		"SUBADMIN",
 	]);
 
+	const DEFAULT_EVENT_DURATION_MS = 90 * 60 * 1000; // 1.5 hours
 	const endAt =
 		input.endDatetime ??
-		new Date(input.startDatetime.getTime() + 90 * 60 * 1000);
+		new Date(input.startDatetime.getTime() + DEFAULT_EVENT_DURATION_MS);
 
 	await db.teamEvent.create({
 		data: {

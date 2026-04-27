@@ -64,7 +64,9 @@ const handler: Controller<
 	const now = new Date();
 
 	return [
-		...registrations.map((reg) => ({
+		...registrations
+		.filter((reg) => !manualAttendanceUserIds.has(reg.userId))
+		.map((reg) => ({
 			...reg,
 			confirmedAbsent: absentUserIds.has(reg.userId),
 			attendedWithoutRsvp: false,
@@ -82,7 +84,7 @@ const handler: Controller<
 				type: "ATTENDING" as const,
 				confirmedAbsent: a.status === "ABSENT",
 				attendedWithoutRsvp: true,
-				absenceReason: null as null,
+				absenceReason: a.status === "ABSENT" ? ("overridden" as const) : (null as null),
 				userId: a.userId,
 				eventId: a.eventId,
 				comment: null,

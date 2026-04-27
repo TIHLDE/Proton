@@ -117,7 +117,15 @@ export default function CreateEvent({ teamId }: CreateEventProps) {
 										<FormControl>
 											<DateTimePicker
 												value={field.value}
-												onChange={field.onChange}
+												onChange={(date) => {
+													field.onChange(date);
+													if (date) {
+														form.setValue(
+															"endDatetime",
+															new Date(date.getTime() + 90 * 60 * 1000),
+														);
+													}
+												}}
 												placeholder="Velg startdato og tid"
 												minDate={new Date()}
 											/>
@@ -144,6 +152,7 @@ export default function CreateEvent({ teamId }: CreateEventProps) {
 												onChange={field.onChange}
 												placeholder="Velg sluttdato og tid"
 												minDate={form.watch("startDatetime") ?? new Date()}
+												clearable
 											/>
 										</FormControl>
 										<FormMessage />
@@ -246,6 +255,7 @@ export default function CreateEvent({ teamId }: CreateEventProps) {
 													form.watch("endDatetime") ??
 													form.watch("startDatetime")
 												}
+												clearable
 											/>
 										</FormControl>
 										<FormMessage />

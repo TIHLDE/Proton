@@ -172,6 +172,7 @@ export default function EditEvent({ event, teamId }: EditEventProps) {
 												onChange={field.onChange}
 												placeholder="Velg sluttdato og tid"
 												minDate={form.watch("startDatetime")}
+												clearable
 											/>
 										</FormControl>
 										<FormMessage />
@@ -273,6 +274,7 @@ export default function EditEvent({ event, teamId }: EditEventProps) {
 													form.watch("endDatetime") ??
 													form.watch("startDatetime")
 												}
+												clearable
 											/>
 										</FormControl>
 										<FormMessage />

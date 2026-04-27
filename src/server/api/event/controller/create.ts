@@ -7,17 +7,17 @@ import { db } from "~/server/db";
 import { type Controller, authorizedProcedure } from "../../trpc";
 import { hasTeamAccessMiddleware } from "../../util/auth";
 
+const DEFAULT_EVENT_DURATION_MS = 90 * 60 * 1000;
+
 const handler: Controller<
 	z.infer<typeof CreateEventInputSchema>,
 	void
 > = async ({ input, ctx }) => {
-	// Check if user has access
 	await hasTeamAccessMiddleware(ctx.user as User, input.teamId, [
 		"ADMIN",
 		"SUBADMIN",
 	]);
 
-	const DEFAULT_EVENT_DURATION_MS = 90 * 60 * 1000; // 1.5 hours
 	const endAt =
 		input.endDatetime ??
 		new Date(input.startDatetime.getTime() + DEFAULT_EVENT_DURATION_MS);

@@ -21,7 +21,7 @@ const handler: Controller<
 			name: input.name,
 			eventType: input.type,
 			startAt: input.startDatetime,
-			endAt: input.endDatetime,
+			endAt: input.endDatetime ?? null,
 			location: input.location,
 			note: input.note,
 			registrationDeadline: input.registrationDeadline,

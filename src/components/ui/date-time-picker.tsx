@@ -2,7 +2,7 @@
 
 import { format } from "date-fns";
 import { nb } from "date-fns/locale";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, X } from "lucide-react";
 import * as React from "react";
 import { Button } from "~/components/ui/button";
 import { Calendar } from "~/components/ui/calendar";
@@ -19,6 +19,7 @@ interface DateTimePickerProps {
 	onChange: (date: Date | undefined) => void;
 	placeholder?: string;
 	disabled?: boolean;
+	clearable?: boolean;
 	minDate?: Date;
 	maxDate?: Date;
 	className?: string;
@@ -29,20 +30,27 @@ export function DateTimePicker({
 	onChange,
 	placeholder = "Velg dato og tid",
 	disabled,
+	clearable,
 	minDate,
 	maxDate,
 	className,
 }: DateTimePickerProps) {
 	const [open, setOpen] = React.useState(false);
+	const [localTime, setLocalTime] = React.useState(
+		value ? format(value, "HH:mm") : "00:00",
+	);
 
-	const timeValue = value ? format(value, "HH:mm") : "00:00";
+	React.useEffect(() => {
+		if (value) setLocalTime(format(value, "HH:mm"));
+	}, [value]);
 
 	const handleDaySelect = (day: Date | undefined) => {
 		if (!day) {
 			onChange(undefined);
+			setOpen(false);
 			return;
 		}
-		const [hours, minutes] = timeValue.split(":").map(Number);
+		const [hours, minutes] = localTime.split(":").map(Number);
 		const newDate = new Date(day);
 		newDate.setHours(hours ?? 0, minutes ?? 0, 0, 0);
 		onChange(newDate);
@@ -51,16 +59,24 @@ export function DateTimePicker({
 
 	const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const timeStr = e.target.value;
-		if (!timeStr) return;
+		setLocalTime(timeStr);
+		if (!timeStr || !value) return;
 		const [hours, minutes] = timeStr.split(":").map(Number);
-		const base = value ?? new Date();
-		const newDate = new Date(base);
+		const newDate = new Date(value);
 		newDate.setHours(hours ?? 0, minutes ?? 0, 0, 0);
 		onChange(newDate);
 	};
 
+	const minTime = React.useMemo(() => {
+		if (!minDate || !value) return undefined;
+		const valueDay = new Date(value).setHours(0, 0, 0, 0);
+		const minDay = new Date(minDate).setHours(0, 0, 0, 0);
+		if (valueDay === minDay) return format(minDate, "HH:mm");
+		return undefined;
+	}, [minDate, value]);
+
 	return (
-		<div className={cn("flex gap-2", className)}>
+		<div className={cn("flex flex-col gap-1.5", className)}>
 			<Popover open={open} onOpenChange={setOpen}>
 				<PopoverTrigger asChild>
 					<Button
@@ -68,16 +84,14 @@ export function DateTimePicker({
 						type="button"
 						disabled={disabled}
 						className={cn(
-							"flex-1 justify-start bg-card text-left font-normal",
+							"w-full justify-start bg-card text-left font-normal",
 							!value && "text-muted-foreground",
 						)}
 					>
 						<CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
-						{value ? (
-							format(value, "d. MMM yyyy", { locale: nb })
-						) : (
-							<span>{placeholder}</span>
-						)}
+						{value
+							? format(value, "d. MMMM yyyy", { locale: nb })
+							: placeholder}
 					</Button>
 				</PopoverTrigger>
 				<PopoverContent className="w-auto p-0" align="start">
@@ -88,17 +102,17 @@ export function DateTimePicker({
 						disabled={
 							minDate || maxDate
 								? (day) => {
-										const dayStart = new Date(day);
-										dayStart.setHours(0, 0, 0, 0);
+										const d = new Date(day);
+										d.setHours(0, 0, 0, 0);
 										if (minDate) {
-											const minStart = new Date(minDate);
-											minStart.setHours(0, 0, 0, 0);
-											if (dayStart < minStart) return true;
+											const min = new Date(minDate);
+											min.setHours(0, 0, 0, 0);
+											if (d < min) return true;
 										}
 										if (maxDate) {
-											const maxStart = new Date(maxDate);
-											maxStart.setHours(0, 0, 0, 0);
-											if (dayStart > maxStart) return true;
+											const max = new Date(maxDate);
+											max.setHours(0, 0, 0, 0);
+											if (d > max) return true;
 										}
 										return false;
 									}
@@ -109,13 +123,29 @@ export function DateTimePicker({
 					/>
 				</PopoverContent>
 			</Popover>
-			<Input
-				type="time"
-				value={timeValue}
-				onChange={handleTimeChange}
-				disabled={disabled}
-				className="w-24 shrink-0 bg-card"
-			/>
+
+			<div className="flex items-center gap-1.5">
+				<Input
+					type="time"
+					value={localTime}
+					min={minTime}
+					onChange={handleTimeChange}
+					disabled={disabled}
+					className="flex-1 bg-card"
+				/>
+				{clearable && value && (
+					<Button
+						type="button"
+						variant="ghost"
+						size="icon"
+						className="h-9 w-9 shrink-0"
+						disabled={disabled}
+						onClick={() => onChange(undefined)}
+					>
+						<X className="h-4 w-4" />
+					</Button>
+				)}
+			</div>
 		</div>
 	);
 }

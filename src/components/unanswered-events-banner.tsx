@@ -27,7 +27,7 @@ export function UnansweredEventsBanner() {
 
 	const handleOpen = () => {
 		if (!unansweredEvents || unansweredEvents.length === 0) return;
-		setSelectedEvent(unansweredEvents[0] as TeamEvent);
+		setSelectedEvent(unansweredEvents[0]);
 		setIsDialogOpen(true);
 	};
 

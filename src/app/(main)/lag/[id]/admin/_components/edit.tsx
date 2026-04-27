@@ -2,7 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { TeamEvent } from "@prisma/client";
-import { format } from "date-fns";
 import { Pencil } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -11,6 +10,7 @@ import { toast } from "sonner";
 import type { z } from "zod";
 import SubmitButton from "~/components/form/submit-button";
 import { Button } from "~/components/ui/button";
+import { DateTimePicker } from "~/components/ui/date-time-picker";
 import {
 	Dialog,
 	DialogContent,
@@ -59,7 +59,7 @@ export default function EditEvent({ event, teamId }: EditEventProps) {
 			teamId,
 			name: event.name,
 			startDatetime: new Date(event.startAt),
-			endDatetime: new Date(event.endAt || new Date()),
+			endDatetime: event.endAt ? new Date(event.endAt) : undefined,
 			type: event.eventType,
 			location: event.location || "",
 			note: event.note || "",
@@ -145,19 +145,10 @@ export default function EditEvent({ event, teamId }: EditEventProps) {
 									<FormItem>
 										<FormLabel>Starttid</FormLabel>
 										<FormControl>
-											<Input
-												type="datetime-local"
-												value={
-													field.value
-														? format(field.value, "yyyy-MM-dd'T'HH:mm")
-														: ""
-												}
-												onChange={(e) => {
-													const value = e.target.value;
-													if (value) {
-														field.onChange(new Date(value));
-													}
-												}}
+											<DateTimePicker
+												value={field.value}
+												onChange={field.onChange}
+												placeholder="Velg startdato og tid"
 											/>
 										</FormControl>
 										<FormMessage />
@@ -169,21 +160,18 @@ export default function EditEvent({ event, teamId }: EditEventProps) {
 								name="endDatetime"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Sluttid</FormLabel>
+										<FormLabel>
+											Sluttid{" "}
+											<span className="font-normal text-muted-foreground">
+												(valgfritt)
+											</span>
+										</FormLabel>
 										<FormControl>
-											<Input
-												type="datetime-local"
-												value={
-													field.value
-														? format(field.value, "yyyy-MM-dd'T'HH:mm")
-														: ""
-												}
-												onChange={(e) => {
-													const value = e.target.value;
-													if (value) {
-														field.onChange(new Date(value));
-													}
-												}}
+											<DateTimePicker
+												value={field.value}
+												onChange={field.onChange}
+												placeholder="Velg sluttdato og tid"
+												minDate={form.watch("startDatetime")}
 											/>
 										</FormControl>
 										<FormMessage />
@@ -277,25 +265,13 @@ export default function EditEvent({ event, teamId }: EditEventProps) {
 									<FormItem>
 										<FormLabel>Frist for påmelding</FormLabel>
 										<FormControl>
-											<Input
-												type="datetime-local"
-												value={
-													field.value
-														? format(field.value, "yyyy-MM-dd'T'HH:mm")
-														: ""
-												}
-												onChange={(e) => {
-													if (e.target.value) {
-														field.onChange(new Date(e.target.value));
-													}
-												}}
-												max={
-													form.getValues("endDatetime")
-														? format(
-																form.getValues("endDatetime"),
-																"yyyy-MM-dd'T'HH:mm",
-															)
-														: undefined
+											<DateTimePicker
+												value={field.value}
+												onChange={field.onChange}
+												placeholder="Velg påmeldingsfrist"
+												maxDate={
+													form.watch("endDatetime") ??
+													form.watch("startDatetime")
 												}
 											/>
 										</FormControl>

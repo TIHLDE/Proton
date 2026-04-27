@@ -17,13 +17,17 @@ const handler: Controller<
 		"SUBADMIN",
 	]);
 
+	const endAt =
+		input.endDatetime ??
+		new Date(input.startDatetime.getTime() + 90 * 60 * 1000);
+
 	await db.teamEvent.create({
 		data: {
 			teamId: input.teamId,
 			name: input.name,
 			eventType: input.type as TeamEventType,
 			startAt: input.startDatetime,
-			endAt: input.endDatetime,
+			endAt,
 			location: input.location,
 			note: input.note,
 			registrationDeadline: input.registrationDeadline,
@@ -59,7 +63,7 @@ const handler: Controller<
 			},
 			{
 				type: "text",
-				content: `Dato og tid: ${input.startDatetime.toLocaleString()} - ${input.endDatetime.toLocaleString()}`,
+				content: `Dato og tid: ${input.startDatetime.toLocaleString()}${input.endDatetime ? ` - ${input.endDatetime.toLocaleString()}` : ""}`,
 			},
 			{
 				type: "text",

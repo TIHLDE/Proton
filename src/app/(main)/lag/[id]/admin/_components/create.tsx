@@ -1,7 +1,6 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { format } from "date-fns";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -9,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type { z } from "zod";
 import { Button } from "~/components/ui/button";
+import { DateTimePicker } from "~/components/ui/date-time-picker";
 import {
 	Dialog,
 	DialogContent,
@@ -115,19 +115,11 @@ export default function CreateEvent({ teamId }: CreateEventProps) {
 									<FormItem>
 										<FormLabel>Starttid</FormLabel>
 										<FormControl>
-											<Input
-												type="datetime-local"
-												value={
-													field.value
-														? format(field.value, "yyyy-MM-dd'T'HH:mm")
-														: ""
-												}
-												onChange={(e) => {
-													if (e.target.value) {
-														field.onChange(new Date(e.target.value));
-													}
-												}}
-												min={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
+											<DateTimePicker
+												value={field.value}
+												onChange={field.onChange}
+												placeholder="Velg startdato og tid"
+												minDate={new Date()}
 											/>
 										</FormControl>
 										<FormMessage />
@@ -140,21 +132,18 @@ export default function CreateEvent({ teamId }: CreateEventProps) {
 								name="endDatetime"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Sluttid</FormLabel>
+										<FormLabel>
+											Sluttid{" "}
+											<span className="font-normal text-muted-foreground">
+												(valgfritt)
+											</span>
+										</FormLabel>
 										<FormControl>
-											<Input
-												type="datetime-local"
-												value={
-													field.value
-														? format(field.value, "yyyy-MM-dd'T'HH:mm")
-														: ""
-												}
-												onChange={(e) => {
-													if (e.target.value) {
-														field.onChange(new Date(e.target.value));
-													}
-												}}
-												min={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
+											<DateTimePicker
+												value={field.value}
+												onChange={field.onChange}
+												placeholder="Velg sluttdato og tid"
+												minDate={form.watch("startDatetime") ?? new Date()}
 											/>
 										</FormControl>
 										<FormMessage />
@@ -249,25 +238,13 @@ export default function CreateEvent({ teamId }: CreateEventProps) {
 									<FormItem>
 										<FormLabel>Frist for påmelding</FormLabel>
 										<FormControl>
-											<Input
-												type="datetime-local"
-												value={
-													field.value
-														? format(field.value, "yyyy-MM-dd'T'HH:mm")
-														: ""
-												}
-												onChange={(e) => {
-													if (e.target.value) {
-														field.onChange(new Date(e.target.value));
-													}
-												}}
-												max={
-													form.getValues("endDatetime")
-														? format(
-																form.getValues("endDatetime"),
-																"yyyy-MM-dd'T'HH:mm",
-															)
-														: undefined
+											<DateTimePicker
+												value={field.value}
+												onChange={field.onChange}
+												placeholder="Velg påmeldingsfrist"
+												maxDate={
+													form.watch("endDatetime") ??
+													form.watch("startDatetime")
 												}
 											/>
 										</FormControl>

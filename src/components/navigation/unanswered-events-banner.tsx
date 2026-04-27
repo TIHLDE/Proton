@@ -16,6 +16,8 @@ import {
 import { getEventTypeLabel } from "~/lib/event-presentation";
 import { api } from "~/trpc/react";
 
+type UnansweredEvent = TeamEvent & { team?: { name: string } };
+
 const DISMISSED_KEY = "unanswered-events-banner-dismissed";
 
 export default function UnansweredEventsBanner() {
@@ -35,7 +37,7 @@ export default function UnansweredEventsBanner() {
 		setDismissed(true);
 	};
 
-	const handleEventClick = (event: TeamEvent & { team?: { name: string } }) => {
+	const handleEventClick = (event: UnansweredEvent) => {
 		setSelectedEvent(event);
 		setIsSheetOpen(false);
 		setIsDialogOpen(true);
@@ -83,40 +85,33 @@ export default function UnansweredEventsBanner() {
 						<SheetTitle>Ubesvarte arrangementer</SheetTitle>
 					</SheetHeader>
 					<div className="mt-4 space-y-2 pb-4">
-						{unansweredEvents.map(
-							(event: TeamEvent & { team?: { name: string } }) => (
-								<button
-									type="button"
-									key={event.id}
-									onClick={() => handleEventClick(event)}
-									className="w-full rounded-lg border bg-card p-3 text-left transition-colors hover:bg-accent"
-								>
-									<div className="flex items-start justify-between gap-2">
-										<div className="min-w-0 flex-1">
-											<div className="truncate font-medium text-sm">
-												{event.name}
-											</div>
-											<div className="text-muted-foreground text-xs">
-												{"team" in event &&
-												event.team &&
-												typeof event.team === "object" &&
-												"name" in event.team
-													? (event.team as { name: string }).name
-													: ""}
-											</div>
+						{unansweredEvents.map((event: UnansweredEvent) => (
+							<button
+								type="button"
+								key={event.id}
+								onClick={() => handleEventClick(event)}
+								className="w-full rounded-lg border bg-card p-3 text-left transition-colors hover:bg-accent"
+							>
+								<div className="flex items-start justify-between gap-2">
+									<div className="min-w-0 flex-1">
+										<div className="truncate font-medium text-sm">
+											{event.name}
 										</div>
-										<span className="shrink-0 text-muted-foreground text-xs">
-											{getEventTypeLabel(event.eventType)}
-										</span>
+										<div className="text-muted-foreground text-xs">
+											{event.team?.name ?? ""}
+										</div>
 									</div>
-									<div className="mt-1 text-muted-foreground text-xs">
-										{format(new Date(event.startAt), "EEE d. MMM HH:mm", {
-											locale: nb,
-										})}
-									</div>
-								</button>
-							),
-						)}
+									<span className="shrink-0 text-muted-foreground text-xs">
+										{getEventTypeLabel(event.eventType)}
+									</span>
+								</div>
+								<div className="mt-1 text-muted-foreground text-xs">
+									{format(new Date(event.startAt), "EEE d. MMM HH:mm", {
+										locale: nb,
+									})}
+								</div>
+							</button>
+						))}
 					</div>
 				</SheetContent>
 			</Sheet>

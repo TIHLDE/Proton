@@ -1,8 +1,13 @@
-import { inferAdditionalFields } from "better-auth/client/plugins";
+import {
+	genericOAuthClient,
+	inferAdditionalFields,
+} from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 
 export const authClient = createAuthClient({
 	plugins: [
+		// Gir signIn.oauth2, som starter Photon-flyten.
+		genericOAuthClient(),
 		inferAdditionalFields({
 			user: {
 				username: {

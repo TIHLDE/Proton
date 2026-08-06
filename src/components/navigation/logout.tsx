@@ -4,7 +4,6 @@ import { Loader2, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { toast } from "sonner";
-import { clearTIHLDEToken } from "~/actions";
 import { authClient } from "~/lib/auth-client";
 
 export default function Logout() {
@@ -18,7 +17,8 @@ export default function Logout() {
 				if (res.error) {
 					toast.error(res.error.message);
 				} else {
-					await clearTIHLDEToken();
+					// Ingen egen TIHLDE-cookie å rydde lenger — tokenet ligger på
+					// account-raden og forsvinner med sesjonen.
 					router.replace("/");
 				}
 			} catch {

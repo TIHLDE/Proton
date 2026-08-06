@@ -56,6 +56,10 @@ export const auth = betterAuth({
 					clientId: env.PHOTON_CLIENT_ID ?? "",
 					clientSecret: env.PHOTON_CLIENT_SECRET ?? "",
 					scopes: ["openid", "profile", "email"],
+					// Photon avviser autorisasjon uten PKCE, også for
+					// konfidensielle klienter som denne: «pkce is required for
+					// this client». better-auth har den av som standard.
+					pkce: true,
 					/**
 					 * `username` er et påkrevd felt på brukeren her, men Photon
 					 * har det ikke i standard-claimene. Uten dette faller

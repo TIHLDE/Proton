@@ -14,6 +14,15 @@ export const env = createEnv({
 		BETTER_AUTH_SECRET: z.string().optional(),
 		EMAIL_API_KEY: z.string().optional(),
 		VAPID_PRIVATE_KEY: z.string().optional(),
+		// Registrer klienten under /admin/oauth-clients på tihlde.org.
+		// Redirect-URI: <origin>/api/auth/oauth2/callback/photon
+		// Valgfrie som resten her, så bygg uten dem ikke faller på validering.
+		PHOTON_CLIENT_ID: z.string().optional(),
+		PHOTON_CLIENT_SECRET: z.string().optional(),
+		PHOTON_ISSUER: z
+			.string()
+			.url()
+			.default("https://photon.tihlde.org/api/auth"),
 	},
 
 	/**
@@ -38,6 +47,9 @@ export const env = createEnv({
 		EMAIL_API_KEY: process.env.EMAIL_API_KEY,
 		VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY,
 		NEXT_PUBLIC_VAPID_PUBLIC_KEY: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+		PHOTON_CLIENT_ID: process.env.PHOTON_CLIENT_ID,
+		PHOTON_CLIENT_SECRET: process.env.PHOTON_CLIENT_SECRET,
+		PHOTON_ISSUER: process.env.PHOTON_ISSUER,
 	},
 	/**
 	 * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

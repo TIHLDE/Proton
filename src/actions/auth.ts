@@ -1,184 +1,72 @@
 "use server";
 
-import { cookies } from "next/headers";
-import type { z } from "zod";
-import { SignInInputSchema } from "~/schemas";
+import { headers } from "next/headers";
+import { env } from "~/env";
+import { auth } from "~/lib/auth";
 import { db } from "~/server/db";
-import type { MembershipResponse, TIHLDEUser } from "~/types";
 
-export interface ActionResponse<T> {
-	fieldError?: Partial<Record<keyof T, string | undefined>>;
-	formError?: string;
-	userData?: {
-		fullName: string;
-		email: string;
-		username: string;
-		isNewUser: boolean;
-	};
-}
+/**
+ * Standardverdien gjentas her med vilje. `SKIP_ENV_VALIDATION` gjør at t3-env
+ * returnerer process.env rått, uten skjemaets default — og siden dette leses
+ * på modulnivå, ville `.replace` på undefined felt hele bygget når Next samler
+ * sidedata.
+ */
+const ISSUER = env.PHOTON_ISSUER ?? "https://photon.tihlde.org/api/auth";
+const API_URL = ISSUER.replace(/\/auth$/, "");
 
-export async function login(
-	formData: FormData,
-): Promise<ActionResponse<z.infer<typeof SignInInputSchema>>> {
-	const obj = Object.fromEntries(formData.entries());
+export type PhotonMembership = {
+	slug: string;
+	name: string;
+	membership: { role: "member" | "leader" } | null;
+};
 
-	const parsed = SignInInputSchema.safeParse(obj);
-	if (!parsed.success) {
-		const err = parsed.error.flatten();
-		return {
-			fieldError: {
-				username: err.fieldErrors.username?.[0],
-				password: err.fieldErrors.password?.[0],
-			},
-		};
-	}
+/**
+ * Access-tokenet better-auth lagret da brukeren logget inn via Photon.
+ *
+ * Tokenet ligger på account-raden, ikke i en egen cookie som før: OAuth-flyten
+ * eier det, og å speile det ut i en cookie ville gitt to kilder som kommer i
+ * utakt når det fornyes.
+ */
+async function getPhotonAccessToken(): Promise<string | null> {
+	const session = await auth.api.getSession({ headers: await headers() });
+	if (!session?.user?.id) return null;
 
-	const { username, password } = parsed.data;
-
-	// Call Lepton API
-	try {
-		const response = await fetch("https://api.tihlde.org/auth/login/", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({ user_id: username, password }),
-		});
-
-		const data = await response.json();
-		if (!response.ok) {
-			throw new Error(data.detail);
-		}
-
-		const userData = await getMyUserInfo(data.token);
-		if (!userData) {
-			throw new Error("Kunne ikke hente brukerdata.");
-		}
-
-		// Add token to user in cookies
-		const cookiesStore = await cookies();
-		cookiesStore.set("tihlde_token", data.token, { httpOnly: true, path: "/" });
-
-		// Check if email is taken
-		const emailTaken = await db.user.findUnique({
-			where: {
-				email: userData.email.toLowerCase(),
-			},
-		});
-
-		if (emailTaken && emailTaken.username !== userData.user_id) {
-			throw new Error(
-				"E-postadressen er allerede i bruk med en annen konto fra TIHLDE.",
-			);
-		}
-
-		// Check if user exists
-		const existingUser = await db.user.findUnique({
-			where: {
-				email: userData.email.toLowerCase(),
-				username: userData.user_id,
-			},
-		});
-
-		// If not, create user
-		if (!existingUser) {
-			console.log("Creating new user...");
-			return {
-				userData: {
-					fullName: `${userData.first_name} ${userData.last_name}`,
-					email: userData.email.toLowerCase(),
-					username: userData.user_id,
-					isNewUser: true,
-				},
-			};
-		}
-
-		return {
-			userData: {
-				fullName: `${userData.first_name} ${userData.last_name}`,
-				email: userData.email.toLowerCase(),
-				username: userData.user_id,
-				isNewUser: false,
-			},
-		};
-	} catch (e) {
-		if (e instanceof Error) {
-			return {
-				formError: e.message,
-			};
-		}
-		return {
-			formError: "Det oppstod en feil under innlogging. Prøv igjen senere.",
-		};
-	}
-}
-
-export async function getUserInfo(
-	username: string,
-): Promise<TIHLDEUser | null> {
-	if (!username) {
-		return null;
-	}
-
-	const response = await fetch(`https://api.tihlde.org/users/${username}/`, {
-		headers: {
-			"Content-Type": "application/json",
-		},
+	const account = await db.account.findFirst({
+		where: { userId: session.user.id, providerId: "photon" },
+		select: { accessToken: true, accessTokenExpiresAt: true },
 	});
 
-	if (!response.ok) {
+	if (!account?.accessToken) return null;
+
+	// Et utløpt token gir 401 uansett; å returnere null her lar kalleren si
+	// «logg inn på nytt» framfor å vise en generisk feil.
+	if (
+		account.accessTokenExpiresAt &&
+		account.accessTokenExpiresAt.getTime() <= Date.now()
+	) {
 		return null;
 	}
 
-	return await response.json();
+	return account.accessToken;
 }
 
-export async function getMyUserInfo(token: string): Promise<TIHLDEUser | null> {
-	if (!token) {
-		return null;
-	}
+/**
+ * Gruppene brukeren er medlem av, hentet fra Photon.
+ *
+ * Erstatter Leptons /users/me/memberships/. Formen er snudd: Photon returnerer
+ * gruppene med medlemskapet nøstet inni, der Lepton returnerte medlemskap med
+ * gruppa nøstet inni.
+ */
+export async function getUserMemberships(): Promise<PhotonMembership[] | null> {
+	const token = await getPhotonAccessToken();
+	if (!token) return null;
 
-	const response = await fetch("https://api.tihlde.org/users/me/", {
-		headers: {
-			"x-csrf-token": token,
-		},
+	const response = await fetch(`${API_URL}/groups/mine`, {
+		headers: { Authorization: `Bearer ${token}` },
+		cache: "no-store",
 	});
 
-	if (!response.ok) {
-		return null;
-	}
+	if (!response.ok) return null;
 
-	return await response.json();
-}
-
-export async function getUserMemberships(
-	token: string,
-): Promise<MembershipResponse | null> {
-	if (!token) {
-		return null;
-	}
-
-	const response = await fetch("https://api.tihlde.org/users/me/memberships/", {
-		headers: {
-			"x-csrf-token": token,
-		},
-	});
-
-	if (!response.ok) {
-		return null;
-	}
-
-	return await response.json();
-}
-
-export async function getTIHLDEToken(): Promise<string | null> {
-	const cookiesStore = await cookies();
-	const token = cookiesStore.get("tihlde_token")?.value;
-
-	return token || null;
-}
-
-export async function clearTIHLDEToken() {
-	const cookiesStore = await cookies();
-	cookiesStore.delete("tihlde_token");
+	return (await response.json()) as PhotonMembership[];
 }

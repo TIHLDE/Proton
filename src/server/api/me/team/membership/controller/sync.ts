@@ -1,19 +1,20 @@
 import type { TeamRole } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
-import { getTIHLDEToken, getUserMemberships } from "~/actions";
+import { getUserMemberships } from "~/actions";
 import { type Controller, authorizedProcedure } from "~/server/api/trpc";
 
 const handler: Controller<void, void> = async ({ ctx }) => {
-	// Get TIHLDE token
-	const token = await getTIHLDEToken();
+	// Hentes fra Photon med access-tokenet OAuth-flyten lagret.
+	const membershipResponse = await getUserMemberships();
 
-	// Get memberships from TIHLDE
-	const membershipResponse = await getUserMemberships(token || "");
-
-	const memberships = membershipResponse?.results.map((membership) => ({
-		groupSlug: membership.group.slug,
-		role: membership.membership_type === "MEMBER" ? "USER" : "ADMIN",
-	}));
+	// Photon nøster medlemskapet inni gruppa, motsatt av Lepton. En gruppe
+	// uten membership skal ikke gi ADMIN ved et uhell, så den hoppes over.
+	const memberships = membershipResponse
+		?.filter((group) => group.membership !== null)
+		.map((group) => ({
+			groupSlug: group.slug,
+			role: group.membership?.role === "leader" ? "ADMIN" : "USER",
+		}));
 
 	if (!memberships) {
 		throw new TRPCError({

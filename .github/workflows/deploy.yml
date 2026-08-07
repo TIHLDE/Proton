@@ -2,9 +2,12 @@ name: 'build -> push -> deploy'
 on:
   push:
     branches: [main]
+    # `./**` matcher ingenting — path-filtre er repo-relative uten `./`, så
+    # push til main har aldri trigget denne workflowen. Eneste kjøringer siden
+    # mai 2026 var manuelle workflow_dispatch, og merget kode ble derfor
+    # liggende ubygget.
     paths:
-      - ./**
-      - .github/workflows/deploy.yml
+      - '**'
   workflow_dispatch:
 
 concurrency:

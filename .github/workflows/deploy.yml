@@ -1,13 +1,21 @@
 name: 'build -> push -> deploy'
 on:
-  push:
-    branches: [main]
-    # `./**` matcher ingenting — path-filtre er repo-relative uten `./`, så
-    # push til main har aldri trigget denne workflowen. Eneste kjøringer siden
-    # mai 2026 var manuelle workflow_dispatch, og merget kode ble derfor
-    # liggende ubygget.
-    paths:
-      - '**'
+  # FRYST: automatisk deploy er slått av med vilje.
+  #
+  # main bærer overgangen til Photon-innlogging (#107, #108). Den slår av
+  # e-post/passord-innlogging og krever PHOTON_CLIENT_ID, PHOTON_CLIENT_SECRET
+  # og PHOTON_ISSUER på Drift. Uten dem mister sporty.tihlde.org innloggingen
+  # som virker i dag, og får ingen ny.
+  #
+  # Slik gjenåpner du når variablene er satt — legg tilbake:
+  #
+  #   push:
+  #     branches: [main]
+  #     paths:
+  #       - '**'
+  #
+  # (Det opprinnelige filteret var `./**`, som er repo-relativt-feil og aldri
+  # matchet noe. Derfor lå #107 og #108 ubygget i månedsvis.)
   workflow_dispatch:
 
 concurrency:

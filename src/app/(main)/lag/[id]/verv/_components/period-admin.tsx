@@ -77,7 +77,7 @@ export default function PeriodAdmin({
 				<Label className="text-xs">Tildel verv</Label>
 				<div className="flex flex-col gap-2 sm:flex-row">
 					<Select value={positionId} onValueChange={setPositionId}>
-						<SelectTrigger className="sm:w-44" aria-label="Verv">
+						<SelectTrigger className="w-full sm:w-44" aria-label="Verv">
 							<SelectValue placeholder="Velg verv" />
 						</SelectTrigger>
 						<SelectContent>

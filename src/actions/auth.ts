@@ -46,10 +46,9 @@ type TokenResult = { ok: true; token: string } | PhotonFailure;
  * at alt utenom den første timen etter innlogging feiler. `getAccessToken`
  * fornyer tokenet med refresh-tokenet når det er utløpt.
  *
- * Photon avviser foreløpig `offline_access` (se ~/lib/auth.ts), så det finnes
- * ikke noe refresh-token å fornye med. Da kommer det utløpte tokenet uendret
- * tilbake, og eneste vei videre er å koble til på nytt — derav «reauth».
- * Fornyelsen her begynner å virke av seg selv den dagen Photon godtar scopet.
+ * Brukere som sist logget inn før `offline_access` kom på plass, har ikke noe
+ * refresh-token på kontoen. Da kommer det utløpte tokenet uendret tilbake, og
+ * eneste vei videre er å logge inn på nytt — derav «reauth».
  */
 async function getPhotonAccessToken(): Promise<TokenResult> {
 	const requestHeaders = await headers();

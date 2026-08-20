@@ -56,22 +56,17 @@ export const auth = betterAuth({
 					clientId: env.PHOTON_CLIENT_ID ?? "",
 					clientSecret: env.PHOTON_CLIENT_SECRET ?? "",
 					/**
-					 * `offline_access` hører hjemme her: Photon kjører
-					 * better-auth sin OIDC-provider, der access-tokens varer én
-					 * time mens sesjonen her varer i 120 dager, og uten
-					 * refresh-token utløper tilgangen etter den timen.
+					 * `offline_access` gir refresh-token. Uten det utløper
+					 * tilgangen til Photon etter en time, mens sesjonen her
+					 * varer i 120 dager — og medlemskapene slutter å synke.
 					 *
-					 * Men Photon avviser scopet med «invalid_scope» og blokkerer
-					 * dermed hele innloggingen. Discovery-dokumentet lister det
-					 * under `scopes_supported`, men den lista er hardkodet i
-					 * better-auth og sier ingenting om hva provideren godtar —
-					 * valideringen skjer mot en egen liste hos Photon.
-					 *
-					 * Legges tilbake når Photon slipper det gjennom. Fram til da
-					 * må brukeren koble til på nytt når timen er ute; knappen på
-					 * /min-oversikt gjør det til ett klikk.
+					 * Scopet ble avvist med «invalid_scope» og veltet hele
+					 * innloggingen fram til TIHLDE/Photon#644 ble fikset. Sjekk
+					 * mot autoriseringsendepunktet, ikke mot discovery, hvis det
+					 * skjer igjen: `scopes_supported` der er hardkodet i
+					 * better-auth og sier ingenting om hva Photon godtar.
 					 */
-					scopes: ["openid", "profile", "email"],
+					scopes: ["openid", "profile", "email", "offline_access"],
 					// Photon avviser autorisasjon uten PKCE, også for
 					// konfidensielle klienter som denne: «pkce is required for
 					// this client». better-auth har den av som standard.

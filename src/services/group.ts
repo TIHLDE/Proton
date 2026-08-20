@@ -28,9 +28,12 @@ export async function getTeamGroups(teamId: string) {
 
 	const opensUpIfDeleted = new Map<string, number>();
 	for (const event of upcoming) {
-		if (event.invitedGroups.length !== 1) continue;
-		const groupId = event.invitedGroups[0]!.groupId;
-		opensUpIfDeleted.set(groupId, (opensUpIfDeleted.get(groupId) ?? 0) + 1);
+		const [onlyGroup] = event.invitedGroups;
+		if (!onlyGroup || event.invitedGroups.length !== 1) continue;
+		opensUpIfDeleted.set(
+			onlyGroup.groupId,
+			(opensUpIfDeleted.get(onlyGroup.groupId) ?? 0) + 1,
+		);
 	}
 
 	return groups.map((group) => ({

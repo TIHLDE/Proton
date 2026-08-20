@@ -160,6 +160,11 @@ export default async function TeamVervPage({ params }: TeamVervPageProps) {
 							{isAdmin && (
 								<PeriodAdmin
 									periodId={period.id}
+									periodLabel={
+										period.name ??
+										`styret ${format(period.startDate, "yyyy", { locale: nb })}`
+									}
+									assignmentCount={period.assignments.length}
 									positions={positions}
 									members={members}
 									missingPositions={missingPositions}

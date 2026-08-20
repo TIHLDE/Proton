@@ -5,6 +5,15 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
+import {
+	Dialog,
+	DialogClose,
+	DialogContent,
+	DialogDescription,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "~/components/ui/dialog";
 import { Label } from "~/components/ui/label";
 import {
 	Select,
@@ -17,6 +26,8 @@ import { api } from "~/trpc/react";
 
 interface PeriodAdminProps {
 	periodId: string;
+	periodLabel: string;
+	assignmentCount: number;
 	positions: { id: string; name: string }[];
 	members: { id: string; name: string }[];
 	missingPositions: { id: string; name: string }[];
@@ -24,6 +35,8 @@ interface PeriodAdminProps {
 
 export default function PeriodAdmin({
 	periodId,
+	periodLabel,
+	assignmentCount,
 	positions,
 	members,
 	missingPositions,
@@ -41,10 +54,16 @@ export default function PeriodAdmin({
 			onError: (error) => toast.error(error.message),
 		});
 
-	const { mutate: deletePeriod } = api.leadership.deletePeriod.useMutation({
-		onSuccess: () => router.refresh(),
-		onError: (error) => toast.error(error.message),
-	});
+	const [deleteOpen, setDeleteOpen] = useState(false);
+
+	const { mutate: deletePeriod, isPending: isDeleting } =
+		api.leadership.deletePeriod.useMutation({
+			onSuccess: () => {
+				setDeleteOpen(false);
+				router.refresh();
+			},
+			onError: (error) => toast.error(error.message),
+		});
 
 	return (
 		<div className="space-y-3 border-t pt-4">
@@ -92,14 +111,41 @@ export default function PeriodAdmin({
 				</div>
 			</div>
 
-			<Button
-				variant="ghost"
-				size="sm"
-				onClick={() => deletePeriod({ periodId })}
-			>
-				<Trash2 />
-				Slett perioden
-			</Button>
+			<Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+				<DialogTrigger asChild>
+					<Button variant="ghost" size="sm">
+						<Trash2 />
+						Slett perioden
+					</Button>
+				</DialogTrigger>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Slett {periodLabel}</DialogTitle>
+						<DialogDescription>
+							{assignmentCount === 0
+								? "Perioden forsvinner. Vervene i laget består."
+								: assignmentCount === 1
+									? "Perioden og den ene tildelingen i den forsvinner. Vervene i laget består."
+									: `Perioden og de ${assignmentCount} tildelingene i den forsvinner. Vervene i laget består.`}
+						</DialogDescription>
+					</DialogHeader>
+
+					<div className="grid gap-2">
+						<Button
+							variant="destructive"
+							disabled={isDeleting}
+							onClick={() => deletePeriod({ periodId })}
+						>
+							Slett perioden
+						</Button>
+						<DialogClose asChild>
+							<Button type="button" variant="ghost">
+								Avbryt
+							</Button>
+						</DialogClose>
+					</div>
+				</DialogContent>
+			</Dialog>
 		</div>
 	);
 }

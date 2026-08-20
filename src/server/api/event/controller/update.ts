@@ -4,6 +4,7 @@ import { UpdateEventInputSchema } from "~/schemas";
 import { db } from "~/server/db";
 import { type Controller, authorizedProcedure } from "../../trpc";
 import { hasTeamAccessMiddleware } from "../../util/auth";
+import { validateGroupIds } from "../../util/validate-groups";
 
 const handler: Controller<
 	z.infer<typeof UpdateEventInputSchema>,
@@ -15,6 +16,11 @@ const handler: Controller<
 		"SUBADMIN",
 	]);
 
+	const validGroupIds = await validateGroupIds(
+		input.teamId,
+		input.groupIds ?? [],
+	);
+
 	await db.teamEvent.update({
 		where: { id: input.id },
 		data: {
@@ -25,6 +31,11 @@ const handler: Controller<
 			location: input.location,
 			note: input.note,
 			registrationDeadline: input.registrationDeadline,
+			// Utvalget settes på nytt i sin helhet, slik dialogen sender det.
+			invitedGroups: {
+				deleteMany: {},
+				create: validGroupIds.map((groupId) => ({ groupId })),
+			},
 		},
 	});
 };

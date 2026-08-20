@@ -59,6 +59,16 @@ export const getAllMyEvents = async (
 				gte: startDate,
 				lt: endDate,
 			},
+			// Min egen kalender skal vise det jeg kan stille på. På lagsiden
+			// er kampene fortsatt synlige for alle, bare låst for påmelding.
+			OR: [
+				{ invitedGroups: { none: {} } },
+				{
+					invitedGroups: {
+						some: { group: { members: { some: { userId: userId } } } },
+					},
+				},
+			],
 		},
 		orderBy: {
 			startAt: "asc",

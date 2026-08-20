@@ -5,6 +5,7 @@ import { createRegistrationSchema } from "~/schemas";
 import { db } from "~/server/db";
 import { type Controller, authorizedProcedure } from "../../trpc";
 import { hasTeamAccessMiddleware } from "../../util/auth";
+import { isUserInvited } from "../../util/invitees";
 
 const handler: Controller<
 	z.infer<typeof createRegistrationSchema>,
@@ -30,6 +31,15 @@ const handler: Controller<
 		["ADMIN", "SUBADMIN", "USER"],
 		false,
 	);
+
+	// Arrangementet kan være åpnet for bare noen av undergruppene.
+	if (!(await isUserInvited(input.eventId, ctx.user.id))) {
+		throw new TRPCError({
+			code: "FORBIDDEN",
+			message:
+				"Dette arrangementet er bare åpent for utvalgte undergrupper i laget.",
+		});
+	}
 
 	// Check user's role in the team
 	const userMembership = await db.teamMember.findUnique({

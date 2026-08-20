@@ -36,7 +36,7 @@ export const auth = betterAuth({
 				type: "string",
 				required: false,
 				unique: true,
-			}
+			},
 		},
 	},
 	trustedOrigins: ["*"],

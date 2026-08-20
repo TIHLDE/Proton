@@ -31,14 +31,23 @@ import { api } from "~/trpc/react";
 interface AttendanceStatsProps {
 	teamId: string;
 	isAdmin: boolean;
+	seasonId?: string;
+	groupId?: string;
+	eventType?: "TRAINING" | "MATCH" | "SOCIAL" | "OTHER";
 }
 
 export default function AttendanceStats({
 	teamId,
 	isAdmin,
+	seasonId,
+	groupId,
+	eventType,
 }: AttendanceStatsProps) {
 	const { data: stats, isLoading } = api.team.getAttendanceStats.useQuery({
 		teamId,
+		seasonId,
+		groupId,
+		eventType,
 	});
 
 	const exportToCSV = () => {
@@ -111,6 +120,12 @@ export default function AttendanceStats({
 	} satisfies ChartConfig;
 
 	const topPerformer = stats[0];
+	// Nevneren er personlig — den som var invitert til flest viser hvor mange
+	// arrangementer filtreringen omfatter.
+	const maxTotalEvents = stats.reduce(
+		(max, stat) => Math.max(max, stat.totalEvents),
+		0,
+	);
 	const averageAttendance =
 		stats.reduce((sum, stat) => sum + stat.attendedCount, 0) / stats.length;
 
@@ -120,15 +135,14 @@ export default function AttendanceStats({
 			<div className="grid gap-4 md:grid-cols-3">
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="font-medium text-sm">
-							Totalt arrangementer
-						</CardTitle>
+						<CardTitle className="font-medium text-sm">Arrangementer</CardTitle>
 						<BarChart3 className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
-						<div className="font-bold text-2xl">
-							{stats[0]?.totalEvents || 0}
-						</div>
+						<div className="font-bold text-2xl">{maxTotalEvents}</div>
+						<p className="text-muted-foreground text-xs">
+							med gjeldende filtrering
+						</p>
 					</CardContent>
 				</Card>
 
@@ -213,7 +227,7 @@ export default function AttendanceStats({
 						Rangering basert på totalt antall deltakelser
 					</div>
 					<div className="text-muted-foreground leading-none">
-						Viser data for alle medlemmer i laget
+						Hver spiller telles mot arrangementene hen var invitert til
 					</div>
 				</CardFooter>
 			</Card>

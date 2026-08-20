@@ -8,7 +8,6 @@ import type { ReactNode } from "react";
 import EventRegistration from "~/app/(main)/lag/[id]/_components/event-registration";
 import {
 	type AttendanceStatusFilter,
-	type EventOverviewSurface,
 	attendanceStatusOrder,
 	getAttendanceStatusLabel,
 	getAttendanceStatusTextClassName,
@@ -22,7 +21,6 @@ import { api } from "~/trpc/react";
 interface EventOverviewProps {
 	event: TeamEvent;
 	headerActions?: ReactNode;
-	surface?: EventOverviewSurface;
 	showAttendanceSummary?: boolean;
 	showRegistration?: boolean;
 	onAttendanceStatusClick?: (status: AttendanceStatusFilter) => void;
@@ -104,23 +102,17 @@ function AttendanceSummaryItem({
 export function EventOverview({
 	event,
 	headerActions,
-	surface = "default",
 	showAttendanceSummary = false,
 	showRegistration = false,
 	onAttendanceStatusClick,
 	footer,
 }: EventOverviewProps) {
 	const eventDateTime = getEventDateTime(event);
-	const titleClassName =
-		surface === "inverse" ? "text-white" : "text-foreground";
-	const labelClassName =
-		surface === "inverse" ? "text-white/70" : "text-muted-foreground";
-	const valueClassName =
-		surface === "inverse" ? "text-white" : "text-foreground";
-	const secondaryValueClassName =
-		surface === "inverse" ? "text-white/80" : "text-muted-foreground";
-	const sectionBorderClassName =
-		surface === "inverse" ? "border-white/15" : "border-border";
+	const titleClassName = "text-foreground";
+	const labelClassName = "text-muted-foreground";
+	const valueClassName = "text-foreground";
+	const secondaryValueClassName = "text-muted-foreground";
+	const sectionBorderClassName = "border-border";
 
 	const { data: registration } = api.registration.getMyRegistration.useQuery(
 		{ eventId: event.id },
@@ -131,6 +123,13 @@ export function EventOverview({
 		{ eventId: event.id },
 		{ enabled: showAttendanceSummary },
 	);
+
+	const { data: inviteInfo } = api.event.getInviteInfo.useQuery({
+		eventId: event.id,
+	});
+
+	const invitedGroupNames = inviteInfo?.groups.map((group) => group.name) ?? [];
+	const isLockedForMe = inviteInfo ? !inviteInfo.isInvited : false;
 
 	return (
 		<div className="space-y-6">
@@ -148,7 +147,6 @@ export function EventOverview({
 						className={cn(
 							"inline-flex rounded-full px-3 py-1 font-medium text-sm",
 							getEventTypeBadgeClassName(event.eventType),
-							event.eventType === "OTHER" ? "" : "text-white",
 						)}
 					>
 						{getEventTypeLabel(event.eventType)}
@@ -191,6 +189,16 @@ export function EventOverview({
 					</EventInfoBlock>
 				)}
 
+				{invitedGroupNames.length > 0 && (
+					<EventInfoBlock
+						label="Åpent for"
+						labelClassName={labelClassName}
+						valueClassName={valueClassName}
+					>
+						{invitedGroupNames.join(", ")}
+					</EventInfoBlock>
+				)}
+
 				{event.note && (
 					<EventInfoBlock
 						label="Beskrivelse"
@@ -228,11 +236,19 @@ export function EventOverview({
 					<h3 className={cn("mb-4 font-semibold text-lg", titleClassName)}>
 						Påmelding
 					</h3>
-					<EventRegistration
-						eventId={event.id}
-						initialRegistration={registration}
-						registrationDeadline={event.registrationDeadline}
-					/>
+					{isLockedForMe ? (
+						<p className={cn("text-sm", secondaryValueClassName)}>
+							{invitedGroupNames.length === 1
+								? `Bare ${invitedGroupNames[0]} kan melde seg på.`
+								: `Bare ${invitedGroupNames.join(", ")} kan melde seg på.`}
+						</p>
+					) : (
+						<EventRegistration
+							eventId={event.id}
+							initialRegistration={registration}
+							registrationDeadline={event.registrationDeadline}
+						/>
+					)}
 				</div>
 			)}
 

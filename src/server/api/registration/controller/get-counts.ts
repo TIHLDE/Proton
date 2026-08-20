@@ -5,6 +5,7 @@ import { getRegistrationByEventSchema } from "~/schemas";
 import { db } from "~/server/db";
 import { type Controller, authorizedProcedure } from "../../trpc";
 import { hasTeamAccessMiddleware } from "../../util/auth";
+import { getInvitedUserIds, invitedUserFilter } from "../../util/invitees";
 
 const handler: Controller<
 	z.infer<typeof getRegistrationByEventSchema>,
@@ -40,10 +41,13 @@ const handler: Controller<
 		},
 	});
 
-	// Get total team members count
+	// Nevneren er de inviterte, ikke hele laget.
+	const invitedUserIds = await getInvitedUserIds(input.eventId);
+
 	const totalTeamMembers = await db.teamMember.count({
 		where: {
 			teamId: event.teamId,
+			...invitedUserFilter(invitedUserIds),
 		},
 	});
 

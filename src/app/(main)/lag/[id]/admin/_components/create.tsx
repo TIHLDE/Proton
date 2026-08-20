@@ -38,6 +38,7 @@ import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
 import { CreateEventInputSchema } from "~/schemas";
 import { api } from "~/trpc/react";
+import GroupPicker from "./group-picker";
 
 interface CreateEventProps {
 	teamId: string;
@@ -56,6 +57,7 @@ export default function CreateEvent({ teamId }: CreateEventProps) {
 			type: undefined,
 			location: "",
 			note: "",
+			groupIds: [],
 		},
 	});
 
@@ -175,7 +177,7 @@ export default function CreateEvent({ teamId }: CreateEventProps) {
 											defaultValue={field.value}
 										>
 											<FormControl>
-												<SelectTrigger className="bg-card">
+												<SelectTrigger className="w-full bg-card">
 													<SelectValue placeholder="Velg type arrangement" />
 												</SelectTrigger>
 											</FormControl>
@@ -225,6 +227,12 @@ export default function CreateEvent({ teamId }: CreateEventProps) {
 									<FormMessage />
 								</FormItem>
 							)}
+						/>
+
+						<GroupPicker
+							teamId={teamId}
+							value={form.watch("groupIds") ?? []}
+							onChange={(groupIds) => form.setValue("groupIds", groupIds)}
 						/>
 
 						<div className="flex items-center justify-between space-x-2">

@@ -6,6 +6,10 @@ import { sendNotification } from "~/lib/notify";
 import { notifyUnattendedEventRegistrationSchema } from "~/schemas";
 import { type Controller, authorizedProcedure } from "~/server/api/trpc";
 import { hasTeamAccessMiddleware } from "~/server/api/util/auth";
+import {
+	getInvitedUserIds,
+	invitedUserFilter,
+} from "~/server/api/util/invitees";
 
 const handler: Controller<
 	z.infer<typeof notifyUnattendedEventRegistrationSchema>,
@@ -29,9 +33,13 @@ const handler: Controller<
 		});
 	}
 
+	// Den som ikke kan melde seg på skal heller ikke mases på.
+	const invitedUserIds = await getInvitedUserIds(input.eventId);
+
 	const teamMembers = await ctx.db.teamMember.findMany({
 		where: {
 			teamId: input.teamId,
+			...invitedUserFilter(invitedUserIds),
 		},
 		select: {
 			userId: true,

@@ -5,6 +5,7 @@ import { getEligibleWithoutRsvpSchema } from "~/schemas/registration";
 import { db } from "~/server/db";
 import { type Controller, authorizedProcedure } from "../../trpc";
 import { hasTeamAccessMiddleware } from "../../util/auth";
+import { getInvitedUserIds, invitedUserFilter } from "../../util/invitees";
 
 type EligibleUser = { id: string; name: string; image: string | null };
 
@@ -46,10 +47,13 @@ const handler: Controller<
 
 	const excluded = new Set([...attendingUserIds, ...manualPresentUserIds]);
 
+	const invitedUserIds = await getInvitedUserIds(input.eventId);
+
 	const teamMembers = await db.teamMember.findMany({
 		where: {
 			teamId: event.teamId,
 			userId: { notIn: [...excluded] },
+			...invitedUserFilter(invitedUserIds),
 		},
 		select: { user: { select: { id: true, name: true, image: true } } },
 	});

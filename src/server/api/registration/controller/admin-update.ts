@@ -5,6 +5,7 @@ import { adminUpdateRegistrationSchema } from "~/schemas";
 import { db } from "~/server/db";
 import { type Controller, authorizedProcedure } from "../../trpc";
 import { hasTeamAccessMiddleware } from "../../util/auth";
+import { isUserInvited } from "../../util/invitees";
 
 const handler: Controller<
 	z.infer<typeof adminUpdateRegistrationSchema>,
@@ -43,6 +44,13 @@ const handler: Controller<
 		throw new TRPCError({
 			code: "NOT_FOUND",
 			message: "Brukeren er ikke medlem av laget",
+		});
+	}
+
+	if (!(await isUserInvited(input.eventId, input.userId))) {
+		throw new TRPCError({
+			code: "BAD_REQUEST",
+			message: "Brukeren er ikke invitert til dette arrangementet",
 		});
 	}
 

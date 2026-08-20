@@ -5,6 +5,7 @@ import { getRegistrationByEventSchema } from "~/schemas";
 import { db } from "~/server/db";
 import { type Controller, authorizedProcedure } from "../../trpc";
 import { hasTeamAccessMiddleware } from "../../util/auth";
+import { getInvitedUserIds, invitedUserFilter } from "../../util/invitees";
 
 const handler: Controller<
 	z.infer<typeof getRegistrationByEventSchema>,
@@ -30,10 +31,13 @@ const handler: Controller<
 		"USER",
 	]);
 
-	// Get all team members
+	// Bare de inviterte kan svare, så bare de kan mangle svar.
+	const invitedUserIds = await getInvitedUserIds(input.eventId);
+
 	const teamMembers = await db.teamMember.findMany({
 		where: {
 			teamId: event.teamId,
+			...invitedUserFilter(invitedUserIds),
 		},
 		include: {
 			user: {

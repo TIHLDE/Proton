@@ -8,7 +8,6 @@ import { Button } from "~/components/ui/button";
 import {
 	type AttendanceStatusFilter,
 	getEventDetailCardClassName,
-	getEventDetailSurface,
 } from "~/lib/event-presentation";
 import { cn } from "~/lib/utils";
 import ConfirmEventAttendance from "./confirm-event-attendance";
@@ -45,19 +44,16 @@ export default function EventCard({
 		setDialogOpen(true);
 	};
 
-	const surface = getEventDetailSurface(event.eventType);
-
 	return (
 		<div
 			className={cn(
-				"rounded-lg p-6 shadow transition-shadow hover:shadow-md",
-				getEventDetailCardClassName(event.eventType),
+				"rounded-xl p-6 transition-shadow",
+				getEventDetailCardClassName(),
 			)}
 		>
 			<EventOverview
 				event={event}
 				headerActions={actions}
-				surface={surface}
 				showAttendanceSummary={showRegistration}
 				showRegistration={showRegistration}
 				onAttendanceStatusClick={handleStatusClick}

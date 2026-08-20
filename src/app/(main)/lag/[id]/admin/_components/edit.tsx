@@ -220,7 +220,7 @@ export default function EditEvent({ event, teamId }: EditEventProps) {
 											defaultValue={field.value}
 										>
 											<FormControl>
-												<SelectTrigger className="bg-card">
+												<SelectTrigger className="w-full bg-card">
 													<SelectValue placeholder="Velg type arrangement" />
 												</SelectTrigger>
 											</FormControl>

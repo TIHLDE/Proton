@@ -57,7 +57,10 @@ export default function MatchStatistics({
 						value={type}
 						onValueChange={(value) => setType(value as MatchEventType)}
 					>
-						<SelectTrigger className="sm:w-48" aria-label="Type hendelse">
+						<SelectTrigger
+							className="w-full sm:w-48"
+							aria-label="Type hendelse"
+						>
 							<SelectValue />
 						</SelectTrigger>
 						<SelectContent>

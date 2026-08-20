@@ -31,6 +31,7 @@ model User {
   pushSubscriptions PushSubscription[]
   groupMemberships  TeamGroupMember[]
   matchEvents       MatchEvent[]
+  positions         PositionAssignment[]
 
   @@unique([email])
   @@map("user")
@@ -89,9 +90,11 @@ model Team {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  members TeamMember[]
-  events  TeamEvent[]
-  groups  TeamGroup[]
+  members   TeamMember[]
+  events    TeamEvent[]
+  groups    TeamGroup[]
+  positions TeamPosition[]
+  periods   LeadershipPeriod[]
 
   @@map("team")
 }
@@ -188,6 +191,63 @@ enum TeamEventType {
 /// hele laget er invitert — det er standarden, og det alle arrangementer
 /// som fantes før undergruppene ble innført fortsetter å være.
 /// Resultatet av en kamp. Henger på arrangementet, ett til ett.
+/// Et verv i laget, for eksempel trener eller botsjef. Lagene definerer
+/// sine egne — håndball har ikke 7'er-trener, og fotball har ikke det
+/// håndball har. Derfor rader og ikke en enum.
+model TeamPosition {
+  id     String @id @default(cuid())
+  teamId String
+  name   String
+  /// Styrer rekkefølgen vervene vises i. Like verdier sorteres på navn.
+  order  Int    @default(0)
+
+  team        Team                 @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  assignments PositionAssignment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@unique([teamId, name])
+  @@index([teamId])
+  @@map("team_position")
+}
+
+/// En styreperiode. Vervene tildeles innenfor en periode, slik at
+/// historikken består når folk byttes ut.
+model LeadershipPeriod {
+  id        String   @id @default(cuid())
+  teamId    String
+  name      String?
+  startDate DateTime
+  endDate   DateTime
+
+  team        Team                 @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  assignments PositionAssignment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@index([teamId])
+  @@map("leadership_period")
+}
+
+model PositionAssignment {
+  id         String @id @default(cuid())
+  periodId   String
+  positionId String
+  userId     String
+
+  period   LeadershipPeriod @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  position TeamPosition     @relation(fields: [positionId], references: [id], onDelete: Cascade)
+  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([periodId, positionId, userId])
+  @@index([periodId])
+  @@map("position_assignment")
+}
+
 model Match {
   id        String @id @default(cuid())
   eventId   String @unique

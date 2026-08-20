@@ -1,7 +1,13 @@
 "use server";
 
 import type { User } from "@prisma/client";
-import { ArrowRight, BarChart3, PackageOpen, UsersRound } from "lucide-react";
+import {
+	ArrowRight,
+	BarChart3,
+	Layers,
+	PackageOpen,
+	UsersRound,
+} from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -72,6 +78,12 @@ export default async function TeamPage({
 						<Link href={`/lag/${team.id}/medlemmer`}>
 							<UsersRound />
 							Medlemmer
+						</Link>
+					</Button>
+					<Button asChild variant="outline">
+						<Link href={`/lag/${team.id}/undergrupper`}>
+							<Layers />
+							Undergrupper
 						</Link>
 					</Button>
 					<Button asChild variant="outline">

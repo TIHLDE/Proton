@@ -29,6 +29,7 @@ model User {
   registrations     Registration[]
   attendances       Attendance[]
   pushSubscriptions PushSubscription[]
+  groupMemberships  TeamGroupMember[]
 
   @@unique([email])
   @@map("user")
@@ -89,6 +90,7 @@ model Team {
 
   members TeamMember[]
   events  TeamEvent[]
+  groups  TeamGroup[]
 
   @@map("team")
 }
@@ -112,6 +114,43 @@ enum TeamRole {
   ADMIN
   SUBADMIN
   USER
+}
+
+/// En undergruppe av et lag, f.eks. "11'er" eller "7'er". Lagets egne
+/// administratorer oppretter, døper og sletter dem — det finnes ingen
+/// forhåndsdefinerte inndelinger, fordi hvert idrettslag deler seg ulikt.
+model TeamGroup {
+  id          String  @id @default(cuid())
+  teamId      String
+  name        String
+  description String?
+  team        Team    @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  members TeamGroupMember[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@unique([teamId, name])
+  @@index([teamId])
+  @@map("team_group")
+}
+
+/// Medlemskap i en undergruppe. En spiller kan være med i flere samtidig.
+/// createdAt brukes av oppmøtestatistikken til å la være å telle
+/// arrangementer fra før spilleren ble med i gruppa.
+model TeamGroupMember {
+  id      String    @id @default(cuid())
+  groupId String
+  userId  String
+  group   TeamGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([groupId, userId])
+  @@index([userId])
+  @@map("team_group_member")
 }
 
 model TeamEvent {

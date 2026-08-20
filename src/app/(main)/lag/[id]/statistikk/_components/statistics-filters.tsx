@@ -53,7 +53,7 @@ export default function StatisticsFilters({
 				value={seasonId}
 				onValueChange={(value) => setFilter("sesong", value)}
 			>
-				<SelectTrigger aria-label="Sesong">
+				<SelectTrigger className="w-full" aria-label="Sesong">
 					<SelectValue placeholder="Sesong" />
 				</SelectTrigger>
 				<SelectContent>
@@ -70,7 +70,7 @@ export default function StatisticsFilters({
 					value={groupId ?? ALL}
 					onValueChange={(value) => setFilter("gruppe", value)}
 				>
-					<SelectTrigger aria-label="Undergruppe">
+					<SelectTrigger className="w-full" aria-label="Undergruppe">
 						<SelectValue placeholder="Undergruppe" />
 					</SelectTrigger>
 					<SelectContent>
@@ -88,7 +88,7 @@ export default function StatisticsFilters({
 				value={eventType ?? ALL}
 				onValueChange={(value) => setFilter("type", value)}
 			>
-				<SelectTrigger aria-label="Type arrangement">
+				<SelectTrigger className="w-full" aria-label="Type arrangement">
 					<SelectValue placeholder="Type" />
 				</SelectTrigger>
 				<SelectContent>

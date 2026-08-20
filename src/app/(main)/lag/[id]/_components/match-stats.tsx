@@ -201,7 +201,7 @@ export default function MatchStats({
 										value={type}
 										onValueChange={(value) => setType(value as MatchEventType)}
 									>
-										<SelectTrigger className="sm:w-40">
+										<SelectTrigger className="w-full sm:w-40">
 											<SelectValue />
 										</SelectTrigger>
 										<SelectContent>

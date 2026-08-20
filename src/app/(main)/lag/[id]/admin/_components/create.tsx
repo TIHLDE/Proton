@@ -177,7 +177,7 @@ export default function CreateEvent({ teamId }: CreateEventProps) {
 											defaultValue={field.value}
 										>
 											<FormControl>
-												<SelectTrigger className="bg-card">
+												<SelectTrigger className="w-full bg-card">
 													<SelectValue placeholder="Velg type arrangement" />
 												</SelectTrigger>
 											</FormControl>

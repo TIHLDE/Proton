@@ -11,9 +11,11 @@ export const metadata: Metadata = {
 	description: "Idrettsplattformen til TIHLDE - bli med på lag og aktiviteter",
 };
 
+// Variabel-akse (ingen `weight`), samme typesnitt som @tihlde/ui laster via
+// @fontsource-variable/inter. Eksponeres som --font-inter og plukkes opp av
+// --font-sans i globals.css.
 const inter = Inter({
 	subsets: ["latin"],
-	weight: ["300", "400", "500", "600", "700", "800", "900"],
 	variable: "--font-inter",
 	display: "swap",
 });
@@ -24,8 +26,10 @@ export default async function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="no-NO" suppressHydrationWarning>
-			<body className={`antialiased ${inter.variable}`}>
+		// Font-variabelen må ligge på <html>: globals.css setter `font-sans` der,
+		// og en variabel definert på <body> er ikke synlig for forelderen.
+		<html lang="no-NO" className={inter.variable} suppressHydrationWarning>
+			<body className="antialiased">
 				<Providers>
 					<ServiceWorkerRegistration />
 					<div className="relative min-h-dvh">

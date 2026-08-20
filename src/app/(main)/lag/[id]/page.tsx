@@ -6,6 +6,7 @@ import {
 	BarChart3,
 	Layers,
 	PackageOpen,
+	ScrollText,
 	UsersRound,
 } from "lucide-react";
 import { headers } from "next/headers";
@@ -84,6 +85,12 @@ export default async function TeamPage({
 						<Link href={`/lag/${team.id}/undergrupper`}>
 							<Layers />
 							Undergrupper
+						</Link>
+					</Button>
+					<Button asChild variant="outline">
+						<Link href={`/lag/${team.id}/verv`}>
+							<ScrollText />
+							Verv
 						</Link>
 					</Button>
 					<Button asChild variant="outline">

@@ -250,7 +250,7 @@ export default function ConfirmEventAttendance({
 													value={selectedWithoutRsvpUserId || undefined}
 													onValueChange={setSelectedWithoutRsvpUserId}
 												>
-													<SelectTrigger>
+													<SelectTrigger className="w-full">
 														<SelectValue placeholder="Velg medlem" />
 													</SelectTrigger>
 													<SelectContent>

@@ -5,7 +5,7 @@ import type { TeamEvent } from "@prisma/client";
 import { format } from "date-fns";
 import { Pencil } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type { z } from "zod";
@@ -40,6 +40,7 @@ import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
 import { UpdateEventInputSchema } from "~/schemas";
 import { api } from "~/trpc/react";
+import GroupPicker from "./group-picker";
 
 interface EditEventProps {
 	event: TeamEvent;
@@ -66,8 +67,23 @@ export default function EditEvent({ event, teamId }: EditEventProps) {
 			registrationDeadline: event.registrationDeadline
 				? new Date(event.registrationDeadline)
 				: undefined,
+			groupIds: [],
 		},
 	});
+
+	const { data: inviteInfo, isPending: isInviteInfoPending } =
+		api.event.getInviteInfo.useQuery({ eventId: event.id }, { enabled: open });
+
+	// Utvalget hentes først når dialogen åpnes, så feltet fylles når svaret
+	// kommer. Uten dette ville lagring tømt gruppene arrangementet hadde.
+	useEffect(() => {
+		if (inviteInfo) {
+			form.setValue(
+				"groupIds",
+				inviteInfo.groups.map((group) => group.id),
+			);
+		}
+	}, [inviteInfo]);
 
 	const { mutate: updateEvent, status } = api.event.update.useMutation({
 		onSuccess: () => {
@@ -204,7 +220,7 @@ export default function EditEvent({ event, teamId }: EditEventProps) {
 											defaultValue={field.value}
 										>
 											<FormControl>
-												<SelectTrigger className="bg-card">
+												<SelectTrigger className="w-full bg-card">
 													<SelectValue placeholder="Velg type arrangement" />
 												</SelectTrigger>
 											</FormControl>
@@ -255,6 +271,12 @@ export default function EditEvent({ event, teamId }: EditEventProps) {
 								</FormItem>
 							)}
 						/>
+						<GroupPicker
+							teamId={teamId}
+							value={form.watch("groupIds") ?? []}
+							onChange={(groupIds) => form.setValue("groupIds", groupIds)}
+						/>
+
 						<div className="flex items-center justify-between space-x-2">
 							<Label htmlFor="has-deadline-edit">Påmeldingsfrist</Label>
 							<Switch
@@ -349,8 +371,12 @@ export default function EditEvent({ event, teamId }: EditEventProps) {
 								</DialogContent>
 							</Dialog>
 
+							{/* Gruppevalget hentes når dialogen åpnes. Lagres det før
+							    svaret er inne, ville en tom liste åpnet arrangementet
+							    for hele laget. */}
 							<SubmitButton
 								status={status}
+								disabled={isInviteInfoPending}
 								text="Lagre endringer"
 								size="sm"
 								className="md:w-auto"

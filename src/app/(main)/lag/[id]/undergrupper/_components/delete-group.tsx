@@ -19,9 +19,14 @@ import { api } from "~/trpc/react";
 interface DeleteGroupProps {
 	groupId: string;
 	name: string;
+	opensUpIfDeleted: number;
 }
 
-export default function DeleteGroup({ groupId, name }: DeleteGroupProps) {
+export default function DeleteGroup({
+	groupId,
+	name,
+	opensUpIfDeleted,
+}: DeleteGroupProps) {
 	const [open, setOpen] = useState(false);
 	const router = useRouter();
 
@@ -49,6 +54,14 @@ export default function DeleteGroup({ groupId, name }: DeleteGroupProps) {
 						Gruppa forsvinner for alle. Medlemmene blir værende på laget.
 					</DialogDescription>
 				</DialogHeader>
+
+				{opensUpIfDeleted > 0 && (
+					<div className="rounded-md bg-yellow-500/10 p-3 text-sm text-yellow-600">
+						{opensUpIfDeleted === 1
+							? "Ett kommende arrangement er bare åpent for denne gruppa, og blir åpent for hele laget."
+							: `${opensUpIfDeleted} kommende arrangementer er bare åpne for denne gruppa, og blir åpne for hele laget.`}
+					</div>
+				)}
 
 				<div className="grid gap-2">
 					<Button

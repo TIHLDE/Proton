@@ -7,7 +7,11 @@ import { notFound, redirect } from "next/navigation";
 import { Button } from "~/components/ui/button";
 import { H1, H2, P } from "~/components/ui/typography";
 import { auth } from "~/lib/auth";
-import { getAllEventsByTeamId, getTeamMembershipRoles } from "~/services";
+import {
+	getAllEventsByTeamId,
+	getTeam,
+	getTeamMembershipRoles,
+} from "~/services";
 import EventCard from "../_components/event-card";
 import CreateEvent from "./_components/create";
 import EditEvent from "./_components/edit";
@@ -32,6 +36,7 @@ export default async function EventsAdminPage({ params }: EventPageProps) {
 	)
 		notFound();
 	const events = await getAllEventsByTeamId(id);
+	const team = await getTeam(id);
 
 	return (
 		<div className="mx-auto min-h-screen w-full max-w-7xl space-y-12 px-2 py-24 md:space-y-20 md:py-32 lg:px-12">
@@ -73,6 +78,7 @@ export default async function EventsAdminPage({ params }: EventPageProps) {
 						<EventCard
 							key={event.id}
 							event={event}
+							teamName={team?.name}
 							actions={<EditEvent event={event} teamId={id} />}
 							isAdmin
 						/>

@@ -2,6 +2,8 @@ import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 import { emailRouter } from "./email/router";
 import { eventRouter } from "./event/router";
 import { groupRouter } from "./group/router";
+import { leadershipRouter } from "./leadership/router";
+import { matchRouter } from "./match/router";
 import { meRouter } from "./me/router";
 import { pushRouter } from "./push/router";
 import { registrationRouter } from "./registration/router";
@@ -18,6 +20,8 @@ export const appRouter = createTRPCRouter({
 	me: meRouter,
 	event: eventRouter,
 	group: groupRouter,
+	match: matchRouter,
+	leadership: leadershipRouter,
 	user: userRouter,
 	registration: registrationRouter,
 	push: pushRouter,

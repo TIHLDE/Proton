@@ -26,17 +26,20 @@ const handler: Controller<void, UnansweredEvent[]> = async ({ ctx }) => {
 			startAt: {
 				gte: new Date(),
 			},
+			registrations: {
+				none: {
+					userId: userId,
+				},
+			},
+			// Arrangementer som bare er åpne for utvalgte undergrupper skal
+			// ikke mase på folk som uansett ikke kan melde seg på.
 			OR: [
-				// No registration exists
+				{ invitedGroups: { none: {} } },
 				{
-					registrations: {
-						none: {
-							userId: userId,
-						},
+					invitedGroups: {
+						some: { group: { members: { some: { userId: userId } } } },
 					},
 				},
-				// Registration exists but is neither ATTENDING nor NOT_ATTENDING
-				// This shouldn't happen with current schema, but keeping for safety
 			],
 		},
 		include: {

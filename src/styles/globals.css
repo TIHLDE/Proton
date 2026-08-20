@@ -3,24 +3,125 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@theme {
-	--font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
-		"Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+/* Fargene, radiusen og motion-systemet under er speilet fra @tihlde/ui
+ * (packages/ui/src/styles.css i Photon-monorepoet), så Proton ser ut som
+ * resten av TIHLDE-plattformen. Endres paletten der, må den endres her. */
+
+:root {
+	/* TIHLDE-blå — logofargen i lys modus, og CTA-fargen den driver via
+	   --primary / --sidebar-primary / --ring. Mørk modus overstyrer alle
+	   disse med den lysere blåen fra navy-paletten. */
+	--logo: #1c458a;
+	--background: oklch(1 0 0);
+	--foreground: oklch(0.145 0 0);
+	--card: oklch(1 0 0);
+	--card-foreground: oklch(0.145 0 0);
+	--popover: oklch(1 0 0);
+	--popover-foreground: oklch(0.145 0 0);
+	--primary: var(--logo);
+	--primary-foreground: oklch(0.985 0 0);
+	/* Tekstlenker følger --primary i lys modus — den mørke logoblåen har
+	   rikelig kontrast mot hvitt (9.27:1) og leses fint som tynn tekst. Egen
+	   token likevel, fordi mørk modus må avvike; se overstyringen i `.dark`. */
+	--link: var(--primary);
+	--secondary: oklch(0.97 0 0);
+	--secondary-foreground: oklch(0.205 0 0);
+	--muted: oklch(0.97 0 0);
+	--muted-foreground: oklch(0.556 0 0);
+	--accent: oklch(0.97 0 0);
+	--accent-foreground: oklch(0.205 0 0);
+	--destructive: oklch(0.577 0.245 27.325);
+	--destructive-foreground: oklch(0.577 0.245 27.325);
+	--border: oklch(0.922 0 0);
+	/* Dempet skillelinje for seksjoner som ikke skal trekke blikket (footer o.l.) */
+	--border-subtle: oklch(0.97 0 0);
+	/* Omrisset rundt card-flater */
+	--card-border: oklch(0.922 0 0);
+	--input: oklch(0.922 0 0);
+	--ring: var(--logo);
+	--chart-1: oklch(0.87 0 0);
+	--chart-2: oklch(0.556 0 0);
+	--chart-3: oklch(0.439 0 0);
+	--chart-4: oklch(0.371 0 0);
+	--chart-5: oklch(0.269 0 0);
+	--radius: 0.625rem;
+	--sidebar: oklch(0.985 0 0);
+	--sidebar-foreground: oklch(0.145 0 0);
+	--sidebar-primary: var(--logo);
+	--sidebar-primary-foreground: oklch(0.985 0 0);
+	--sidebar-accent: oklch(0.97 0 0);
+	--sidebar-accent-foreground: oklch(0.205 0 0);
+	--sidebar-border: oklch(0.922 0 0);
+	--sidebar-ring: var(--logo);
+}
+
+.dark {
+	/* Navy-palett generert fra A (#030B1A) — hsl(219°)-skala */
+	--background: #030b1a;
+	--foreground: #f5f7f9;
+	--card: #061532;
+	--card-foreground: #f5f7f9;
+	--popover: #091f49;
+	--popover-foreground: #f5f7f9;
+	--primary: #1b61e4;
+	--primary-foreground: #ffffff;
+	/* Her kan ikke lenker følge --primary: som tekst gir #1b61e4 bare 3.34:1
+	   mot --card (#061532), under WCAG AA. Dessuten leses en stor fylt flate
+	   lysere enn tynne 14px-bokstaver i samme hex, så CTA-fyllet og
+	   lenketeksten ser ulike ut. Neste trinn i navy-skalaen
+	   (hsl(219°, 75%, 60%)) løser begge: 5.30:1 mot --background og 4.87:1
+	   mot --card. */
+	--link: #4d82e6;
+	--secondary: #0d3172;
+	--secondary-foreground: #f5f7f9;
+	--muted: #0d3172;
+	--muted-foreground: #5d8bdf;
+	--accent: #0d3172;
+	--accent-foreground: #f5f7f9;
+	--destructive: oklch(0.704 0.191 22.216);
+	--destructive-foreground: oklch(0.637 0.237 25.331);
+	--border: #0d3172;
+	/* Nytt trinn i navy-skalaen (L 11%), midt mellom --background (L 5.7%) og
+	   #091f49 (L 16.1%). Så vidt synlig mot bakgrunnen. Merk: samme verdi som
+	   --card, så en subtle separator inni et card blir usynlig. */
+	--border-subtle: #061532;
+	/* Ett trinn over --card i navy-skalaen, så omrisset skiller kortet fra
+	   bakgrunnen uten den lyse ring-foreground/10-kanten. */
+	--card-border: #091f49;
+	--input: #0d3172;
+	--ring: #1b61e4;
+	--chart-1: #5d8bdf;
+	--chart-2: #1b61e4;
+	--chart-3: #1652c0;
+	--chart-4: #124097;
+	--chart-5: #0d3172;
+	--sidebar: #091f49;
+	--sidebar-foreground: #f5f7f9;
+	--sidebar-primary: #1b61e4;
+	--sidebar-primary-foreground: #ffffff;
+	--sidebar-accent: #0d3172;
+	--sidebar-accent-foreground: #f5f7f9;
+	--sidebar-border: #0d3172;
+	--sidebar-ring: #1b61e4;
+	/* Mot den mørke navy-bakgrunnen holder logoen seg lys for kontrast */
+	--logo: var(--foreground);
 }
 
 @theme inline {
-	--radius-sm: calc(var(--radius) - 4px);
-	--radius-md: calc(var(--radius) - 2px);
-	--radius-lg: var(--radius);
-	--radius-xl: calc(var(--radius) + 4px);
+	/* Inter lastes via next/font i src/app/layout.tsx og eksponeres som
+	   --font-inter. Photon laster samme familie via @fontsource-variable/inter
+	   under navnet "Inter Variable"; typesnittet er det samme. */
+	--font-sans: var(--font-inter), sans-serif;
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
 	--color-card: var(--card);
 	--color-card-foreground: var(--card-foreground);
+	--color-card-border: var(--card-border);
 	--color-popover: var(--popover);
 	--color-popover-foreground: var(--popover-foreground);
 	--color-primary: var(--primary);
 	--color-primary-foreground: var(--primary-foreground);
+	--color-link: var(--link);
 	--color-secondary: var(--secondary);
 	--color-secondary-foreground: var(--secondary-foreground);
 	--color-muted: var(--muted);
@@ -28,7 +129,9 @@
 	--color-accent: var(--accent);
 	--color-accent-foreground: var(--accent-foreground);
 	--color-destructive: var(--destructive);
+	--color-destructive-foreground: var(--destructive-foreground);
 	--color-border: var(--border);
+	--color-border-subtle: var(--border-subtle);
 	--color-input: var(--input);
 	--color-ring: var(--ring);
 	--color-chart-1: var(--chart-1);
@@ -36,6 +139,10 @@
 	--color-chart-3: var(--chart-3);
 	--color-chart-4: var(--chart-4);
 	--color-chart-5: var(--chart-5);
+	--radius-sm: calc(var(--radius) - 4px);
+	--radius-md: calc(var(--radius) - 2px);
+	--radius-lg: var(--radius);
+	--radius-xl: calc(var(--radius) + 4px);
 	--color-sidebar: var(--sidebar);
 	--color-sidebar-foreground: var(--sidebar-foreground);
 	--color-sidebar-primary: var(--sidebar-primary);
@@ -44,108 +151,140 @@
 	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
 	--color-sidebar-border: var(--sidebar-border);
 	--color-sidebar-ring: var(--sidebar-ring);
+	--color-logo: var(--logo);
+	--font-heading: var(--font-sans);
+	--radius-2xl: calc(var(--radius) * 1.8);
+	--radius-3xl: calc(var(--radius) * 2.2);
+	--radius-4xl: calc(var(--radius) * 2.6);
 }
 
-:root {
-	--background: oklch(0.98 0 0);
-	--foreground: oklch(0.28 0.04 260.33);
-	--card: oklch(1.0 0 0);
-	--card-foreground: oklch(0.28 0.04 260.33);
-	--popover: oklch(1.0 0 0);
-	--popover-foreground: oklch(0.28 0.04 260.33);
-	--primary: oklch(0.59 0.2 277.06);
-	--primary-foreground: oklch(1.0 0 0);
-	--secondary: oklch(0.93 0.01 261.82);
-	--secondary-foreground: oklch(0.37 0.03 259.73);
-	--muted: oklch(0.97 0 0);
-	--muted-foreground: oklch(0.55 0.02 264.41);
-	--accent: oklch(0.93 0.03 273.66);
-	--accent-foreground: oklch(0.37 0.03 259.73);
-	--destructive: oklch(0.64 0.21 25.39);
-	--border: oklch(0.87 0.01 261.81);
-	--input: oklch(0.87 0.01 261.81);
-	--ring: oklch(0.59 0.2 277.06);
-	--chart-1: oklch(0.59 0.2 277.06);
-	--chart-2: oklch(0.51 0.23 276.97);
-	--chart-3: oklch(0.46 0.21 277.06);
-	--chart-4: oklch(0.4 0.18 277.16);
-	--chart-5: oklch(0.36 0.14 278.65);
-	--sidebar: oklch(0.97 0 0);
-	--sidebar-foreground: oklch(0.28 0.04 260.33);
-	--sidebar-primary: oklch(0.59 0.2 277.06);
-	--sidebar-primary-foreground: oklch(1.0 0 0);
-	--sidebar-accent: oklch(0.93 0.03 273.66);
-	--sidebar-accent-foreground: oklch(0.37 0.03 259.73);
-	--sidebar-border: oklch(0.87 0.01 261.81);
-	--sidebar-ring: oklch(0.59 0.2 277.06);
+/* Fra shadcn/tailwind.css, som @tihlde/ui importerer. Bare denne ene utilityen
+   er portet — resten (scroll-fade, shimmer, data-*-varianter) har ingen bruker
+   i Proton, og Radix-komponentene her bruker `data-[state=…]` direkte. */
+@utility no-scrollbar {
+	-ms-overflow-style: none;
+	scrollbar-width: none;
 
-	--font-sans: Inter, sans-serif;
-	--font-serif: Merriweather, serif;
-	--font-mono: JetBrains Mono, monospace;
-
-	--radius: 0.5rem;
-
-	--shadow-2xs: 0px 4px 8px -1px oklch(0.0 0 0 / 0.05);
-	--shadow-xs: 0px 4px 8px -1px oklch(0.0 0 0 / 0.05);
-	--shadow-sm: 0px 4px 8px -1px oklch(0.0 0 0 / 0.1), 0px 1px 2px -2px
-		oklch(0.0 0 0 / 0.1);
-	--shadow: 0px 4px 8px -1px oklch(0.0 0 0 / 0.1), 0px 1px 2px -2px
-		oklch(0.0 0 0 / 0.1);
-	--shadow-md: 0px 4px 8px -1px oklch(0.0 0 0 / 0.1), 0px 2px 4px -2px
-		oklch(0.0 0 0 / 0.1);
-	--shadow-lg: 0px 4px 8px -1px oklch(0.0 0 0 / 0.1), 0px 4px 6px -2px
-		oklch(0.0 0 0 / 0.1);
-	--shadow-xl: 0px 4px 8px -1px oklch(0.0 0 0 / 0.1), 0px 8px 10px -2px
-		oklch(0.0 0 0 / 0.1);
-	--shadow-2xl: 0px 4px 8px -1px oklch(0.0 0 0 / 0.25);
+	&::-webkit-scrollbar {
+		display: none;
+	}
 }
 
-.dark {
-	--background: oklch(0.21 0.04 264.04);
-	--foreground: oklch(0.93 0.01 256.71);
-	--card: oklch(0.28 0.04 260.33);
-	--card-foreground: oklch(0.93 0.01 256.71);
-	--popover: oklch(0.28 0.04 260.33);
-	--popover-foreground: oklch(0.93 0.01 256.71);
-	--primary: oklch(0.68 0.16 276.93);
-	--primary-foreground: oklch(0.21 0.04 264.04);
-	--secondary: oklch(0.34 0.03 261.83);
-	--secondary-foreground: oklch(0.87 0.01 261.81);
-	--muted: oklch(0.28 0.04 260.33);
-	--muted-foreground: oklch(0.71 0.02 261.33);
-	--accent: oklch(0.37 0.03 259.73);
-	--accent-foreground: oklch(0.87 0.01 261.81);
-	--destructive: oklch(0.64 0.21 25.39);
-	--border: oklch(0.45 0.03 257.68);
-	--input: oklch(0.45 0.03 257.68);
-	--ring: oklch(0.68 0.16 276.93);
-	--chart-1: oklch(0.68 0.16 276.93);
-	--chart-2: oklch(0.59 0.2 277.06);
-	--chart-3: oklch(0.51 0.23 276.97);
-	--chart-4: oklch(0.46 0.21 277.06);
-	--chart-5: oklch(0.4 0.18 277.16);
-	--sidebar: oklch(0.28 0.04 260.33);
-	--sidebar-foreground: oklch(0.93 0.01 256.71);
-	--sidebar-primary: oklch(0.68 0.16 276.93);
-	--sidebar-primary-foreground: oklch(0.21 0.04 264.04);
-	--sidebar-accent: oklch(0.37 0.03 259.73);
-	--sidebar-accent-foreground: oklch(0.87 0.01 261.81);
-	--sidebar-border: oklch(0.45 0.03 257.68);
-	--sidebar-ring: oklch(0.68 0.16 276.93);
+/* ── Motion-system ────────────────────────────────────────────────────────
+   Ett sett easing- og timing-tokens, så hver transition og enter/exit-
+   animasjon leses som ett system i stedet for en samling per-komponent-
+   kurver. Standardisert på expo-out `cubic-bezier(0.22, 1, 0.36, 1)`: den
+   starter raskt for umiddelbar tilbakemelding og bremser ned i en lang,
+   rolig hale.
 
-	--shadow-2xs: 0 1px 3px 0px oklch(0.0 0 0 / 0.05);
-	--shadow-xs: 0 1px 3px 0px oklch(0.0 0 0 / 0.05);
-	--shadow-sm: 0 1px 3px 0px oklch(0.0 0 0 / 0.1), 0 1px 2px -1px
-		oklch(0.0 0 0 / 0.1);
-	--shadow: 0 1px 3px 0px oklch(0.0 0 0 / 0.1), 0 1px 2px -1px
-		oklch(0.0 0 0 / 0.1);
-	--shadow-md: 0 1px 3px 0px oklch(0.0 0 0 / 0.1), 0 2px 4px -1px
-		oklch(0.0 0 0 / 0.1);
-	--shadow-lg: 0 1px 3px 0px oklch(0.0 0 0 / 0.1), 0 4px 6px -1px
-		oklch(0.0 0 0 / 0.1);
-	--shadow-xl: 0 1px 3px 0px oklch(0.0 0 0 / 0.1), 0 8px 10px -1px
-		oklch(0.0 0 0 / 0.1);
-	--shadow-2xl: 0 1px 3px 0px oklch(0.0 0 0 / 0.25);
+   `static` fordi easing-tokenene er kontrakten til motion-systemet — de skal
+   alltid ligge i `:root`, også når ingen komponent bruker en gitt kurve akkurat
+   nå. Uten `static` tree-shaker Tailwind ubrukte tema-tokens, og en framtidig
+   `ease-in-out`-utility ville fått en tom verdi. */
+@theme static {
+	--ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+	--ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+	--ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@theme {
+	/* Hver bare `transition-*`-utility (knapp, select-trigger, tabellrad,
+	   switch, badge, …) bremser nå ned med samme kurve i stedet for den flate
+	   standarden. Komponenter som setter en eksplisitt `ease-*` vinner. */
+	--default-transition-timing-function: var(--ease-out);
+
+	/* tw-animate-css slår opp enter/exit-easing via `var(--tw-ease, …)`.
+	   Redefinerer kortformene så dialoger, popovers, dropdowns, selects og
+	   tooltips som ikke setter en egen `ease-*`-klasse faller tilbake på vår
+	   ease-out (var den flate browser-`ease`). */
+	--animate-in: enter var(--tw-animation-duration, var(--tw-duration, 0.15s))
+		var(--tw-ease, var(--ease-out)) var(--tw-animation-delay, 0s)
+		var(--tw-animation-iteration-count, 1) var(--tw-animation-direction, normal)
+		var(--tw-animation-fill-mode, none);
+	--animate-out: exit var(--tw-animation-duration, var(--tw-duration, 0.15s))
+		var(--tw-ease, var(--ease-out)) var(--tw-animation-delay, 0s)
+		var(--tw-animation-iteration-count, 1) var(--tw-animation-direction, normal)
+		var(--tw-animation-fill-mode, none);
+}
+
+/* ── Inngangsanimasjon ────────────────────────────────────────────────────
+   Innhold som monteres — en seksjon, et rutenett med kort — toner opp i
+   stedet for å smelle inn. `<Reveal>` og `<Stagger>` (components/ui/motion.tsx)
+   er de eneste inngangene; timingen bor her.
+
+   `backwards`, ikke `both`: en `both`-animasjon fyller videre etter at den er
+   ferdig, og lar `transform` bli stående permanent — et transformert element
+   er containing block for `position: fixed`-etterkommere for alltid. */
+@keyframes reveal-in {
+	from {
+		opacity: 0;
+		transform: translate3d(0, var(--reveal-distance, 0.5rem), 0);
+	}
+}
+
+[data-slot="reveal"] {
+	animation: reveal-in var(--reveal-duration, 0.26s) var(--ease-out) backwards;
+}
+
+/* Stagger: barna kommer inn 40 ms fra hverandre, med tak på 5 steg (200 ms).
+   Taket gjør to ting. Uten det ville et rutenett med 24 kort fortsatt animere
+   et sekund etter at det ble rendret; og siden regelen også dekker barn som
+   legges til senere, er taket nøyaktig hvor lenge en «last inn mer»-batch er
+   usynlig før den toner inn. */
+[data-slot="stagger"] > * {
+	animation: reveal-in var(--reveal-duration, 0.26s) var(--ease-out)
+		calc(var(--reveal-step, 0.04s) * var(--reveal-index, 0)) backwards;
+}
+[data-slot="stagger"] > *:nth-child(1) {
+	--reveal-index: 0;
+}
+[data-slot="stagger"] > *:nth-child(2) {
+	--reveal-index: 1;
+}
+[data-slot="stagger"] > *:nth-child(3) {
+	--reveal-index: 2;
+}
+[data-slot="stagger"] > *:nth-child(4) {
+	--reveal-index: 3;
+}
+[data-slot="stagger"] > *:nth-child(5) {
+	--reveal-index: 4;
+}
+[data-slot="stagger"] > *:nth-child(n + 6) {
+	--reveal-index: 5;
+}
+
+/* ── Klikkbare flater ─────────────────────────────────────────────────────
+   Et kort som navigerer skal svare på pekeren. Styrt av `data-slot` framfor en
+   klasse, så hvert nåværende og framtidig lenkekort får samme behandling uten
+   å melde seg på.
+
+   `@media (hover: hover)` er obligatorisk på håndskrevne regler. Tailwind
+   pakker sine egne `hover:`-utilities i denne guarden, men ren CSS får ingen
+   slik hjelp — og på en touch-enhet henger en ubeskyttet `:hover` igjen etter
+   et trykk til brukeren trykker et annet sted. */
+:is(a, button)[data-slot="card"],
+[data-slot="list-card"] {
+	transition: translate 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
+}
+
+@media (hover: hover) {
+	/* Begge flatene har `ring-1`, så `box-shadow` er allerede Tailwinds stabel
+	   av `var(--tw-*)`-slots. Å mate elevasjonen gjennom `--tw-shadow` legger
+	   den *under* ringen; å sette `box-shadow` her ville droppet ringen. */
+	:is(a, button)[data-slot="card"]:hover,
+	[data-slot="list-card"]:hover {
+		translate: 0 -2px;
+		--tw-shadow: 0 10px 24px -14px oklch(0 0 0 / 0.45);
+	}
+}
+
+/* Trykk setter kortet ned igjen, raskere enn det løftet seg — systemet som
+   svarer skal alltid være kjappere enn brukeren som bestemmer seg. */
+:is(a, button)[data-slot="card"]:active,
+[data-slot="list-card"]:active {
+	translate: 0 0;
+	transition-duration: 0.1s;
 }
 
 @layer base {
@@ -153,6 +292,48 @@
 		@apply border-border outline-ring/50;
 	}
 	body {
+		background-color: var(--background);
+		color: var(--foreground);
 		@apply bg-background text-foreground;
+		/* Brukerskrevet innhold inneholder ubrytelige ord: e-postadresser,
+		 * URL-er, lange norske sammensetninger. Uten dette setter ett slikt
+		 * ord min-content-bredden til en flex-boks, og hele sida blir
+		 * bredere enn skjermen på mobil. `anywhere` (ikke `break-word`)
+		 * fordi bare den påvirker intrinsic sizing. */
+		overflow-wrap: anywhere;
+	}
+	html {
+		@apply font-sans;
+		/* Reserver plass til den vertikale scrollbaren så sentrerte layouts
+		 * ikke hopper sidelengs når innholdshøyden endrer seg. */
+		scrollbar-gutter: stable;
+		/* Siste skanse mot sidescroll på mobil. `clip`, ikke `hidden`:
+		 * `hidden` gjør elementet til en scroll-container, og da bytter
+		 * `position: sticky` scrollport — det ville brutt den klebrige
+		 * headeren og sidebaren. */
+		overflow-x: clip;
+		overflow-y: visible;
+	}
+}
+
+/* Respekter reduced-motion globalt: kollaps bevegelsesbaserte transitions og
+   animasjoner til tilnærmet umiddelbart, men behold slutt-tilstanden — opasitet
+   og farge lander fortsatt, bare uten reise. tw-animate-css har ingen slik
+   guard, så uten dette spilles hver overlay-slide og evige loop uansett. */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+		/* Delays må også bort, ikke bare durations. En stagget inngang fyller
+		   `backwards` — opacity 0 — hele forsinkelsen, så en urørt 320 ms
+		   delay ville latt de siste kortene stå blanke i en tredels sekund før
+		   de smalt inn. Det leses som en lastefeil, som er det motsatte av hva
+		   reduced motion ber om. */
+		animation-delay: 0ms !important;
+		transition-delay: 0ms !important;
 	}
 }

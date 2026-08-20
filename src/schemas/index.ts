@@ -3,6 +3,8 @@ export * from "./team";
 export * from "./membership";
 export * from "./event";
 export * from "./group";
+export * from "./match";
+export * from "./leadership";
 export * from "./user";
 export * from "./registration";
 export * from "./push";

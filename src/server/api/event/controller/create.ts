@@ -6,6 +6,8 @@ import { CreateEventInputSchema } from "~/schemas";
 import { db } from "~/server/db";
 import { type Controller, authorizedProcedure } from "../../trpc";
 import { hasTeamAccessMiddleware } from "../../util/auth";
+import { getInvitedUserIds, invitedUserFilter } from "../../util/invitees";
+import { validateGroupIds } from "../../util/validate-groups";
 
 const handler: Controller<
 	z.infer<typeof CreateEventInputSchema>,
@@ -17,7 +19,12 @@ const handler: Controller<
 		"SUBADMIN",
 	]);
 
-	await db.teamEvent.create({
+	const validGroupIds = await validateGroupIds(
+		input.teamId,
+		input.groupIds ?? [],
+	);
+
+	const event = await db.teamEvent.create({
 		data: {
 			teamId: input.teamId,
 			name: input.name,
@@ -27,12 +34,19 @@ const handler: Controller<
 			location: input.location,
 			note: input.note,
 			registrationDeadline: input.registrationDeadline,
+			invitedGroups: {
+				create: validGroupIds.map((groupId) => ({ groupId })),
+			},
 		},
 	});
+
+	// Varselet skal bare gå til de som faktisk kan melde seg på.
+	const invitedUserIds = await getInvitedUserIds(event.id);
 
 	const teamMembers = await db.teamMember.findMany({
 		where: {
 			teamId: input.teamId,
+			...invitedUserFilter(invitedUserIds),
 		},
 		select: {
 			userId: true,

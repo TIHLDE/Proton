@@ -6,6 +6,7 @@ import {
 	BarChart3,
 	Layers,
 	PackageOpen,
+	ScrollText,
 	UsersRound,
 } from "lucide-react";
 import { headers } from "next/headers";
@@ -87,6 +88,12 @@ export default async function TeamPage({
 						</Link>
 					</Button>
 					<Button asChild variant="outline">
+						<Link href={`/lag/${team.id}/verv`}>
+							<ScrollText />
+							Verv
+						</Link>
+					</Button>
+					<Button asChild variant="outline">
 						<Link href={`/lag/${team.id}/statistikk`}>
 							<BarChart3 />
 							Statistikk
@@ -125,6 +132,7 @@ export default async function TeamPage({
 							<EventCard
 								key={event.id}
 								event={event}
+								teamName={team.name}
 								showRegistration={!showPastEvents}
 								isAdmin={
 									session.user.isAdmin ||

@@ -18,7 +18,28 @@ export async function getTeamGroups(teamId: string) {
 		orderBy: { name: "asc" },
 	});
 
-	return groups;
+	// Slettes en gruppe, mister arrangementene den. De som da ikke har noen
+	// grupper igjen, blir åpne for hele laget. Det er verdt en advarsel, så
+	// her regnes det ut hvor mange det gjelder per gruppe.
+	const upcoming = await db.teamEvent.findMany({
+		where: { teamId, startAt: { gte: new Date() } },
+		select: { invitedGroups: { select: { groupId: true } } },
+	});
+
+	const opensUpIfDeleted = new Map<string, number>();
+	for (const event of upcoming) {
+		const [onlyGroup] = event.invitedGroups;
+		if (!onlyGroup || event.invitedGroups.length !== 1) continue;
+		opensUpIfDeleted.set(
+			onlyGroup.groupId,
+			(opensUpIfDeleted.get(onlyGroup.groupId) ?? 0) + 1,
+		);
+	}
+
+	return groups.map((group) => ({
+		...group,
+		opensUpIfDeleted: opensUpIfDeleted.get(group.id) ?? 0,
+	}));
 }
 
 export async function getTeamGroup(groupId: string) {

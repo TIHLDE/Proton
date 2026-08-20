@@ -125,6 +125,7 @@ export default async function TeamPage({
 							<EventCard
 								key={event.id}
 								event={event}
+								teamName={team.name}
 								showRegistration={!showPastEvents}
 								isAdmin={
 									session.user.isAdmin ||

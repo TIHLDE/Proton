@@ -136,7 +136,7 @@ const handler: Controller<
 		registrations.map((r) => `${r.userId}:${r.eventId}`),
 	);
 
-	const countsAsAttendance: { userId: string }[] = [
+	const countsAsAttendance: { userId: string; eventId: string }[] = [
 		...registrations.filter((reg) => {
 			const event = eventMap.get(reg.eventId);
 			if (!event || !isEventPast(event)) return true;
@@ -156,14 +156,23 @@ const handler: Controller<
 		{} as Record<string, number>,
 	);
 
+	// Oppmøte teller også når spilleren siden har gått ut av undergruppa.
+	// Uten dette havner deltakelsen i telleren mens arrangementet faller ut
+	// av nevneren, og prosenten kan gå over 100.
+	const attendedKeys = new Set(
+		countsAsAttendance.map((row) => `${row.userId}:${row.eventId}`),
+	);
+
 	// Build stats for each team member
 	const stats: AttendanceStats[] = teamMembers.map((member) => {
 		const attendedCount = attendanceCounts[member.userId] || 0;
 
 		// Nevneren er personlig: bare arrangementer denne spilleren faktisk
 		// var invitert til, og bare fra hen ble med i gruppa.
-		const totalEvents = eventIds.filter((eventId) =>
-			countsTowards(member.userId, eventId),
+		const totalEvents = eventIds.filter(
+			(eventId) =>
+				countsTowards(member.userId, eventId) ||
+				attendedKeys.has(`${member.userId}:${eventId}`),
 		).length;
 
 		const attendanceRate =

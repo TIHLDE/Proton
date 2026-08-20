@@ -132,6 +132,13 @@ export function EventOverview({
 		{ enabled: showAttendanceSummary },
 	);
 
+	const { data: inviteInfo } = api.event.getInviteInfo.useQuery({
+		eventId: event.id,
+	});
+
+	const invitedGroupNames = inviteInfo?.groups.map((group) => group.name) ?? [];
+	const isLockedForMe = inviteInfo ? !inviteInfo.isInvited : false;
+
 	return (
 		<div className="space-y-6">
 			<div className="flex items-start justify-between gap-4">
@@ -191,6 +198,16 @@ export function EventOverview({
 					</EventInfoBlock>
 				)}
 
+				{invitedGroupNames.length > 0 && (
+					<EventInfoBlock
+						label="Åpent for"
+						labelClassName={labelClassName}
+						valueClassName={valueClassName}
+					>
+						{invitedGroupNames.join(", ")}
+					</EventInfoBlock>
+				)}
+
 				{event.note && (
 					<EventInfoBlock
 						label="Beskrivelse"
@@ -228,11 +245,19 @@ export function EventOverview({
 					<h3 className={cn("mb-4 font-semibold text-lg", titleClassName)}>
 						Påmelding
 					</h3>
-					<EventRegistration
-						eventId={event.id}
-						initialRegistration={registration}
-						registrationDeadline={event.registrationDeadline}
-					/>
+					{isLockedForMe ? (
+						<p className={cn("text-sm", secondaryValueClassName)}>
+							{invitedGroupNames.length === 1
+								? `Bare ${invitedGroupNames[0]} kan melde seg på.`
+								: `Bare ${invitedGroupNames.join(", ")} kan melde seg på.`}
+						</p>
+					) : (
+						<EventRegistration
+							eventId={event.id}
+							initialRegistration={registration}
+							registrationDeadline={event.registrationDeadline}
+						/>
+					)}
 				</div>
 			)}
 

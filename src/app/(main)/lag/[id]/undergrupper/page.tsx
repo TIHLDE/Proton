@@ -122,7 +122,11 @@ export default async function TeamGroupsPage({ params }: TeamGroupsPageProps) {
 										name={group.name}
 										description={group.description}
 									/>
-									<DeleteGroup groupId={group.id} name={group.name} />
+									<DeleteGroup
+										groupId={group.id}
+										name={group.name}
+										opensUpIfDeleted={group.opensUpIfDeleted}
+									/>
 								</div>
 							)}
 						</div>

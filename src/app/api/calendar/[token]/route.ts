@@ -26,6 +26,19 @@ export async function GET(
 					id: true,
 					name: true,
 					events: {
+						// Samme regel som den personlige kalenderen i appen.
+						where: {
+							OR: [
+								{ invitedGroups: { none: {} } },
+								{
+									invitedGroups: {
+										some: {
+											group: { members: { some: { userId: user.id } } },
+										},
+									},
+								},
+							],
+						},
 						orderBy: { startAt: "asc" },
 						select: {
 							id: true,

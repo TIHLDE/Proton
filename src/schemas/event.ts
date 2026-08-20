@@ -18,6 +18,8 @@ export const CreateEventInputSchema = z
 			.optional()
 			.transform((val) => (val?.trim() ? val : undefined)),
 		registrationDeadline: z.date().optional(),
+		// Tom eller utelatt = hele laget er invitert.
+		groupIds: z.array(z.string().min(1)).optional(),
 	})
 	.superRefine((data, ctx) => {
 		if (data.endDatetime < data.startDatetime) {
@@ -48,6 +50,8 @@ export const UpdateEventInputSchema = z
 			.optional()
 			.transform((val) => (val?.trim() ? val : undefined)),
 		registrationDeadline: z.date().optional(),
+		// Tom eller utelatt = hele laget er invitert.
+		groupIds: z.array(z.string().min(1)).optional(),
 	})
 	.superRefine((data, ctx) => {
 		if (data.endDatetime < data.startDatetime) {

@@ -127,6 +127,7 @@ model TeamGroup {
   team        Team    @relation(fields: [teamId], references: [id], onDelete: Cascade)
 
   members TeamGroupMember[]
+  events  TeamEventGroup[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -166,6 +167,7 @@ model TeamEvent {
   team                 Team           @relation(fields: [teamId], references: [id], onDelete: Cascade)
   registrations        Registration[]
   attendances          Attendance[]
+  invitedGroups        TeamEventGroup[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -178,6 +180,22 @@ enum TeamEventType {
   MATCH
   SOCIAL
   OTHER
+}
+
+/// Hvilke undergrupper et arrangement er åpent for. Ingen rader betyr at
+/// hele laget er invitert — det er standarden, og det alle arrangementer
+/// som fantes før undergruppene ble innført fortsetter å være.
+model TeamEventGroup {
+  eventId String
+  groupId String
+  event   TeamEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  group   TeamGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@id([eventId, groupId])
+  @@index([groupId])
+  @@map("team_event_group")
 }
 
 model Registration {

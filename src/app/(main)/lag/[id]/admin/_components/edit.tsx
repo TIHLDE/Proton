@@ -5,7 +5,7 @@ import type { TeamEvent } from "@prisma/client";
 import { format } from "date-fns";
 import { Pencil } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type { z } from "zod";
@@ -40,6 +40,7 @@ import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
 import { UpdateEventInputSchema } from "~/schemas";
 import { api } from "~/trpc/react";
+import GroupPicker from "./group-picker";
 
 interface EditEventProps {
 	event: TeamEvent;
@@ -66,8 +67,25 @@ export default function EditEvent({ event, teamId }: EditEventProps) {
 			registrationDeadline: event.registrationDeadline
 				? new Date(event.registrationDeadline)
 				: undefined,
+			groupIds: [],
 		},
 	});
+
+	const { data: inviteInfo } = api.event.getInviteInfo.useQuery(
+		{ eventId: event.id },
+		{ enabled: open },
+	);
+
+	// Utvalget hentes først når dialogen åpnes, så feltet fylles når svaret
+	// kommer. Uten dette ville lagring tømt gruppene arrangementet hadde.
+	useEffect(() => {
+		if (inviteInfo) {
+			form.setValue(
+				"groupIds",
+				inviteInfo.groups.map((group) => group.id),
+			);
+		}
+	}, [inviteInfo]);
 
 	const { mutate: updateEvent, status } = api.event.update.useMutation({
 		onSuccess: () => {
@@ -255,6 +273,12 @@ export default function EditEvent({ event, teamId }: EditEventProps) {
 								</FormItem>
 							)}
 						/>
+						<GroupPicker
+							teamId={teamId}
+							value={form.watch("groupIds") ?? []}
+							onChange={(groupIds) => form.setValue("groupIds", groupIds)}
+						/>
+
 						<div className="flex items-center justify-between space-x-2">
 							<Label htmlFor="has-deadline-edit">Påmeldingsfrist</Label>
 							<Switch

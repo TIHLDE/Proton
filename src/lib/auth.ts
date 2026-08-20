@@ -55,7 +55,15 @@ export const auth = betterAuth({
 					// med én gang og bare for innlogging.
 					clientId: env.PHOTON_CLIENT_ID ?? "",
 					clientSecret: env.PHOTON_CLIENT_SECRET ?? "",
-					scopes: ["openid", "profile", "email"],
+					// Photon kjører better-auth sin OIDC-provider, der
+					// access-tokens varer én time mens sesjonen her varer i 120
+					// dager — uten refresh ville alt utenom den første timen
+					// etter innlogging feile.
+					// `offline_access` gir refresh-token. Photon utsteder det ut
+					// fra scopene alene, så ingen `prompt: "consent"` her —
+					// den ville bare gitt et ekstra klikk ved hver innlogging.
+					scopes: ["openid", "profile", "email", "offline_access"],
+					accessType: "offline",
 					// Photon avviser autorisasjon uten PKCE, også for
 					// konfidensielle klienter som denne: «pkce is required for
 					// this client». better-auth har den av som standard.

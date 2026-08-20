@@ -13,6 +13,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "~/components/ui/table";
+import { formatInAppZone } from "~/lib/datetime";
 import EditRole from "./edit";
 
 interface UsersTableProps {
@@ -67,11 +68,7 @@ export default function UsersTable({
 							<TableCell>{user.email}</TableCell>
 							<TableCell>{user.isAdmin ? "Admin" : "Medlem"}</TableCell>
 							<TableCell>
-								{user.createdAt.toLocaleDateString("no-NO", {
-									year: "numeric",
-									month: "long",
-									day: "numeric",
-								})}
+								{formatInAppZone(user.createdAt, "d. MMMM yyyy")}
 							</TableCell>
 							<TableCell>
 								<EditRole userId={user.id} isAdmin={user.isAdmin} />

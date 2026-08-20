@@ -6,6 +6,7 @@ import { nb } from "date-fns/locale";
 import { Users } from "lucide-react";
 import type { ReactNode } from "react";
 import EventRegistration from "~/app/(main)/lag/[id]/_components/event-registration";
+import { toAppZone } from "~/lib/datetime";
 import {
 	type AttendanceStatusFilter,
 	attendanceStatusOrder,
@@ -180,7 +181,7 @@ export function EventOverview({
 						valueClassName={valueClassName}
 					>
 						{format(
-							new Date(event.registrationDeadline),
+							toAppZone(new Date(event.registrationDeadline)),
 							"d. MMMM yyyy 'kl.' HH:mm",
 							{
 								locale: nb,

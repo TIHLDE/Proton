@@ -2,6 +2,7 @@ import type { User } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import type z from "zod";
 import { env } from "~/env";
+import { formatDateTimeLong } from "~/lib/datetime";
 import { sendNotification } from "~/lib/notify";
 import { notifyUnattendedEventRegistrationSchema } from "~/schemas";
 import { type Controller, authorizedProcedure } from "~/server/api/trpc";
@@ -79,7 +80,7 @@ const handler: Controller<
 			},
 			{
 				type: "text",
-				content: `Dato og tid: ${event.startAt.toLocaleString()}`,
+				content: `Dato og tid: ${formatDateTimeLong(event.startAt)}`,
 			},
 			{
 				type: "text",

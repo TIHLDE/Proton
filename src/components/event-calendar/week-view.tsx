@@ -30,6 +30,7 @@ import {
 	useCurrentTimeIndicator,
 } from "~/components/event-calendar";
 import { EndHour, StartHour } from "~/components/event-calendar/constants";
+import { nowInAppZone } from "~/lib/datetime";
 import { cn } from "~/lib/utils";
 
 interface WeekViewProps {
@@ -224,7 +225,7 @@ export function WeekView({
 			<div className="sticky top-0 z-30 grid grid-cols-8 border-border/70 border-b bg-background/80 backdrop-blur-md">
 				<div className="py-2 text-center text-muted-foreground/70 text-sm">
 					{/* <span className="max-[479px]:sr-only">
-						{format(new Date(), "O", { locale: nb })}
+						{format(nowInAppZone(), "O", { locale: nb })}
 					</span> */}
 				</div>
 				{days.map((day) => (

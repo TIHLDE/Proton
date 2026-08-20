@@ -12,6 +12,9 @@
 		"enabled": true,
 		"ignore": [
 			"src/components/event-calendar/**/*",
+			// Hentet uendret fra Photon (packages/ui) for at velgerne skal være
+			// nøyaktig samme komponent. Lintes der, ikke her.
+			"src/components/ui/photon/**/*",
 			"prisma/seed.ts",
 			"src/components/ui/chart.tsx"
 		],

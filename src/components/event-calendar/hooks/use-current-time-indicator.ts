@@ -4,6 +4,7 @@ import { endOfWeek, isSameDay, isWithinInterval, startOfWeek } from "date-fns";
 import { useEffect, useState } from "react";
 
 import { EndHour, StartHour } from "~/components/event-calendar/constants";
+import { nowInAppZone } from "~/lib/datetime";
 
 export function useCurrentTimeIndicator(
 	currentDate: Date,
@@ -14,7 +15,7 @@ export function useCurrentTimeIndicator(
 
 	useEffect(() => {
 		const calculateTimePosition = () => {
-			const now = new Date();
+			const now = nowInAppZone();
 			const hours = now.getHours();
 			const minutes = now.getMinutes();
 			const totalMinutes = (hours - StartHour) * 60 + minutes;

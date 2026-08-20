@@ -71,10 +71,8 @@ export default function EditEvent({ event, teamId }: EditEventProps) {
 		},
 	});
 
-	const { data: inviteInfo } = api.event.getInviteInfo.useQuery(
-		{ eventId: event.id },
-		{ enabled: open },
-	);
+	const { data: inviteInfo, isPending: isInviteInfoPending } =
+		api.event.getInviteInfo.useQuery({ eventId: event.id }, { enabled: open });
 
 	// Utvalget hentes først når dialogen åpnes, så feltet fylles når svaret
 	// kommer. Uten dette ville lagring tømt gruppene arrangementet hadde.
@@ -373,8 +371,12 @@ export default function EditEvent({ event, teamId }: EditEventProps) {
 								</DialogContent>
 							</Dialog>
 
+							{/* Gruppevalget hentes når dialogen åpnes. Lagres det før
+							    svaret er inne, ville en tom liste åpnet arrangementet
+							    for hele laget. */}
 							<SubmitButton
 								status={status}
+								disabled={isInviteInfoPending}
 								text="Lagre endringer"
 								size="sm"
 								className="md:w-auto"

@@ -21,6 +21,10 @@ model User {
   emailNotificationsEnabled Boolean @default(true)
   calendarToken     String?  @unique
 
+  /// Sist gang medlemskapene ble hentet fra Photon. Brukes til å strupe den
+  /// automatiske synkingen, så et sidebesøk ikke betyr et Photon-kall.
+  membershipsSyncedAt DateTime?
+
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @default(now()) @updatedAt
   sessions          Session[]

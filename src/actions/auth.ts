@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 import { env } from "~/env";
 import { auth } from "~/lib/auth";
+import { db } from "~/server/db";
 
 /**
  * Standardverdien gjentas her med vilje. `SKIP_ENV_VALIDATION` gjør at t3-env
@@ -15,6 +16,20 @@ const API_URL = ISSUER.replace(/\/auth$/, "");
 
 /** Taket for hvor lenge en sidelasting kan vente på Photon. */
 const PHOTON_TIMEOUT_MS = 5000;
+
+/** Se `tokenUrlParams` i ~/lib/auth.ts for hvorfor denne må være med. */
+const PHOTON_AUDIENCE = ISSUER;
+const TOKEN_ENDPOINT = `${ISSUER}/oauth2/token`;
+
+/**
+ * Fornyelser underveis, nøklet på refresh-tokenet som brukes.
+ *
+ * Photon roterer refresh-tokens og regner andre gangs bruk av samme token som
+ * tyveri: hele kjeden droppes og brukeren blir logget ut. To faner som lastes
+ * samtidig ville ellers kappes om det, og den andre ville sett ut som et
+ * stjålet token.
+ */
+const inFlight = new Map<string, Promise<string | null>>();
 
 export type PhotonMembership = {
 	slug: string;
@@ -51,34 +66,116 @@ type TokenResult = { ok: true; token: string } | PhotonFailure;
  * eneste vei videre er å logge inn på nytt — derav «reauth».
  */
 async function getPhotonAccessToken(): Promise<TokenResult> {
-	const requestHeaders = await headers();
-	const session = await auth.api.getSession({ headers: requestHeaders });
+	const session = await auth.api.getSession({ headers: await headers() });
 	if (!session?.user?.id) return { ok: false, reason: "no-session" };
 
-	try {
-		const tokens = await auth.api.getAccessToken({
-			body: { providerId: "photon", userId: session.user.id },
-			headers: requestHeaders,
-		});
+	const account = await db.account.findFirst({
+		where: { userId: session.user.id, providerId: "photon" },
+		select: {
+			id: true,
+			accessToken: true,
+			refreshToken: true,
+			accessTokenExpiresAt: true,
+		},
+	});
 
-		if (!tokens?.accessToken) return { ok: false, reason: "reauth" };
+	if (!account?.accessToken) return { ok: false, reason: "reauth" };
 
-		const expiresAt = tokens.accessTokenExpiresAt
-			? new Date(tokens.accessTokenExpiresAt).getTime()
-			: null;
-
-		// Et utløpt token gir 401 uansett; å stoppe her lar kalleren si «logg
-		// inn på nytt» framfor å vise en generisk feil.
-		if (expiresAt !== null && expiresAt <= Date.now()) {
-			return { ok: false, reason: "reauth" };
-		}
-
-		return { ok: true, token: tokens.accessToken };
-	} catch {
-		// Kastes blant annet når kontoen mangler, eller når fornyelsen ble
-		// avvist av Photon. Begge løses av en ny innlogging.
-		return { ok: false, reason: "reauth" };
+	// Fem sekunders margin: et token som utløper mens kallet er i lufta er like
+	// ubrukelig som et utløpt et.
+	const expiresAt = account.accessTokenExpiresAt?.getTime() ?? null;
+	if (expiresAt === null || expiresAt - Date.now() > 5000) {
+		return { ok: true, token: account.accessToken };
 	}
+
+	// Brukere som sist logget inn før `offline_access` kom på plass, har ikke
+	// noe refresh-token. Eneste vei videre er en ny innlogging.
+	if (!account.refreshToken) return { ok: false, reason: "reauth" };
+
+	const refreshed = await refreshPhotonToken(account.id, account.refreshToken);
+	if (!refreshed) return { ok: false, reason: "reauth" };
+
+	return { ok: true, token: refreshed };
+}
+
+/**
+ * Veksler refresh-tokenet inn i et nytt access-token, og lagrer begge.
+ *
+ * Gjøres for hånd fordi better-auth sin `genericOAuth` ikke sender
+ * `tokenUrlParams` videre ved fornyelse. Uten `resource` her ville Photon svart
+ * med et opakt token, og alle kall mot API-et deres ville gitt 401 — samme felle
+ * som ved innlogging, bare en time forsinket.
+ */
+async function refreshPhotonToken(
+	accountId: string,
+	refreshToken: string,
+): Promise<string | null> {
+	const existing = inFlight.get(refreshToken);
+	if (existing) return existing;
+
+	const request = performRefresh(accountId, refreshToken).finally(() => {
+		inFlight.delete(refreshToken);
+	});
+
+	inFlight.set(refreshToken, request);
+	return request;
+}
+
+async function performRefresh(
+	accountId: string,
+	refreshToken: string,
+): Promise<string | null> {
+	const clientId = env.PHOTON_CLIENT_ID;
+	const clientSecret = env.PHOTON_CLIENT_SECRET;
+	if (!clientId || !clientSecret) return null;
+
+	let response: Response;
+	try {
+		response = await fetch(TOKEN_ENDPOINT, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/x-www-form-urlencoded",
+				Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString("base64")}`,
+			},
+			body: new URLSearchParams({
+				grant_type: "refresh_token",
+				refresh_token: refreshToken,
+				client_id: clientId,
+				// Audiencen avgjøres per utstedelse, så den må sendes på nytt
+				// her — en fornyelse uten den gir et opakt token tilbake.
+				resource: PHOTON_AUDIENCE,
+			}),
+			cache: "no-store",
+			signal: AbortSignal.timeout(PHOTON_TIMEOUT_MS),
+		});
+	} catch {
+		return null;
+	}
+
+	if (!response.ok) return null;
+
+	const data = (await response.json()) as {
+		access_token?: string;
+		refresh_token?: string;
+		expires_in?: number;
+	};
+
+	if (!data.access_token) return null;
+
+	await db.account.update({
+		where: { id: accountId },
+		data: {
+			accessToken: data.access_token,
+			// Photon roterer refresh-tokenet. Faller vi tilbake på det gamle,
+			// er det brukt opp, og neste fornyelse ville sett ut som tyveri.
+			refreshToken: data.refresh_token ?? refreshToken,
+			accessTokenExpiresAt: data.expires_in
+				? new Date(Date.now() + data.expires_in * 1000)
+				: null,
+		},
+	});
+
+	return data.access_token;
 }
 
 /**

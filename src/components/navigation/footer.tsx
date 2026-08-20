@@ -5,7 +5,7 @@ import TihldeLogo from "../logo";
 
 const Footer = () => {
 	const attributes = [
-		{ id: "email", key: "E-post", value: "hs@tihlde.org" },
+		{ id: "email", key: "E-post", value: "idkom@tihlde.org" },
 		{ id: "orgNumber", key: "Organisasjonsnummer", value: "989 684 183" },
 		{ id: "location", key: "Lokasjon", value: "c/o IDI NTNU" },
 	];

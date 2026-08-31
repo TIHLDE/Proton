@@ -8,15 +8,9 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "~/components/ui/select";
+import { eventTypeOptions } from "~/lib/event-presentation";
 
 const ALL = "alle";
-
-const eventTypeOptions = [
-	{ value: "TRAINING", label: "Trening" },
-	{ value: "MATCH", label: "Kamp" },
-	{ value: "SOCIAL", label: "Sosialt" },
-	{ value: "OTHER", label: "Annet" },
-];
 
 interface StatisticsFiltersProps {
 	seasons: { id: string; label: string }[];
@@ -50,8 +44,12 @@ export default function StatisticsFilters({
 	return (
 		<div className="grid gap-3 sm:grid-cols-3">
 			<Select
+				items={seasons.map((season) => ({
+					value: season.id,
+					label: season.label,
+				}))}
 				value={seasonId}
-				onValueChange={(value) => setFilter("sesong", value)}
+				onValueChange={(value) => value !== null && setFilter("sesong", value)}
 			>
 				<SelectTrigger className="w-full" aria-label="Sesong">
 					<SelectValue placeholder="Sesong" />
@@ -67,8 +65,17 @@ export default function StatisticsFilters({
 
 			{groups.length > 0 && (
 				<Select
+					items={[
+						{ value: ALL, label: "Hele laget" },
+						...groups.map((group) => ({
+							value: group.id,
+							label: group.name,
+						})),
+					]}
 					value={groupId ?? ALL}
-					onValueChange={(value) => setFilter("gruppe", value)}
+					onValueChange={(value) =>
+						value !== null && setFilter("gruppe", value)
+					}
 				>
 					<SelectTrigger className="w-full" aria-label="Undergruppe">
 						<SelectValue placeholder="Undergruppe" />
@@ -85,8 +92,9 @@ export default function StatisticsFilters({
 			)}
 
 			<Select
+				items={[{ value: ALL, label: "Alle typer" }, ...eventTypeOptions]}
 				value={eventType ?? ALL}
-				onValueChange={(value) => setFilter("type", value)}
+				onValueChange={(value) => value !== null && setFilter("type", value)}
 			>
 				<SelectTrigger className="w-full" aria-label="Type arrangement">
 					<SelectValue placeholder="Type" />

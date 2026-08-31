@@ -86,12 +86,16 @@ export default async function TeamStatistikkPage({
 	return (
 		<div className="mx-auto min-h-screen w-full max-w-7xl space-y-12 px-2 py-24 md:space-y-20 md:py-32 lg:px-12">
 			<div className="space-y-4">
-				<Button asChild variant="ghost" size="sm">
-					<Link href={`/lag/${id}`}>
-						<ArrowLeft />
-						Tilbake til {team.name}
-					</Link>
-				</Button>
+				<Button
+					variant="ghost"
+					size="sm"
+					render={
+						<Link href={`/lag/${id}`}>
+							<ArrowLeft />
+							Tilbake til {team.name}
+						</Link>
+					}
+				/>
 				<H1>Statistikk - {team.name}</H1>
 			</div>
 

@@ -109,13 +109,13 @@ export default function AttendanceStats({
 	const chartData = stats.slice(0, 10).map((stat, index) => ({
 		name: stat.userName,
 		attendedCount: stat.attendedCount,
-		fill: index === 0 ? "hsl(var(--chart-1))" : "hsl(var(--chart-2))",
+		fill: index === 0 ? "var(--chart-1)" : "var(--chart-2)",
 	}));
 
 	const chartConfig = {
 		attendedCount: {
 			label: "Arrangementer",
-			color: "hsl(var(--chart-1))",
+			color: "var(--chart-1)",
 		},
 	} satisfies ChartConfig;
 

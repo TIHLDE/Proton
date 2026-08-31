@@ -58,12 +58,16 @@ export default function MainSidebarGroup() {
 				<SidebarMenu className="space-y-2">
 					{applicationItems.map((item: SidebarItem) => (
 						<SidebarMenuItem key={item.title}>
-							<SidebarMenuButton asChild isActive={isActive(item)} size="lg">
-								<Link onClick={handleSidebar} href={item.url}>
-									<item.icon className="h-4 w-4" />
-									<span>{item.title}</span>
-								</Link>
-							</SidebarMenuButton>
+							<SidebarMenuButton
+								isActive={isActive(item)}
+								size="lg"
+								render={
+									<Link onClick={handleSidebar} href={item.url}>
+										<item.icon className="h-4 w-4" />
+										<span>{item.title}</span>
+									</Link>
+								}
+							/>
 						</SidebarMenuItem>
 					))}
 				</SidebarMenu>

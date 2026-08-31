@@ -1,16 +1,20 @@
-import { Slot } from "@radix-ui/react-slot";
+"use client";
+
+import { Button as ButtonPrimitive } from "@base-ui/react/button";
+import { mergeProps } from "@base-ui/react/merge-props";
+import { useRender } from "@base-ui/react/use-render";
 import { type VariantProps, cva } from "class-variance-authority";
-import type * as React from "react";
+import { isValidElement } from "react";
 
 import { cn } from "~/lib/utils";
 
 const buttonVariants = cva(
-	// Trykk-tilstanden kombinerer et 1px fall med 0.97 i skala: dyttet alene er
-	// lett å overse, og det er skalaen som faktisk leses som «knappen hørte
-	// deg». Begge hoppes over på triggere for popups (aria-haspopup) — de står
-	// visuelt trykket så lenge menyen er åpen, så å animere trykket der ville
-	// slåss med åpen-tilstanden. `translate` og `scale` er egne CSS-properties
-	// i Tailwind v4, så de to komponerer i stedet for å overskrive hverandre.
+	// The press state pairs a 1px drop with a 0.97 scale: the nudge alone is
+	// easy to miss, and the scale is what actually reads as "the button heard
+	// you". Both are skipped on popup triggers (aria-haspopup) — those stay
+	// visually pressed for as long as their menu is open, so animating the
+	// press there fights the open state. `translate` and `scale` are separate
+	// CSS properties in Tailwind v4, so the two compose instead of clobbering.
 	"group/button inline-flex max-w-full shrink-0 cursor-pointer select-none items-center justify-center whitespace-nowrap rounded-lg border border-transparent bg-clip-padding font-medium text-sm outline-none transition-[color,background-color,border-color,box-shadow,translate,scale] duration-150 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:not-aria-[haspopup]:translate-y-px active:not-aria-[haspopup]:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
 	{
 		variants: {
@@ -47,25 +51,80 @@ const buttonVariants = cva(
 	},
 );
 
+type ButtonProps = ButtonPrimitive.Props & VariantProps<typeof buttonVariants>;
+
 function Button({
 	className,
-	variant,
-	size,
-	asChild = false,
+	variant = "default",
+	size = "default",
+	nativeButton,
+	render,
 	...props
-}: React.ComponentProps<"button"> &
-	VariantProps<typeof buttonVariants> & {
-		asChild?: boolean;
-	}) {
-	const Comp = asChild ? Slot : "button";
+}: ButtonProps) {
+	const classNames = cn(buttonVariants({ variant, size, className }));
+
+	// Base UI is explicit that links "have their own semantics and should not
+	// be rendered as buttons through the `render` prop": routed through
+	// ButtonPrimitive they either warn (`nativeButton` defaults to true, and
+	// the element turns out not to be a `<button>`) or get `role="button"`
+	// slapped on, which hides the link from screen readers. So a link only
+	// borrows the styling — the anchor keeps its own semantics.
+	if (isLinkRender(render)) {
+		return <ButtonLink {...props} className={classNames} render={render} />;
+	}
 
 	return (
-		<Comp
+		<ButtonPrimitive
 			data-slot="button"
-			className={cn(buttonVariants({ variant, size, className }))}
+			className={classNames}
+			render={render}
+			// Any other non-`<button>` render element (a `<div>`, a `<span>`)
+			// does want Base UI's button semantics — it just has to say so, or
+			// Base UI warns. Infer it instead of asking every call site; an
+			// explicit prop still wins, and a render *function* is opaque here
+			// so it keeps the native default.
+			nativeButton={nativeButton ?? isNativeButtonRender(render)}
 			{...props}
 		/>
 	);
+}
+
+function ButtonLink({
+	className,
+	render,
+	...props
+}: Omit<ButtonProps, "nativeButton" | "variant" | "size" | "className"> & {
+	className?: string;
+}) {
+	return useRender({
+		defaultTagName: "a",
+		render: render as useRender.ComponentProps<"a">["render"],
+		props: mergeProps<"a">(
+			{ className },
+			props as useRender.ComponentProps<"a">,
+		),
+		state: { slot: "button" },
+	});
+}
+
+function isLinkRender(render: ButtonProps["render"]) {
+	if (!isValidElement<{ href?: unknown; to?: unknown }>(render)) {
+		return false;
+	}
+
+	// `<a href>` and TanStack Router's `<Link to>` — the two ways this codebase
+	// renders a button that navigates. A destination is what makes it a link:
+	// an `<a>` without one is just a clickable element, and does want Base UI's
+	// button semantics (`role="button"`, keyboard activation).
+	return render.props.href !== undefined || render.props.to !== undefined;
+}
+
+function isNativeButtonRender(render: ButtonProps["render"]) {
+	if (isValidElement(render)) {
+		return render.type === "button";
+	}
+
+	return true;
 }
 
 export { Button, buttonVariants };

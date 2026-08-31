@@ -53,6 +53,8 @@
 	--sidebar-accent-foreground: oklch(0.205 0 0);
 	--sidebar-border: oklch(0.922 0 0);
 	--sidebar-ring: var(--logo);
+	/* Flaten et autofylt felt males med; se autofyll-regelen nederst i fila. */
+	--input-autofill: var(--card);
 }
 
 .dark {
@@ -103,6 +105,8 @@
 	--sidebar-accent-foreground: #f5f7f9;
 	--sidebar-border: #0d3172;
 	--sidebar-ring: #1b61e4;
+	/* Speiler `dark:bg-input/30` lagt over --card. */
+	--input-autofill: color-mix(in oklab, var(--input) 30%, var(--card));
 	/* Mot den mørke navy-bakgrunnen holder logoen seg lys for kontrast */
 	--logo: var(--foreground);
 }
@@ -291,6 +295,33 @@
 	* {
 		@apply border-border outline-ring/50;
 	}
+
+	/* Musepekeren skal si at noe er klikkbart. Tailwind v4 fjernet nettleserens
+	 * gamle `cursor: pointer` på knapper, så uten denne står markøren som en
+	 * pil over knapper, brytere, avkryssingsbokser, menyvalg og faner — og
+	 * hvert komponent måtte hatt sin egen `cursor-pointer`-klasse.
+	 *
+	 * Ligger i base-laget, så en `cursor-*`-verktøyklasse i en komponent
+	 * overstyrer den som før. Avslått tilstand kommer sist og vinner. */
+	button,
+	summary,
+	label[for],
+	[role="button"],
+	[role="tab"],
+	[role="switch"],
+	[role="checkbox"],
+	[role="radio"],
+	[role="option"],
+	[role="menuitem"],
+	[role="menuitemcheckbox"],
+	[role="menuitemradio"] {
+		cursor: pointer;
+	}
+	:disabled,
+	[aria-disabled="true"],
+	[data-disabled]:not([data-disabled="false"]) {
+		cursor: default;
+	}
 	body {
 		background-color: var(--background);
 		color: var(--foreground);
@@ -336,4 +367,45 @@
 		animation-delay: 0ms !important;
 		transition-delay: 0ms !important;
 	}
+}
+
+/* Autofyll: Chrome maler sin egen bakgrunn på utfylte felt, og i mørk modus er
+   den en lys blåtone som ikke ligner noe annet i grensesnittet. Den eneste
+   måten å overstyre den på er en `inset box-shadow` som dekker hele feltet.
+
+   Regelen må ligge her, utenfor `@layer`, og ikke som en `autofill:`-utility på
+   selve inputen: fokusringen er også en box-shadow, og med lik spesifisitet
+   vinner `focus-visible:ring-3` over autofyll-skyggen — da blir feltet blått i
+   det øyeblikket det får fokus. Ulagd CSS slår alle lag, og vi tar med
+   ring-variablene selv så ringen fortsatt tegnes.
+
+   De to blokkene under er med vilje like. `:autofill` er den standardiserte
+   formen og `:-webkit-autofill` den gamle, og en nettleser som ikke kjenner
+   selektoren forkaster HELE regelen den står i — ikke bare den ene selektoren. */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+	box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000),
+		var(--tw-ring-shadow, 0 0 #0000), 0 0 0 1000px var(--input-autofill) inset;
+	-webkit-text-fill-color: var(--foreground);
+	caret-color: var(--foreground);
+	/* Chrome animerer bakgrunnen tilbake til sin egen etter autofyll; en
+	   absurd lang transition parkerer den på vår. */
+	transition: background-color 99999s ease-in-out 0s;
+}
+
+input:autofill,
+input:autofill:hover,
+input:autofill:focus,
+input:autofill:active,
+textarea:autofill,
+select:autofill {
+	box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000),
+		var(--tw-ring-shadow, 0 0 #0000), 0 0 0 1000px var(--input-autofill) inset;
+	-webkit-text-fill-color: var(--foreground);
+	caret-color: var(--foreground);
+	transition: background-color 99999s ease-in-out 0s;
 }

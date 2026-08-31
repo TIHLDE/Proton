@@ -1,16 +1,19 @@
 "use client";
 
-import { Loader2, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { authClient } from "~/lib/auth-client";
 
-export default function Logout() {
+// Bare handlingen, ingen markup. Base UIs menyvalg er ikke en <button>, så en
+// utloggingsknapp kan ikke lenger sendes inn som `render` — den ville gitt
+// menyvalget dobbelt sett med semantikk. I stedet lar vi DropdownMenuItem
+// være hele UI-et og henter oppførselen herfra.
+export function useLogout() {
 	const [isPending, startTransition] = useTransition();
 	const router = useRouter();
 
-	const onLogout = async () => {
+	const logout = () => {
 		startTransition(async () => {
 			try {
 				const res = await authClient.signOut();
@@ -29,19 +32,5 @@ export default function Logout() {
 		});
 	};
 
-	return (
-		<button
-			type="button"
-			onClick={onLogout}
-			disabled={isPending}
-			className="data-[variant=destructive]:*:[svg]:!text-destructive relative flex w-full cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[inset]:pl-8 data-[variant=destructive]:text-destructive data-[disabled]:opacity-50 data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive dark:data-[variant=destructive]:focus:bg-destructive/20 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0"
-		>
-			{isPending ? (
-				<Loader2 className="h-5! w-5! animate-spin" />
-			) : (
-				<LogOut className="h-5! w-5!" />
-			)}
-			Logg ut
-		</button>
-	);
+	return { logout, isPending };
 }

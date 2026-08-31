@@ -1,6 +1,6 @@
 "use client";
 
-import * as AvatarPrimitive from "@radix-ui/react-avatar";
+import { Avatar as AvatarPrimitive } from "@base-ui/react/avatar";
 import type * as React from "react";
 
 import { cn } from "~/lib/utils";
@@ -9,7 +9,7 @@ function Avatar({
 	className,
 	size = "default",
 	...props
-}: React.ComponentProps<typeof AvatarPrimitive.Root> & {
+}: AvatarPrimitive.Root.Props & {
 	size?: "default" | "sm" | "lg";
 }) {
 	return (
@@ -17,9 +17,6 @@ function Avatar({
 			data-slot="avatar"
 			data-size={size}
 			className={cn(
-				// Omrisset ligger som et `after`-lag med blend-mode i stedet for
-				// en border, så det mørkner kanten på et lyst bilde uten å legge
-				// en synlig ring rundt et mørkt et.
 				"group/avatar relative flex size-8 shrink-0 select-none rounded-full after:absolute after:inset-0 after:rounded-full after:border after:border-border after:mix-blend-darken data-[size=lg]:size-10 data-[size=sm]:size-6 dark:after:mix-blend-lighten",
 				className,
 			)}
@@ -28,10 +25,7 @@ function Avatar({
 	);
 }
 
-function AvatarImage({
-	className,
-	...props
-}: React.ComponentProps<typeof AvatarPrimitive.Image>) {
+function AvatarImage({ className, ...props }: AvatarPrimitive.Image.Props) {
 	return (
 		<AvatarPrimitive.Image
 			data-slot="avatar-image"
@@ -47,7 +41,7 @@ function AvatarImage({
 function AvatarFallback({
 	className,
 	...props
-}: React.ComponentProps<typeof AvatarPrimitive.Fallback>) {
+}: AvatarPrimitive.Fallback.Props) {
 	return (
 		<AvatarPrimitive.Fallback
 			data-slot="avatar-fallback"

@@ -41,12 +41,14 @@ export default function DeleteGroup({
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
-			<DialogTrigger asChild>
-				<Button variant="ghost" size="sm">
-					<Trash2 />
-					Slett
-				</Button>
-			</DialogTrigger>
+			<DialogTrigger
+				render={
+					<Button variant="ghost" size="sm">
+						<Trash2 />
+						Slett
+					</Button>
+				}
+			/>
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>Slett {name}</DialogTitle>
@@ -71,11 +73,13 @@ export default function DeleteGroup({
 					>
 						Slett undergruppe
 					</Button>
-					<DialogClose asChild>
-						<Button type="button" variant="ghost">
-							Avbryt
-						</Button>
-					</DialogClose>
+					<DialogClose
+						render={
+							<Button type="button" variant="ghost">
+								Avbryt
+							</Button>
+						}
+					/>
 				</div>
 			</DialogContent>
 		</Dialog>

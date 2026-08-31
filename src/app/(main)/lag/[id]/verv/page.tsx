@@ -60,12 +60,16 @@ export default async function TeamVervPage({ params }: TeamVervPageProps) {
 		<div className="mx-auto min-h-screen w-full max-w-7xl space-y-12 px-2 py-24 md:space-y-20 md:py-32 lg:px-12">
 			<div className="space-y-4 md:flex md:items-center md:justify-between md:space-y-0">
 				<div className="space-y-4">
-					<Button asChild variant="ghost" size="sm">
-						<Link href={`/lag/${id}`}>
-							<ArrowLeft />
-							Tilbake til {team.name}
-						</Link>
-					</Button>
+					<Button
+						variant="ghost"
+						size="sm"
+						render={
+							<Link href={`/lag/${id}`}>
+								<ArrowLeft />
+								Tilbake til {team.name}
+							</Link>
+						}
+					/>
 					<H1>Vervhistorikk</H1>
 					<P>Hvem som har hatt hvilket verv, nå og tidligere.</P>
 				</div>

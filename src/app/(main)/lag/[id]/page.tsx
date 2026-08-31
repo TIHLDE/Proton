@@ -68,37 +68,51 @@ export default async function TeamPage({
 					{(roles.includes("ADMIN") ||
 						roles.includes("SUBADMIN") ||
 						session.user.isAdmin) && (
-						<Button asChild>
-							<Link href={`/lag/${team.id}/admin`}>
-								Administrer arrangementer
-								<ArrowRight />
-							</Link>
-						</Button>
+						<Button
+							render={
+								<Link href={`/lag/${team.id}/admin`}>
+									Administrer arrangementer
+									<ArrowRight />
+								</Link>
+							}
+						/>
 					)}
-					<Button asChild variant="outline">
-						<Link href={`/lag/${team.id}/medlemmer`}>
-							<UsersRound />
-							Medlemmer
-						</Link>
-					</Button>
-					<Button asChild variant="outline">
-						<Link href={`/lag/${team.id}/undergrupper`}>
-							<Layers />
-							Undergrupper
-						</Link>
-					</Button>
-					<Button asChild variant="outline">
-						<Link href={`/lag/${team.id}/verv`}>
-							<ScrollText />
-							Verv
-						</Link>
-					</Button>
-					<Button asChild variant="outline">
-						<Link href={`/lag/${team.id}/statistikk`}>
-							<BarChart3 />
-							Statistikk
-						</Link>
-					</Button>
+					<Button
+						variant="outline"
+						render={
+							<Link href={`/lag/${team.id}/medlemmer`}>
+								<UsersRound />
+								Medlemmer
+							</Link>
+						}
+					/>
+					<Button
+						variant="outline"
+						render={
+							<Link href={`/lag/${team.id}/undergrupper`}>
+								<Layers />
+								Undergrupper
+							</Link>
+						}
+					/>
+					<Button
+						variant="outline"
+						render={
+							<Link href={`/lag/${team.id}/verv`}>
+								<ScrollText />
+								Verv
+							</Link>
+						}
+					/>
+					<Button
+						variant="outline"
+						render={
+							<Link href={`/lag/${team.id}/statistikk`}>
+								<BarChart3 />
+								Statistikk
+							</Link>
+						}
+					/>
 				</div>
 			</div>
 

@@ -50,12 +50,14 @@ export default function CreateTeam() {
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
-			<DialogTrigger asChild>
-				<Button>
-					<Plus />
-					Opprett lag
-				</Button>
-			</DialogTrigger>
+			<DialogTrigger
+				render={
+					<Button>
+						<Plus />
+						Opprett lag
+					</Button>
+				}
+			/>
 			<DialogContent className="md:max-w-md">
 				<div className="mb-4 flex flex-col items-center gap-2">
 					<div

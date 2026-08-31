@@ -47,12 +47,14 @@ export default function ManagePositions({
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
-			<DialogTrigger asChild>
-				<Button variant="outline">
-					<Settings2 />
-					Verv
-				</Button>
-			</DialogTrigger>
+			<DialogTrigger
+				render={
+					<Button variant="outline">
+						<Settings2 />
+						Verv
+					</Button>
+				}
+			/>
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>Vervene i laget</DialogTitle>
@@ -105,11 +107,13 @@ export default function ManagePositions({
 					</div>
 				</div>
 
-				<DialogClose asChild>
-					<Button type="button" variant="ghost">
-						Lukk
-					</Button>
-				</DialogClose>
+				<DialogClose
+					render={
+						<Button type="button" variant="ghost">
+							Lukk
+						</Button>
+					}
+				/>
 			</DialogContent>
 		</Dialog>
 	);

@@ -44,12 +44,15 @@ export default async function EventsAdminPage({ params }: EventPageProps) {
 				<div>
 					<H1>Arrangementer</H1>
 					<P>Her kan du administrere alle arrangementene for laget</P>
-					<Button asChild variant="link">
-						<Link href={`/lag/${id}`}>
-							<ArrowLeft />
-							Tilbake
-						</Link>
-					</Button>
+					<Button
+						variant="link"
+						render={
+							<Link href={`/lag/${id}`}>
+								<ArrowLeft />
+								Tilbake
+							</Link>
+						}
+					/>
 				</div>
 
 				<CreateEvent teamId={id} />

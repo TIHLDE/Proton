@@ -198,6 +198,10 @@ export default function MatchStats({
 								<Label>Ny hendelse</Label>
 								<div className="flex flex-col gap-2 sm:flex-row">
 									<Select
+										items={matchEventOrder.map((eventType) => ({
+											value: eventType,
+											label: getMatchEventLabel(eventType),
+										}))}
 										value={type}
 										onValueChange={(value) => setType(value as MatchEventType)}
 									>
@@ -213,7 +217,16 @@ export default function MatchStats({
 										</SelectContent>
 									</Select>
 
-									<Select value={userId} onValueChange={setUserId}>
+									<Select
+										items={players.map((player) => ({
+											value: player.id,
+											label: player.name,
+										}))}
+										value={userId}
+										onValueChange={(value) =>
+											value !== null && setUserId(value)
+										}
+									>
 										<SelectTrigger className="flex-1">
 											<SelectValue placeholder="Velg spiller" />
 										</SelectTrigger>

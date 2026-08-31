@@ -80,19 +80,21 @@ export default function PeriodDialog({ teamId, period }: PeriodDialogProps) {
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
-			<DialogTrigger asChild>
-				{period ? (
-					<Button variant="ghost" size="sm">
-						<Pencil />
-						Endre
-					</Button>
-				) : (
-					<Button>
-						<Plus />
-						Ny periode
-					</Button>
-				)}
-			</DialogTrigger>
+			<DialogTrigger
+				render={
+					period ? (
+						<Button variant="ghost" size="sm">
+							<Pencil />
+							Endre
+						</Button>
+					) : (
+						<Button>
+							<Plus />
+							Ny periode
+						</Button>
+					)
+				}
+			/>
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>{period ? "Endre periode" : "Ny periode"}</DialogTitle>
@@ -138,11 +140,13 @@ export default function PeriodDialog({ teamId, period }: PeriodDialogProps) {
 					<Button disabled={isCreating || isUpdating} onClick={submit}>
 						{period ? "Lagre" : "Opprett"}
 					</Button>
-					<DialogClose asChild>
-						<Button type="button" variant="ghost">
-							Avbryt
-						</Button>
-					</DialogClose>
+					<DialogClose
+						render={
+							<Button type="button" variant="ghost">
+								Avbryt
+							</Button>
+						}
+					/>
 				</div>
 			</DialogContent>
 		</Dialog>

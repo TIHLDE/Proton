@@ -50,12 +50,14 @@ export function CalendarSubscribeDialog() {
 
 	return (
 		<Dialog>
-			<DialogTrigger asChild>
-				<Button variant="outline" size="sm" className="gap-2">
-					<CalendarDays size={16} />
-					Abonner på kalender
-				</Button>
-			</DialogTrigger>
+			<DialogTrigger
+				render={
+					<Button variant="outline" size="sm" className="gap-2">
+						<CalendarDays size={16} />
+						Abonner på kalender
+					</Button>
+				}
+			/>
 			<DialogContent className="max-w-md">
 				<DialogHeader>
 					<DialogTitle>Abonner på kalender</DialogTitle>

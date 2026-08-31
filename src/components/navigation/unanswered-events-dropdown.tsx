@@ -33,21 +33,23 @@ export default function UnansweredEventsDropdown() {
 	return (
 		<>
 			<DropdownMenu>
-				<DropdownMenuTrigger asChild>
-					<Button
-						size="icon"
-						variant="ghost"
-						className="relative h-8 w-8 sm:h-10 sm:w-10"
-					>
-						<ListChecks className="h-[1rem] w-[1rem] sm:h-[1.2rem] sm:w-[1.2rem]" />
-						{unansweredCount > 0 && (
-							<span className="absolute top-0 right-0 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] text-white">
-								{unansweredCount > 9 ? "9+" : unansweredCount}
-							</span>
-						)}
-						<span className="sr-only">Ubesvarte events</span>
-					</Button>
-				</DropdownMenuTrigger>
+				<DropdownMenuTrigger
+					render={
+						<Button
+							size="icon"
+							variant="ghost"
+							className="relative h-8 w-8 sm:h-10 sm:w-10"
+						>
+							<ListChecks className="h-[1rem] w-[1rem] sm:h-[1.2rem] sm:w-[1.2rem]" />
+							{unansweredCount > 0 && (
+								<span className="absolute top-0 right-0 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] text-white">
+									{unansweredCount > 9 ? "9+" : unansweredCount}
+								</span>
+							)}
+							<span className="sr-only">Ubesvarte events</span>
+						</Button>
+					}
+				/>
 				<DropdownMenuContent align="end" className="w-80">
 					<DropdownMenuLabel>Ubesvarte events</DropdownMenuLabel>
 					<DropdownMenuSeparator />

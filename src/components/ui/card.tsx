@@ -1,27 +1,31 @@
+"use client";
+
+import { useRender } from "@base-ui/react/use-render";
 import type * as React from "react";
 
 import { cn } from "~/lib/utils";
 
 type CardProps = React.ComponentProps<"div"> & {
 	size?: "default" | "sm";
+	render?: useRender.RenderProp;
 };
 
-function Card({ className, size = "default", ...props }: CardProps) {
-	return (
-		<div
-			data-slot="card"
-			data-size={size}
-			className={cn(
-				// `card-media` får samme flush-mot-kanten-behandling som en bar
-				// `img`, så et cover og plassholderen dens ligger på linje i
-				// stedet for at plassholderen sitter inntrukket under en stripe
-				// av kortet.
+function Card({ className, size = "default", render, ...props }: CardProps) {
+	return useRender({
+		render: render ?? <div />,
+		props: {
+			"data-slot": "card",
+			"data-size": size,
+			className: cn(
+				// `card-media` gets the same flush-to-the-edge treatment as a
+				// bare `img`, so a cover and its placeholder line up instead of
+				// the placeholder sitting inset below a strip of card.
 				"group/card flex flex-col gap-4 overflow-hidden rounded-xl bg-card py-4 text-card-foreground text-sm ring-1 ring-card-border has-[>[data-slot=card-media]:first-child]:pt-0 has-[>img:first-child]:pt-0 has-data-[slot=card-footer]:pb-0 data-[size=sm]:gap-3 data-[size=sm]:py-3 data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[[data-slot=card-media]:first-child]:rounded-t-xl *:[[data-slot=card-media]:last-child]:rounded-b-xl *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl",
 				className,
-			)}
-			{...props}
-		/>
-	);
+			),
+			...props,
+		},
+	});
 }
 
 function CardHeader({ className, ...props }: React.ComponentProps<"div">) {

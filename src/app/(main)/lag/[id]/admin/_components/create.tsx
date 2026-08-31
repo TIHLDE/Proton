@@ -36,6 +36,7 @@ import {
 } from "~/components/ui/select";
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
+import { eventTypeOptions } from "~/lib/event-presentation";
 import { CreateEventInputSchema } from "~/schemas";
 import { api } from "~/trpc/react";
 import GroupPicker from "./group-picker";
@@ -80,12 +81,14 @@ export default function CreateEvent({ teamId }: CreateEventProps) {
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
-			<DialogTrigger asChild>
-				<Button>
-					<Plus />
-					Nytt arrangement
-				</Button>
-			</DialogTrigger>
+			<DialogTrigger
+				render={
+					<Button>
+						<Plus />
+						Nytt arrangement
+					</Button>
+				}
+			/>
 			<DialogContent className="sm:max-w-[425px] md:w-full md:max-w-xl">
 				<DialogHeader>
 					<DialogTitle>Opprett nytt arrangement</DialogTitle>
@@ -173,6 +176,7 @@ export default function CreateEvent({ teamId }: CreateEventProps) {
 									<FormItem>
 										<FormLabel>Type</FormLabel>
 										<Select
+											items={eventTypeOptions}
 											onValueChange={field.onChange}
 											defaultValue={field.value}
 										>
@@ -182,10 +186,11 @@ export default function CreateEvent({ teamId }: CreateEventProps) {
 												</SelectTrigger>
 											</FormControl>
 											<SelectContent>
-												<SelectItem value="TRAINING">Trening</SelectItem>
-												<SelectItem value="MATCH">Kamp</SelectItem>
-												<SelectItem value="SOCIAL">Sosialt</SelectItem>
-												<SelectItem value="OTHER">Annet</SelectItem>
+												{eventTypeOptions.map((option) => (
+													<SelectItem key={option.value} value={option.value}>
+														{option.label}
+													</SelectItem>
+												))}
 											</SelectContent>
 										</Select>
 										<FormMessage />

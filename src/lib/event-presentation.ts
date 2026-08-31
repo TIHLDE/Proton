@@ -31,6 +31,13 @@ const eventTypePresentation: Record<
 	},
 };
 
+// Base UIs SelectValue viser den rå verdien med mindre <Select> får `items`
+// med etiketter. Lista bor her, sammen med etikettene den bruker, så den ikke
+// driver fra hverandre i de tre skjemaene som trenger den.
+export const eventTypeOptions: { value: TeamEventType; label: string }[] = (
+	Object.keys(eventTypePresentation) as TeamEventType[]
+).map((type) => ({ value: type, label: eventTypePresentation[type].label }));
+
 export type AttendanceStatusFilter =
 	| "attending"
 	| "notAttending"

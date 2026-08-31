@@ -79,11 +79,13 @@ export default function EditTeam({ team }: EditTeamProps) {
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
-			<DialogTrigger asChild>
-				<Button size="sm" variant="outline">
-					<Pencil className="h-4 w-4" />
-				</Button>
-			</DialogTrigger>
+			<DialogTrigger
+				render={
+					<Button size="sm" variant="outline">
+						<Pencil className="h-4 w-4" />
+					</Button>
+				}
+			/>
 			<DialogContent className="md:max-w-md">
 				<div className="mb-4 flex flex-col items-center gap-2">
 					<div
@@ -130,9 +132,9 @@ export default function EditTeam({ team }: EditTeamProps) {
 							</div>
 
 							<Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-								<DialogTrigger asChild>
-									<Button variant="destructive">Slett lag</Button>
-								</DialogTrigger>
+								<DialogTrigger
+									render={<Button variant="destructive">Slett lag</Button>}
+								/>
 								<DialogContent className="md:max-w-sm">
 									<div className="mb-4 flex flex-col items-center gap-2">
 										<div
@@ -164,15 +166,17 @@ export default function EditTeam({ team }: EditTeamProps) {
 											/>
 										</div>
 										<DialogFooter>
-											<DialogClose asChild>
-												<Button
-													type="button"
-													variant="outline"
-													className="flex-1"
-												>
-													Avbryt
-												</Button>
-											</DialogClose>
+											<DialogClose
+												render={
+													<Button
+														type="button"
+														variant="outline"
+														className="flex-1"
+													>
+														Avbryt
+													</Button>
+												}
+											/>
 											<Button
 												type="button"
 												variant="destructive"

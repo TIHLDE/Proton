@@ -55,12 +55,15 @@ export default async function TeamsOverviewPage() {
 							</div>
 
 							<div className="flex justify-end">
-								<Button asChild variant="link">
-									<Link href={`/lag/${team.id}`}>
-										Gå til lag
-										<ArrowRight className="size-4" />
-									</Link>
-								</Button>
+								<Button
+									variant="link"
+									render={
+										<Link href={`/lag/${team.id}`}>
+											Gå til lag
+											<ArrowRight className="size-4" />
+										</Link>
+									}
+								/>
 							</div>
 						</div>
 					))}

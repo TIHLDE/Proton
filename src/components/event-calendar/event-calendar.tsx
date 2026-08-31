@@ -315,35 +315,37 @@ export function EventCalendar({
 					</div>
 					<div className="flex items-center gap-2">
 						<DropdownMenu>
-							<DropdownMenuTrigger asChild>
-								<Button variant="outline" className="gap-1.5 max-[479px]:h-8">
-									<span>
-										<span className="min-[480px]:hidden" aria-hidden="true">
-											{view === "day"
-												? "Dag"
-												: view === "week"
-													? "Uke"
-													: view === "month"
-														? "Måned"
-														: "Agenda"}
+							<DropdownMenuTrigger
+								render={
+									<Button variant="outline" className="gap-1.5 max-[479px]:h-8">
+										<span>
+											<span className="min-[480px]:hidden" aria-hidden="true">
+												{view === "day"
+													? "Dag"
+													: view === "week"
+														? "Uke"
+														: view === "month"
+															? "Måned"
+															: "Agenda"}
+											</span>
+											<span className="max-[479px]:sr-only">
+												{view === "day"
+													? "Dag"
+													: view === "week"
+														? "Uke"
+														: view === "month"
+															? "Måned"
+															: "Agenda"}
+											</span>
 										</span>
-										<span className="max-[479px]:sr-only">
-											{view === "day"
-												? "Dag"
-												: view === "week"
-													? "Uke"
-													: view === "month"
-														? "Måned"
-														: "Agenda"}
-										</span>
-									</span>
-									<ChevronDownIcon
-										className="-me-1 opacity-60"
-										size={16}
-										aria-hidden="true"
-									/>
-								</Button>
-							</DropdownMenuTrigger>
+										<ChevronDownIcon
+											className="-me-1 opacity-60"
+											size={16}
+											aria-hidden="true"
+										/>
+									</Button>
+								}
+							/>
 							<DropdownMenuContent align="end" className="min-w-32">
 								<DropdownMenuItem onClick={() => setView("month")}>
 									Måned <DropdownMenuShortcut>M</DropdownMenuShortcut>

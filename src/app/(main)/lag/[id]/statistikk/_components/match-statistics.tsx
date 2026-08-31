@@ -54,6 +54,10 @@ export default function MatchStatistics({
 						</CardDescription>
 					</div>
 					<Select
+						items={matchEventOrder.map((eventType) => ({
+							value: eventType,
+							label: getMatchEventLabel(eventType),
+						}))}
 						value={type}
 						onValueChange={(value) => setType(value as MatchEventType)}
 					>

@@ -247,8 +247,15 @@ export default function ConfirmEventAttendance({
 										<div className="flex flex-col gap-2 sm:flex-row sm:items-end">
 											<div className="min-w-0 flex-1">
 												<Select
+													items={eligibleWithoutRsvp.map((u: UserPreview) => ({
+														value: u.id,
+														label: u.name,
+													}))}
 													value={selectedWithoutRsvpUserId || undefined}
-													onValueChange={setSelectedWithoutRsvpUserId}
+													onValueChange={(value) =>
+														value !== null &&
+														setSelectedWithoutRsvpUserId(value)
+													}
 												>
 													<SelectTrigger className="w-full">
 														<SelectValue placeholder="Velg medlem" />

@@ -58,12 +58,15 @@ export default async function TeamMembersPage({
 				<div>
 					<H1>{team.name}</H1>
 					<P>Medlemmer ({membersCount})</P>
-					<Button asChild variant="link">
-						<Link href={`/lag/${id}`}>
-							<ArrowLeft />
-							Tilbake
-						</Link>
-					</Button>
+					<Button
+						variant="link"
+						render={
+							<Link href={`/lag/${id}`}>
+								<ArrowLeft />
+								Tilbake
+							</Link>
+						}
+					/>
 				</div>
 			</div>
 

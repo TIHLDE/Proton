@@ -20,16 +20,16 @@ export default function Hero() {
 						av det sosiale miljøet rundt sport og trening.
 					</p>
 					<Button
-						asChild
 						variant="default"
 						size="default"
 						className="flex items-center gap-2 px-6 py-3"
-					>
-						<Link href="/min-oversikt">
-							Se dine lag
-							<Trophy className="h-4 w-4 stroke-[1.75] sm:h-6 sm:w-6" />
-						</Link>
-					</Button>
+						render={
+							<Link href="/min-oversikt">
+								Se dine lag
+								<Trophy className="h-4 w-4 stroke-[1.75] sm:h-6 sm:w-6" />
+							</Link>
+						}
+					/>
 				</div>
 			</section>
 		</>

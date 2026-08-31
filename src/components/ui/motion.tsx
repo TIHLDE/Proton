@@ -1,62 +1,71 @@
 "use client";
 
-import { Slot } from "@radix-ui/react-slot";
+import { useRender } from "@base-ui/react/use-render";
 import type * as React from "react";
 
 import { cn } from "~/lib/utils";
 
 /**
- * Inngangsanimasjon for innhold som monteres.
+ * Entrance motion for content that mounts.
  *
- * Begge komponentene er markup-frie når du gir dem `asChild`: de rendrer *som*
- * elementet du legger inni, så å pakke en eksisterende `<ul className="grid …">`
- * endrer ingen layout og legger ingen ekstra node. Selve animasjonen bor i
- * `src/styles/globals.css` ved siden av easing-tokenene, styrt av `data-slot`
- * disse setter — det holder timingen ett sted.
+ * Both components are markup-free: they render *as* the element you pass to
+ * `render`, so dropping one around an existing `<ul className="grid …">`
+ * changes no layout and adds no wrapper node. The animation itself lives in
+ * `styles.css` next to the easing tokens, keyed off the `data-slot` these set
+ * — that keeps timing in one place and keeps consuming apps free of animation
+ * classes (see apps/kvark/CLAUDE.md, which forbids them outright).
  *
- * De kjøres på nytt hver gang elementet monteres, som er det som gjør at de
- * virker sammen med Suspense og klient-navigering: en seksjon som strømmer inn
- * sent animerer når dataene lander, ikke når dokumentet først ble parset.
+ * These re-run whenever the element mounts, which is what makes them work with
+ * Suspense and with client-side navigation: a section that streams in late
+ * animates when its data lands, not when the document first parsed.
  */
 
 type MotionProps = React.ComponentProps<"div"> & {
-	asChild?: boolean;
+	render?: useRender.RenderProp;
 };
 
 /**
- * Toner ett element opp ved montering.
+ * Fades a single element up on mount.
  *
  * ```tsx
- * <Reveal asChild>
- *   <section className="flex flex-col gap-4">…</section>
- * </Reveal>
+ * <Reveal render={<section className="flex flex-col gap-4" />}>…</Reveal>
  * ```
  *
- * Juster per bruk med `--reveal-duration` / `--reveal-distance`.
+ * Tune per instance with `--reveal-duration` / `--reveal-distance`.
  */
-function Reveal({ className, asChild = false, ...props }: MotionProps) {
-	const Comp = asChild ? Slot : "div";
-
-	return <Comp data-slot="reveal" className={cn(className)} {...props} />;
+function Reveal({ className, render, ...props }: MotionProps) {
+	return useRender({
+		render: render ?? <div />,
+		props: {
+			"data-slot": "reveal",
+			className: cn(className),
+			...props,
+		},
+	});
 }
 
 /**
- * Toner elementets direkte barn opp ved montering, hvert et hakk etter det
- * forrige. Bruk den på selve lista eller rutenettet, så barna den staggerer er
- * kortene:
+ * Fades this element's direct children up on mount, each a beat after the one
+ * before it. Use it on the list or grid itself so the children it staggers are
+ * the cards:
  *
  * ```tsx
- * <Stagger asChild>
- *   <ul className="grid gap-4 sm:grid-cols-2">…</ul>
+ * <Stagger render={<ul className="grid gap-4 sm:grid-cols-2" />}>
+ *     {items.map((item) => <li key={item.id}>…</li>)}
  * </Stagger>
  * ```
  *
- * Steget er 40 ms, med tak på 5 barn; `--reveal-step` overstyrer det.
+ * The step is 40ms, capped at 8 children; `--reveal-step` overrides it.
  */
-function Stagger({ className, asChild = false, ...props }: MotionProps) {
-	const Comp = asChild ? Slot : "div";
-
-	return <Comp data-slot="stagger" className={cn(className)} {...props} />;
+function Stagger({ className, render, ...props }: MotionProps) {
+	return useRender({
+		render: render ?? <div />,
+		props: {
+			"data-slot": "stagger",
+			className: cn(className),
+			...props,
+		},
+	});
 }
 
 export { Reveal, Stagger };

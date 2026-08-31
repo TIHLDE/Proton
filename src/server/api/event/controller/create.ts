@@ -1,6 +1,7 @@
 import type { TeamEventType, User } from "@prisma/client";
 import type z from "zod";
 import { env } from "~/env";
+import { formatDateTimeLong } from "~/lib/datetime";
 import { sendNotification } from "~/lib/notify";
 import { CreateEventInputSchema } from "~/schemas";
 import { db } from "~/server/db";
@@ -73,7 +74,7 @@ const handler: Controller<
 			},
 			{
 				type: "text",
-				content: `Dato og tid: ${input.startDatetime.toLocaleString()} - ${input.endDatetime.toLocaleString()}`,
+				content: `Dato og tid: ${formatDateTimeLong(input.startDatetime)} - ${formatDateTimeLong(input.endDatetime)}`,
 			},
 			{
 				type: "text",
@@ -93,7 +94,7 @@ const handler: Controller<
 		],
 		pushPayload: {
 			title: "Nytt arrangement opprettet",
-			body: `"${input.name}" - ${input.startDatetime.toLocaleString()}`,
+			body: `"${input.name}" - ${formatDateTimeLong(input.startDatetime)}`,
 			url: `${env.NEXT_PUBLIC_URL}/lag/${input.teamId}`,
 		},
 	});

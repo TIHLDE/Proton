@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { format } from "date-fns";
+import { nb } from "date-fns/locale";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -9,6 +9,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type { z } from "zod";
 import { Button } from "~/components/ui/button";
+import { DateTimePicker } from "~/components/ui/date-time-picker";
 import {
 	Dialog,
 	DialogContent,
@@ -36,6 +37,7 @@ import {
 } from "~/components/ui/select";
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
+import { anchorToAppZone, nowInAppZone, toAppZone } from "~/lib/datetime";
 import { eventTypeOptions } from "~/lib/event-presentation";
 import { CreateEventInputSchema } from "~/schemas";
 import { api } from "~/trpc/react";
@@ -120,19 +122,15 @@ export default function CreateEvent({ teamId }: CreateEventProps) {
 									<FormItem>
 										<FormLabel>Starttid</FormLabel>
 										<FormControl>
-											<Input
-												type="datetime-local"
-												value={
-													field.value
-														? format(field.value, "yyyy-MM-dd'T'HH:mm")
-														: ""
+											<DateTimePicker
+												value={field.value ? toAppZone(field.value) : null}
+												onValueChange={(date) =>
+													field.onChange(
+														date ? anchorToAppZone(date) : undefined,
+													)
 												}
-												onChange={(e) => {
-													if (e.target.value) {
-														field.onChange(new Date(e.target.value));
-													}
-												}}
-												min={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
+												locale={nb}
+												minDate={nowInAppZone()}
 											/>
 										</FormControl>
 										<FormMessage />
@@ -147,19 +145,15 @@ export default function CreateEvent({ teamId }: CreateEventProps) {
 									<FormItem>
 										<FormLabel>Sluttid</FormLabel>
 										<FormControl>
-											<Input
-												type="datetime-local"
-												value={
-													field.value
-														? format(field.value, "yyyy-MM-dd'T'HH:mm")
-														: ""
+											<DateTimePicker
+												value={field.value ? toAppZone(field.value) : null}
+												onValueChange={(date) =>
+													field.onChange(
+														date ? anchorToAppZone(date) : undefined,
+													)
 												}
-												onChange={(e) => {
-													if (e.target.value) {
-														field.onChange(new Date(e.target.value));
-													}
-												}}
-												min={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
+												locale={nb}
+												minDate={nowInAppZone()}
 											/>
 										</FormControl>
 										<FormMessage />
@@ -262,24 +256,17 @@ export default function CreateEvent({ teamId }: CreateEventProps) {
 									<FormItem>
 										<FormLabel>Frist for påmelding</FormLabel>
 										<FormControl>
-											<Input
-												type="datetime-local"
-												value={
-													field.value
-														? format(field.value, "yyyy-MM-dd'T'HH:mm")
-														: ""
+											<DateTimePicker
+												value={field.value ? toAppZone(field.value) : null}
+												onValueChange={(date) =>
+													field.onChange(
+														date ? anchorToAppZone(date) : undefined,
+													)
 												}
-												onChange={(e) => {
-													if (e.target.value) {
-														field.onChange(new Date(e.target.value));
-													}
-												}}
-												max={
+												locale={nb}
+												maxDate={
 													form.getValues("endDatetime")
-														? format(
-																form.getValues("endDatetime"),
-																"yyyy-MM-dd'T'HH:mm",
-															)
+														? toAppZone(form.getValues("endDatetime"))
 														: undefined
 												}
 											/>

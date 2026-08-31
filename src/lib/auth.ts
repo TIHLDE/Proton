@@ -5,6 +5,12 @@ import { genericOAuth } from "better-auth/plugins";
 import { env } from "~/env";
 import { db } from "~/server/db";
 
+/**
+ * Audience-en Photon utsteder JWT-access-tokens for. Se `tokenUrlParams` under.
+ */
+const PHOTON_AUDIENCE =
+	env.PHOTON_ISSUER ?? "https://photon.tihlde.org/api/auth";
+
 export const auth = betterAuth({
 	secret: env.BETTER_AUTH_SECRET,
 	database: prismaAdapter(db, {
@@ -55,7 +61,35 @@ export const auth = betterAuth({
 					// med én gang og bare for innlogging.
 					clientId: env.PHOTON_CLIENT_ID ?? "",
 					clientSecret: env.PHOTON_CLIENT_SECRET ?? "",
-					scopes: ["openid", "profile", "email"],
+					/**
+					 * `offline_access` gir refresh-token. Uten det utløper
+					 * tilgangen til Photon etter en time, mens sesjonen her
+					 * varer i 120 dager — og medlemskapene slutter å synke.
+					 *
+					 * Scopet ble avvist med «invalid_scope» og veltet hele
+					 * innloggingen fram til TIHLDE/Photon#644 ble fikset. Sjekk
+					 * mot autoriseringsendepunktet, ikke mot discovery, hvis det
+					 * skjer igjen: `scopes_supported` der er hardkodet i
+					 * better-auth og sier ingenting om hva Photon godtar.
+					 */
+					scopes: ["openid", "profile", "email", "offline_access"],
+					/**
+					 * Uten `resource` utsteder Photon et *opakt* token
+					 * (`tihlde_oat_…`), og dens egen `requireAuth` avviser det —
+					 * den forstår bare JWT-er. Hvert kall mot Photon svarer da
+					 * 401, som utad ser ut som en utløpt sesjon i stedet for et
+					 * feilformet token-kall.
+					 *
+					 * Verdien må være nøyaktig auth-base-URL-en; Photon har ikke
+					 * satt opp `validAudiences`, så alt annet avvises. Samme
+					 * verdi og samme grunn som i TIHLDE/kontres.
+					 *
+					 * Merk at dette bare dekker kodebyttet. `genericOAuth` sender
+					 * ikke disse videre ved fornyelse, så refresh gjøres for hånd
+					 * i ~/actions/auth.ts — ellers ville første fornyelse gitt et
+					 * opakt token igjen.
+					 */
+					tokenUrlParams: { resource: PHOTON_AUDIENCE },
 					// Photon avviser autorisasjon uten PKCE, også for
 					// konfidensielle klienter som denne: «pkce is required for
 					// this client». better-auth har den av som standard.

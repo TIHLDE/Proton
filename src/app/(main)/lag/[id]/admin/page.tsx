@@ -1,11 +1,10 @@
 "use server";
 
-import { ArrowLeft, PackageOpen } from "lucide-react";
+import { PackageOpen } from "lucide-react";
 import { headers } from "next/headers";
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Button } from "~/components/ui/button";
-import { H1, H2, P } from "~/components/ui/typography";
+import { H2, P } from "~/components/ui/typography";
 import { auth } from "~/lib/auth";
 import {
 	getAllEventsByTeamId,
@@ -39,20 +38,11 @@ export default async function EventsAdminPage({ params }: EventPageProps) {
 	const team = await getTeam(id);
 
 	return (
-		<div className="mx-auto min-h-screen w-full max-w-7xl space-y-12 px-2 py-24 md:space-y-20 md:py-32 lg:px-12">
+		<div className="space-y-12 md:space-y-20">
 			<div className="flex items-center justify-between">
 				<div>
-					<H1>Arrangementer</H1>
+					<H2>Arrangementer</H2>
 					<P>Her kan du administrere alle arrangementene for laget</P>
-					<Button
-						variant="link"
-						render={
-							<Link href={`/lag/${id}`}>
-								<ArrowLeft />
-								Tilbake
-							</Link>
-						}
-					/>
 				</div>
 
 				<CreateEvent teamId={id} />

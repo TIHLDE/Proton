@@ -1,11 +1,12 @@
 "use client";
 
-import { format } from "date-fns";
+import { nb } from "date-fns/locale";
 import { Pencil, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
+import { DatePicker } from "~/components/ui/date-picker";
 import {
 	Dialog,
 	DialogClose,
@@ -17,6 +18,7 @@ import {
 } from "~/components/ui/dialog";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { anchorToAppZone, toAppZone } from "~/lib/datetime";
 import { api } from "~/trpc/react";
 
 interface PeriodDialogProps {
@@ -29,17 +31,16 @@ interface PeriodDialogProps {
 	};
 }
 
-const toInputValue = (date: Date) => format(date, "yyyy-MM-dd");
-
 export default function PeriodDialog({ teamId, period }: PeriodDialogProps) {
 	const [open, setOpen] = useState(false);
 	const [name, setName] = useState(period?.name ?? "");
-	const [startDate, setStartDate] = useState(
-		period ? toInputValue(period.startDate) : "",
+	// Datoene holdes som Date, ikke som "yyyy-MM-dd"-strenger. new Date("2026-01-01")
+	// tolkes som UTC-midnatt, som i norsk tid blir 1. januar 01:00 om vinteren —
+	// og en dato valgt rett før månedsskiftet kunne havne i feil måned.
+	const [startDate, setStartDate] = useState<Date | null>(
+		period?.startDate ?? null,
 	);
-	const [endDate, setEndDate] = useState(
-		period ? toInputValue(period.endDate) : "",
-	);
+	const [endDate, setEndDate] = useState<Date | null>(period?.endDate ?? null);
 	const router = useRouter();
 
 	const onDone = () => {
@@ -67,8 +68,8 @@ export default function PeriodDialog({ teamId, period }: PeriodDialogProps) {
 
 		const values = {
 			name: name.trim() || undefined,
-			startDate: new Date(startDate),
-			endDate: new Date(endDate),
+			startDate,
+			endDate,
 		};
 
 		if (period) {
@@ -117,20 +118,25 @@ export default function PeriodDialog({ teamId, period }: PeriodDialogProps) {
 					<div className="grid gap-4 sm:grid-cols-2">
 						<div className="space-y-2">
 							<Label htmlFor="period-start">Fra</Label>
-							<Input
+							<DatePicker
 								id="period-start"
-								type="date"
-								value={startDate}
-								onChange={(event) => setStartDate(event.target.value)}
+								value={startDate ? toAppZone(startDate) : null}
+								onValueChange={(date) =>
+									setStartDate(date ? anchorToAppZone(date) : null)
+								}
+								locale={nb}
 							/>
 						</div>
 						<div className="space-y-2">
 							<Label htmlFor="period-end">Til</Label>
-							<Input
+							<DatePicker
 								id="period-end"
-								type="date"
-								value={endDate}
-								onChange={(event) => setEndDate(event.target.value)}
+								value={endDate ? toAppZone(endDate) : null}
+								onValueChange={(date) =>
+									setEndDate(date ? anchorToAppZone(date) : null)
+								}
+								locale={nb}
+								minDate={startDate ? toAppZone(startDate) : undefined}
 							/>
 						</div>
 					</div>

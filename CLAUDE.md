@@ -86,9 +86,16 @@ cp ~/tihlde-repos/Photon/packages/ui/src/components/ui/<navn>.tsx src/components
 # bruker hooks eller Base UI
 ```
 
-Unntakene — filer som er Protons egne og *skal* redigeres her — er
-`form.tsx` (bro mot react-hook-form; Kvark bruker @tanstack/react-form og har
-sin egen), `typography.tsx` og `password-input.tsx`.
+Unntakene — filer som er Protons egne og *skal* redigeres her:
+
+- `form.tsx` — bro mot react-hook-form. Kvark bruker @tanstack/react-form og
+  har sin egen bro mot de samme Field-primitivene.
+- `typography.tsx` og `password-input.tsx` — finnes ikke i @tihlde/ui.
+- `popover.tsx` — Photons versjon portalerer til `<body>`. Ligger popoveren
+  inne i en modal dialog, havner den utenfor dialogen: den vises, men klikk i
+  den lukker dialogen eller når ikke fram i det hele tatt. Derfor finner denne
+  versjonen dialogen den står i og portalerer dit. Utenfor en dialog blir
+  målet null, og Base UI faller tilbake til body — altså Photons oppførsel.
 
 ### tRPC API Pattern
 Routers are in `src/server/api/` with this structure:

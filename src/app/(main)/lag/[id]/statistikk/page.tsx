@@ -1,12 +1,11 @@
 "use server";
 
 import type { User } from "@prisma/client";
-import { ArrowLeft } from "lucide-react";
 import { headers } from "next/headers";
-import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { Button } from "~/components/ui/button";
-import { H1 } from "~/components/ui/typography";
+import { H2 } from "~/components/ui/typography";
 import { auth } from "~/lib/auth";
 import { getSeasonForDate, getSeasons } from "~/lib/season";
 import { db } from "~/server/db";
@@ -84,31 +83,26 @@ export default async function TeamStatistikkPage({
 		: undefined;
 
 	return (
-		<div className="mx-auto min-h-screen w-full max-w-7xl space-y-12 px-2 py-24 md:space-y-20 md:py-32 lg:px-12">
-			<div className="space-y-4">
-				<Button
-					variant="ghost"
-					size="sm"
-					render={
-						<Link href={`/lag/${id}`}>
-							<ArrowLeft />
-							Tilbake til {team.name}
-						</Link>
-					}
-				/>
-				<H1>Statistikk - {team.name}</H1>
-			</div>
+		<div className="space-y-12 md:space-y-20">
+			<H2>Statistikk</H2>
 
-			<StatisticsFilters
-				seasons={seasons.map((season) => ({
-					id: season.id,
-					label: season.label,
-				}))}
-				groups={groups.map((group) => ({ id: group.id, name: group.name }))}
-				seasonId={seasonId}
-				groupId={groupId}
-				eventType={eventType}
-			/>
+			{/* StatisticsFilters kaller useSearchParams(). Uten en Suspense-grense
+			    rundt bailer Next ut til klientrendering for undertreet, og da får
+			    serveren og klienten hver sin useId-sekvens. Radix satte ingen `id`
+			    på trigger-knappen, så avviket var usynlig; Base UI gjør det, og da
+			    ble det en hydreringsfeil. Grensen fjerner selve avviket. */}
+			<Suspense fallback={null}>
+				<StatisticsFilters
+					seasons={seasons.map((season) => ({
+						id: season.id,
+						label: season.label,
+					}))}
+					groups={groups.map((group) => ({ id: group.id, name: group.name }))}
+					seasonId={seasonId}
+					groupId={groupId}
+					eventType={eventType}
+				/>
+			</Suspense>
 
 			<MatchStatistics teamId={id} seasonId={seasonId} groupId={groupId} />
 

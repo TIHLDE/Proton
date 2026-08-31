@@ -1,15 +1,13 @@
 "use server";
 
 import type { User } from "@prisma/client";
-import { format } from "date-fns";
-import { nb } from "date-fns/locale";
-import { ArrowLeft, PackageOpen } from "lucide-react";
+import { PackageOpen } from "lucide-react";
 import { headers } from "next/headers";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Button } from "~/components/ui/button";
-import { H1, H2, H3, P } from "~/components/ui/typography";
+import { H2, H3, P } from "~/components/ui/typography";
 import { auth } from "~/lib/auth";
+import { formatInAppZone } from "~/lib/datetime";
 import {
 	getLeadershipPeriods,
 	getTeam,
@@ -57,20 +55,10 @@ export default async function TeamVervPage({ params }: TeamVervPageProps) {
 	]);
 
 	return (
-		<div className="mx-auto min-h-screen w-full max-w-7xl space-y-12 px-2 py-24 md:space-y-20 md:py-32 lg:px-12">
+		<div className="space-y-12 md:space-y-20">
 			<div className="space-y-4 md:flex md:items-center md:justify-between md:space-y-0">
 				<div className="space-y-4">
-					<Button
-						variant="ghost"
-						size="sm"
-						render={
-							<Link href={`/lag/${id}`}>
-								<ArrowLeft />
-								Tilbake til {team.name}
-							</Link>
-						}
-					/>
-					<H1>Vervhistorikk</H1>
+					<H2>Vervhistorikk</H2>
 					<P>Hvem som har hatt hvilket verv, nå og tidligere.</P>
 				</div>
 
@@ -114,11 +102,11 @@ export default async function TeamVervPage({ params }: TeamVervPageProps) {
 								<div>
 									<H3>
 										{period.name ??
-											`Styret ${format(period.startDate, "yyyy", { locale: nb })}`}
+											`Styret ${formatInAppZone(period.startDate, "yyyy")}`}
 									</H3>
 									<P className="text-muted-foreground text-sm">
-										{format(period.startDate, "MMMM yyyy", { locale: nb })} –{" "}
-										{format(period.endDate, "MMMM yyyy", { locale: nb })}
+										{formatInAppZone(period.startDate, "MMMM yyyy")} –{" "}
+										{formatInAppZone(period.endDate, "MMMM yyyy")}
 										{period.isOldest && " · det første"}
 									</P>
 								</div>
@@ -166,7 +154,7 @@ export default async function TeamVervPage({ params }: TeamVervPageProps) {
 									periodId={period.id}
 									periodLabel={
 										period.name ??
-										`styret ${format(period.startDate, "yyyy", { locale: nb })}`
+										`styret ${formatInAppZone(period.startDate, "yyyy")}`
 									}
 									assignmentCount={period.assignments.length}
 									positions={positions}

@@ -35,6 +35,7 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from "~/components/ui/popover";
+import { nowInAppZone } from "~/lib/datetime";
 
 interface MonthViewProps {
 	currentDate: Date;
@@ -60,7 +61,7 @@ export function MonthView({
 
 	const weekdays = useMemo(() => {
 		return Array.from({ length: 7 }).map((_, i) => {
-			const date = addDays(startOfWeek(new Date()), i);
+			const date = addDays(startOfWeek(nowInAppZone()), i);
 			return format(date, "EEE", { locale: nb });
 		});
 	}, []);

@@ -1,7 +1,7 @@
 "use client";
 
 import { Popover as PopoverPrimitive } from "@base-ui/react/popover";
-import type * as React from "react";
+import * as React from "react";
 
 import { cn } from "~/lib/utils";
 
@@ -25,25 +25,42 @@ function PopoverContent({
 		PopoverPrimitive.Positioner.Props,
 		"align" | "alignOffset" | "side" | "sideOffset"
 	>) {
+	// Avvik fra Photon: portalen får et mål. Proton bruker Radix' modale
+	// Dialog, som setter pointer-events: none på <body> og aria-hidden på alt
+	// utenfor seg selv. Portaleres popoveren til body havner den der og blir
+	// synlig, men helt uklikkbar — datovelgeren i «Nytt arrangement» tok ikke
+	// imot klikk i det hele tatt. Markøren under står der popoveren er brukt,
+	// så vi finner dialogen den ligger i og portalerer dit i stedet. Utenfor
+	// en dialog blir container null, og Base UI faller tilbake til body.
+	const [container, setContainer] = React.useState<HTMLElement | null>(null);
+	const markerRef = React.useCallback((node: HTMLSpanElement | null) => {
+		setContainer(
+			node?.closest<HTMLElement>('[data-slot="dialog-content"]') ?? null,
+		);
+	}, []);
+
 	return (
-		<PopoverPrimitive.Portal>
-			<PopoverPrimitive.Positioner
-				align={align}
-				alignOffset={alignOffset}
-				side={side}
-				sideOffset={sideOffset}
-				className="isolate z-50"
-			>
-				<PopoverPrimitive.Popup
-					data-slot="popover-content"
-					className={cn(
-						"data-[side=bottom]:slide-in-from-top-2 data-[side=inline-end]:slide-in-from-left-2 data-[side=inline-start]:slide-in-from-right-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-open:fade-in-0 data-open:zoom-in-95 data-closed:fade-out-0 data-closed:zoom-out-95 z-50 flex w-72 origin-(--transform-origin) flex-col gap-2.5 rounded-lg bg-popover p-2.5 text-popover-foreground text-sm shadow-md outline-hidden ring-1 ring-foreground/10 duration-100 data-closed:animate-out data-open:animate-in",
-						className,
-					)}
-					{...props}
-				/>
-			</PopoverPrimitive.Positioner>
-		</PopoverPrimitive.Portal>
+		<>
+			<span ref={markerRef} hidden />
+			<PopoverPrimitive.Portal container={container ?? undefined}>
+				<PopoverPrimitive.Positioner
+					align={align}
+					alignOffset={alignOffset}
+					side={side}
+					sideOffset={sideOffset}
+					className="isolate z-50"
+				>
+					<PopoverPrimitive.Popup
+						data-slot="popover-content"
+						className={cn(
+							"data-[side=bottom]:slide-in-from-top-2 data-[side=inline-end]:slide-in-from-left-2 data-[side=inline-start]:slide-in-from-right-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-open:fade-in-0 data-open:zoom-in-95 data-closed:fade-out-0 data-closed:zoom-out-95 z-50 flex w-72 origin-(--transform-origin) flex-col gap-2.5 rounded-lg bg-popover p-2.5 text-popover-foreground text-sm shadow-md outline-hidden ring-1 ring-foreground/10 duration-100 data-closed:animate-out data-open:animate-in",
+							className,
+						)}
+						{...props}
+					/>
+				</PopoverPrimitive.Positioner>
+			</PopoverPrimitive.Portal>
+		</>
 	);
 }
 

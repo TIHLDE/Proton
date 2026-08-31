@@ -2,7 +2,9 @@
 
 import type { TeamEvent } from "@prisma/client";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useMemo } from "react";
 import { type CalendarView, EventCalendar } from "~/components/event-calendar";
+import { toAppZone } from "~/lib/datetime";
 import { CalendarSubscribeDialog } from "./calendar-subscribe-dialog";
 
 interface MyCalendarProps {
@@ -18,6 +20,20 @@ export default function MyCalendar({
 }: MyCalendarProps) {
 	const router = useRouter();
 	const searchParams = useSearchParams();
+
+	// Kalenderen regner ut hvilken dag- og timerute et arrangement havner i med
+	// vanlig date-fns-matematikk, som følger maskinens tidssone. Leses datoene
+	// i norsk tid her, gjør resten av kalenderen det også — ellers ville et
+	// arrangement 18:00 norsk tid lagt seg i feil kolonne for noen i utlandet.
+	const zonedEvents = useMemo(
+		() =>
+			events.map((event) => ({
+				...event,
+				startAt: toAppZone(event.startAt),
+				endAt: event.endAt ? toAppZone(event.endAt) : event.endAt,
+			})),
+		[events],
+	);
 
 	const handleRangeChange = (start: Date, end: Date, view: CalendarView) => {
 		const newStart = start.toISOString();
@@ -49,9 +65,9 @@ export default function MyCalendar({
 					<CalendarSubscribeDialog />
 				</div>
 				<EventCalendar
-					events={events}
+					events={zonedEvents}
 					initialView={initialView || "agenda"}
-					initialDate={initialDate}
+					initialDate={toAppZone(initialDate)}
 					onRangeChange={handleRangeChange}
 				/>
 			</div>

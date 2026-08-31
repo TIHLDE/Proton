@@ -1,14 +1,14 @@
 "use server";
 
 import type { User } from "@prisma/client";
-import { ArrowLeft, Edit } from "lucide-react";
+import { Edit } from "lucide-react";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Navigation from "~/components/navigation/navigation";
 import SearchInput from "~/components/navigation/search-input";
 import { Button } from "~/components/ui/button";
-import { H1, H3, P } from "~/components/ui/typography";
+import { H2, H3, P } from "~/components/ui/typography";
 import { auth } from "~/lib/auth";
 import {
 	getTeam,
@@ -53,21 +53,10 @@ export default async function TeamMembersPage({
 	const roles = await getTeamMembershipRoles(session.user.id, id);
 
 	return (
-		<div className="mx-auto min-h-screen w-full max-w-7xl space-y-12 px-2 py-24 md:space-y-20 md:py-32 lg:px-12">
-			<div className="md:flex md:items-center md:justify-between">
-				<div>
-					<H1>{team.name}</H1>
-					<P>Medlemmer ({membersCount})</P>
-					<Button
-						variant="link"
-						render={
-							<Link href={`/lag/${id}`}>
-								<ArrowLeft />
-								Tilbake
-							</Link>
-						}
-					/>
-				</div>
+		<div className="space-y-12 md:space-y-20">
+			<div>
+				<H2>Medlemmer</H2>
+				<P>{membersCount} i laget</P>
 			</div>
 
 			<div className="space-y-6">

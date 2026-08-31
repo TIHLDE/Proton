@@ -1,6 +1,7 @@
 import type { TeamEvent, TeamEventType } from "@prisma/client";
 import { format, isSameDay } from "date-fns";
 import { nb } from "date-fns/locale";
+import { toAppZone } from "~/lib/datetime";
 
 const eventTypePresentation: Record<
 	TeamEventType,
@@ -108,8 +109,11 @@ export function getAttendanceStatusTextClassName(
 }
 
 export function getEventDateTime(event: Pick<TeamEvent, "startAt" | "endAt">) {
-	const startAt = new Date(event.startAt);
-	const endAt = new Date(event.endAt || event.startAt);
+	// Arrangementene holdes i Norge, så de vises i norsk tid uansett hvor
+	// leseren sitter. Uten dette ville et arrangement 18:00 norsk tid stått
+	// som 12:00 for noen i New York — og på en annen dato ved midnatt.
+	const startAt = toAppZone(new Date(event.startAt));
+	const endAt = toAppZone(new Date(event.endAt || event.startAt));
 
 	if (isSameDay(startAt, endAt)) {
 		return {

@@ -46,6 +46,7 @@ import {
 	DropdownMenuShortcut,
 	DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import { nowInAppZone } from "~/lib/datetime";
 import { cn } from "~/lib/utils";
 
 export interface EventCalendarProps {
@@ -69,7 +70,9 @@ export function EventCalendar({
 	initialDate,
 	onRangeChange,
 }: EventCalendarProps) {
-	const [currentDate, setCurrentDate] = useState(initialDate || new Date());
+	const [currentDate, setCurrentDate] = useState<Date>(
+		initialDate || nowInAppZone(),
+	);
 	const [view, setView] = useState<CalendarView>(initialView);
 	const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
 	const [selectedEvent, setSelectedEvent] = useState<TeamEvent | null>(null);
@@ -176,7 +179,7 @@ export function EventCalendar({
 	};
 
 	const handleToday = () => {
-		const today = new Date();
+		const today = nowInAppZone();
 		setCurrentDate(today);
 	};
 

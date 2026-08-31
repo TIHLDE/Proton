@@ -1,6 +1,5 @@
 "use client";
 
-import { mergeProps } from "@base-ui/react/merge-props";
 import { useRender } from "@base-ui/react/use-render";
 import * as React from "react";
 import {
@@ -19,6 +18,7 @@ import {
 	FieldError,
 	FieldLabel,
 } from "~/components/ui/field";
+import { cn } from "~/lib/utils";
 
 // Denne fila er *bare* en bro mellom react-hook-form og Photons Field-
 // primitiver. Alt visuelt bor i field.tsx, som er kopiert uendret fra
@@ -83,24 +83,31 @@ const FormItemContext = React.createContext<FormItemContextValue>(
 	{} as FormItemContextValue,
 );
 
+// Merk at ingen av wrapperne under setter sin egen `data-slot`. Field-
+// primitivene setter den før de sprer props, så et `data-slot="form-label"`
+// herfra ville overstyrt `field-label` — og da slutter Photons egne
+// selektorer (`*:data-[slot=field-label]`, `has-[>[data-slot=field]]`) å
+// treffe. Slotene tilhører designsystemet, ikke denne broen.
 function FormItem({ ...props }: React.ComponentProps<typeof Field>) {
 	const id = React.useId();
 
 	return (
 		<FormItemContext.Provider value={{ id }}>
-			<Field data-slot="form-item" {...props} />
+			<Field {...props} />
 		</FormItemContext.Provider>
 	);
 }
 
-function FormLabel({ ...props }: React.ComponentProps<typeof FieldLabel>) {
+function FormLabel({
+	className,
+	...props
+}: React.ComponentProps<typeof FieldLabel>) {
 	const { error, formItemId } = useFormField();
 
 	return (
 		<FieldLabel
-			data-slot="form-label"
 			data-error={!!error}
-			className="data-[error=true]:text-destructive"
+			className={cn("data-[error=true]:text-destructive", className)}
 			htmlFor={formItemId}
 			{...props}
 		/>
@@ -116,17 +123,13 @@ function FormControl({ children }: { children: React.ReactElement }) {
 
 	return useRender({
 		render: children as useRender.RenderProp,
-		props: mergeProps(
-			{
-				"data-slot": "form-control",
-				id: formItemId,
-				"aria-describedby": error
-					? `${formDescriptionId} ${formMessageId}`
-					: formDescriptionId,
-				"aria-invalid": !!error,
-			},
-			{},
-		),
+		props: {
+			id: formItemId,
+			"aria-describedby": error
+				? `${formDescriptionId} ${formMessageId}`
+				: formDescriptionId,
+			"aria-invalid": !!error,
+		},
 	});
 }
 
@@ -136,11 +139,7 @@ function FormDescription({
 	const { formDescriptionId } = useFormField();
 
 	return (
-		<FieldDescription
-			data-slot="form-description"
-			id={formDescriptionId}
-			{...props}
-		/>
+		<FieldDescription id={formDescriptionId} {...props} />
 	);
 }
 
@@ -153,7 +152,7 @@ function FormMessage({ ...props }: React.ComponentProps<typeof FieldError>) {
 	}
 
 	return (
-		<FieldError data-slot="form-message" id={formMessageId} {...props}>
+		<FieldError id={formMessageId} {...props}>
 			{body}
 		</FieldError>
 	);

@@ -19,13 +19,19 @@ function PopoverContent({
 	alignOffset = 0,
 	side = "bottom",
 	sideOffset = 4,
+	anchor,
 	...props
 }: PopoverPrimitive.Popup.Props &
 	Pick<
 		PopoverPrimitive.Positioner.Props,
-		"align" | "alignOffset" | "side" | "sideOffset"
+		"align" | "alignOffset" | "side" | "sideOffset" | "anchor"
 	>) {
-	// Avvik fra Photon: portalen får et mål. Proton bruker Radix' modale
+	// Avvik fra Photon nr. 2: `anchor` slippes gjennom til Positioner. Uten den
+	// må alt som skal posisjonere en popover gå via <PopoverTrigger>, og det
+	// tvinger fram en trigger selv der elementet ikke er en knapp — se
+	// time-picker.tsx, der feltet er ankeret og klokkeknappen er triggeren.
+	//
+	// Avvik fra Photon nr. 1: portalen får et mål. Proton bruker Radix' modale
 	// Dialog, som setter pointer-events: none på <body> og aria-hidden på alt
 	// utenfor seg selv. Portaleres popoveren til body havner den der og blir
 	// synlig, men helt uklikkbar — datovelgeren i «Nytt arrangement» tok ikke
@@ -48,6 +54,7 @@ function PopoverContent({
 					alignOffset={alignOffset}
 					side={side}
 					sideOffset={sideOffset}
+					anchor={anchor}
 					className="isolate z-50"
 				>
 					<PopoverPrimitive.Popup

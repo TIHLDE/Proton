@@ -91,11 +91,18 @@ Unntakene — filer som er Protons egne og *skal* redigeres her:
 - `form.tsx` — bro mot react-hook-form. Kvark bruker @tanstack/react-form og
   har sin egen bro mot de samme Field-primitivene.
 - `typography.tsx` og `password-input.tsx` — finnes ikke i @tihlde/ui.
-- `popover.tsx` — Photons versjon portalerer til `<body>`. Ligger popoveren
-  inne i en modal dialog, havner den utenfor dialogen: den vises, men klikk i
-  den lukker dialogen eller når ikke fram i det hele tatt. Derfor finner denne
-  versjonen dialogen den står i og portalerer dit. Utenfor en dialog blir
+- `time-picker.tsx` — i Photon er hele feltet `<PopoverTrigger>`. Feltet er en
+  `<div role="group">` med tre `<input>` inni, så Base UI advarer om at
+  triggeren ikke er en ekte knapp. Her er feltet i stedet *anker*, og
+  klokkeknappen — som allerede er en `<button>` — er triggeren. Se
+  TIHLDE/Photon#725; fiksen hører hjemme der.
+- `popover.tsx` — to ting. (1) Photons versjon portalerer til `<body>`. Ligger
+  popoveren inne i en modal dialog, havner den utenfor dialogen: den vises, men
+  klikk i den lukker dialogen eller når ikke fram i det hele tatt. Derfor finner
+  denne versjonen dialogen den står i og portalerer dit. Utenfor en dialog blir
   målet null, og Base UI faller tilbake til body — altså Photons oppførsel.
+  (2) `anchor` slippes gjennom til `Positioner`, så en popover kan posisjoneres
+  mot ett element og utløses av et annet. Det er dette `time-picker.tsx` bruker.
 
 ### tRPC API Pattern
 Routers are in `src/server/api/` with this structure:

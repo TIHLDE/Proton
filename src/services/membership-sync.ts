@@ -23,6 +23,20 @@ export type SyncResult =
  * Bare lag som allerede finnes her berøres — Photon-grupper uten et tilsvarende
  * lag hoppes over, og medlemskap i lag brukeren har meldt seg ut av i Photon
  * fjernes ikke automatisk.
+ *
+ * Photon bestemmer *om* noen er medlem, ikke *hvilken rolle* de har. Rollen
+ * settes bare når raden opprettes; etterpå eier laget den selv. Uten det skrev
+ * synken over hver rolleendring en lagadmin gjorde: Photon kjenner bare
+ * leader/ikke-leder, så SUBADMIN — som ikke finnes der — ble degradert til
+ * USER ved neste synk, og det samme skjedde med enhver ADMIN som ikke tilfeldig
+ * var gruppeleder i Photon. Siden synken kjører ved besøk på /min-oversikt og
+ * er fersk i 15 minutter, hoppet rollene tilbake i løpet av kvarteret.
+ *
+ * Det speiler regelen over: mister du gruppa i Photon, mister du ikke
+ * medlemskapet her heller. Baksiden er at den som blir gruppeleder i Photon i
+ * ettertid ikke forfremmes automatisk — en lagadmin må sette rollen. Det er
+ * uansett den eneste veien inn i SUBADMIN, så rolleadministrasjonen er samlet
+ * ett sted i stedet for å være delt mellom Photon og Proton.
  */
 export async function syncTeamMemberships(userId: string): Promise<SyncResult> {
 	const result = await getUserMemberships();
@@ -58,15 +72,8 @@ export async function syncTeamMemberships(userId: string): Promise<SyncResult> {
 				where: { userId, teamId: team.id },
 			});
 
-			if (existingMembership) {
-				if (existingMembership.role !== membership.role) {
-					await db.teamMember.update({
-						where: { id: existingMembership.id },
-						data: { role: membership.role },
-					});
-				}
-				return;
-			}
+			// Raden finnes: la rollen stå. Den er lagets, ikke Photons.
+			if (existingMembership) return;
 
 			await db.teamMember.create({
 				data: { userId, teamId: team.id, role: membership.role },

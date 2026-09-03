@@ -3,17 +3,17 @@
 import { ClockIcon } from "lucide-react";
 import * as React from "react";
 
-import { Button } from "~/components/ui/photon/button";
+import { Button } from "~/components/ui/button";
 import {
 	InputGroup,
 	InputGroupAddon,
 	InputGroupButton,
-} from "~/components/ui/photon/input-group";
+} from "~/components/ui/input-group";
 import {
 	Popover,
 	PopoverContent,
 	PopoverTrigger,
-} from "~/components/ui/photon/popover";
+} from "~/components/ui/popover";
 import { cn } from "~/lib/utils";
 
 export type TimeValue = { hour: number; minute: number };
@@ -231,26 +231,35 @@ export function TimePicker({
 		if (pendingHour !== null) tryCommit(pendingHour, minute);
 	};
 
+	const anchorRef = React.useRef<HTMLDivElement | null>(null);
+
 	const stop = (e: React.SyntheticEvent) => e.stopPropagation();
 
-	const focusHourFromBackground = (e: React.MouseEvent<HTMLDivElement>) => {
+	// Avvik fra Photon: der er hele feltet <PopoverTrigger>. Feltet er en
+	// <div role="group"> med tre inputs inni, så Base UI advarer om at det ikke
+	// er en ekte knapp — og eneste måten å tilfredsstille den advarselen på er
+	// `nativeButton={false}`, som setter role="button" på gruppa. Innholdet i
+	// en button er presentasjonelt i ARIA, så skjermlesere ville sluttet å
+	// eksponere time- og minuttfeltene. Her er feltet i stedet *anker*, og
+	// klokkeknappen — som allerede er en ekte <button> — er triggeren.
+	//
+	// Bakgrunnsklikket åpner, slik det gjorde før. Det lukker ikke, men det
+	// gjorde det ikke med triggeren heller: popoveren lukkes hverken av
+	// bakgrunnsklikk, klokkeknappen eller Escape i dagens komponent. Se
+	// TIHLDE/Photon#725.
+	const openFromBackground = (e: React.MouseEvent<HTMLDivElement>) => {
 		const target = e.target as HTMLElement;
 		if (target.tagName === "INPUT" || target.closest("button")) return;
-		// Let PopoverTrigger toggle; the layout effect will pick the right
-		// input based on lastFocusedRef + content state. No preventDefault —
-		// base-ui honors it and would skip the toggle.
+		handleOpenChange(true);
 	};
 
 	return (
 		<Popover open={open} onOpenChange={handleOpenChange} modal={false}>
-			<PopoverTrigger
-				render={
-					<InputGroup
-						onClick={focusHourFromBackground}
-						aria-label="Tidsvelger"
-						className={cn("w-28 min-w-28 cursor-text", className)}
-					/>
-				}
+			<InputGroup
+				ref={anchorRef}
+				onClick={openFromBackground}
+				aria-label="Tidsvelger"
+				className={cn("w-28 min-w-28 cursor-text", className)}
 			>
 				<input
 					ref={hourRef}
@@ -312,18 +321,23 @@ export function TimePicker({
 				/>
 				<div aria-hidden="true" className="flex-1" />
 				<InputGroupAddon align="inline-end">
-					<InputGroupButton
-						size="icon-xs"
-						disabled={disabled}
-						aria-label="Velg tid"
-						tabIndex={-1}
-					>
-						<ClockIcon />
-					</InputGroupButton>
+					<PopoverTrigger
+						render={
+							<InputGroupButton
+								size="icon-xs"
+								disabled={disabled}
+								aria-label="Velg tid"
+								tabIndex={-1}
+							>
+								<ClockIcon />
+							</InputGroupButton>
+						}
+					/>
 				</InputGroupAddon>
-			</PopoverTrigger>
+			</InputGroup>
 			<PopoverContent
 				className="w-auto p-0"
+				anchor={anchorRef}
 				align="start"
 				sideOffset={6}
 				initialFocus={initialFocusRef}

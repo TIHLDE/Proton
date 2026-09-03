@@ -63,12 +63,14 @@ export default function CreateGroup({ teamId }: CreateGroupProps) {
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
-			<DialogTrigger asChild>
-				<Button>
-					<Plus />
-					Ny undergruppe
-				</Button>
-			</DialogTrigger>
+			<DialogTrigger
+				render={
+					<Button>
+						<Plus />
+						Ny undergruppe
+					</Button>
+				}
+			/>
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>Ny undergruppe</DialogTitle>
@@ -112,11 +114,13 @@ export default function CreateGroup({ teamId }: CreateGroupProps) {
 
 						<div className="grid gap-2">
 							<SubmitButton text="Opprett" status={status} />
-							<DialogClose asChild>
-								<Button type="button" variant="ghost">
-									Avbryt
-								</Button>
-							</DialogClose>
+							<DialogClose
+								render={
+									<Button type="button" variant="ghost">
+										Avbryt
+									</Button>
+								}
+							/>
 						</div>
 					</form>
 				</Form>

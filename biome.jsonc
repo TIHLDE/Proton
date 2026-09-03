@@ -6,7 +6,13 @@
 		"useIgnoreFile": true
 	},
 	"files": { "ignoreUnknown": false, "ignore": [] },
-	"formatter": { "enabled": true },
+	// src/components/ui/* er kopiert ordrett fra @tihlde/ui i Photon-monorepoet,
+	// og skal kunne kopieres på nytt med `cp` uten at diffen fylles av
+	// formateringsstøy. Photon formaterer med oxfmt (4 mellomrom) og sorterer
+	// klasser etter oxlints regel; biome ville skrevet begge deler om, og da
+	// slutter filene å være identiske med kilden. Derfor er katalogen holdt
+	// utenfor både formateraren og linteren. Se CLAUDE.md for synkerutinen.
+	"formatter": { "enabled": true, "ignore": ["src/components/ui/**"] },
 	"organizeImports": { "enabled": true },
 	"linter": {
 		"enabled": true,
@@ -14,9 +20,8 @@
 			"src/components/event-calendar/**/*",
 			// Hentet uendret fra Photon (packages/ui) for at velgerne skal være
 			// nøyaktig samme komponent. Lintes der, ikke her.
-			"src/components/ui/photon/**/*",
 			"prisma/seed.ts",
-			"src/components/ui/chart.tsx"
+			"src/components/ui/**"
 		],
 		"rules": {
 			"nursery": {

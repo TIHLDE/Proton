@@ -51,9 +51,63 @@ Use `~/` to import from `src/` (e.g., `import { db } from "~/server/db"`)
 - `src/server/api/` - tRPC routers and procedures
 - `src/services/` - Business logic layer (called by tRPC procedures)
 - `src/schemas/` - Zod validation schemas
-- `src/components/ui/` - Shadcn/ui components
+- `src/components/ui/` - Designsystemet, kopiert ordrett fra Photon (se under)
 - `src/lib/` - Configuration (auth, email, utilities)
 - `prisma/schema.prisma` - Database schema
+
+### Designsystem — kopiert fra Photon
+
+`src/components/ui/*` er **ordrette kopier** av `packages/ui/src/components/ui/*`
+i [TIHLDE/Photon](https://github.com/TIHLDE/Photon) (`@tihlde/ui`), og
+`src/styles/globals.css` speiler `packages/ui/src/styles.css`. Poenget er at
+Proton skal se ut som resten av TIHLDE-plattformen uten å vedlikeholde et eget
+designsystem.
+
+Komponentene er **dumme**: de eier utseende og tilgjengelighet, ingenting annet.
+All tilstand, datahenting og forretningslogikk bor i kallstedet.
+
+- Bygget på **Base UI**, ikke Radix. Det betyr `render={<Child />}` i stedet for
+  `asChild`, `data-checked` i stedet for `data-[state=checked]`, og
+  `Positioner`/`Popup` i stedet for `Portal`/`Content`.
+- `<Select>` må få `items={[{ value, label }]}`. Base UIs `SelectValue` viser
+  ellers den rå verdien, ikke etiketten til valget.
+- `<DropdownMenuTrigger>` er en ekte `<button>`. Send noe annet inn via `render`
+  bare med `nativeButton={false}`. `<DropdownMenuItem>` er motsatt — den er
+  *ikke* en knapp, så en `<button>` i `render` gir advarsel; bruk `onClick`.
+
+**Ikke rediger filene i `src/components/ui/` her.** Endringer hører hjemme i
+Photon, og hentes hit med en ren `cp`. Katalogen er derfor holdt utenfor biome
+(både formatering og linting) i `biome.jsonc`, slik at filene blir byte-like med
+kilden og diffen viser reelle endringer i stedet for formateringsstøy:
+
+```bash
+cp ~/tihlde-repos/Photon/packages/ui/src/components/ui/<navn>.tsx src/components/ui/
+# bytt så `#/`-aliaset til Protons `~/`, og legg på "use client" om komponenten
+# bruker hooks eller Base UI
+```
+
+Unntakene — filer som er Protons egne og *skal* redigeres her:
+
+- `form.tsx` — bro mot react-hook-form. Kvark bruker @tanstack/react-form og
+  har sin egen bro mot de samme Field-primitivene.
+- `typography.tsx` og `password-input.tsx` — finnes ikke i @tihlde/ui.
+- `time-picker.tsx` — i Photon er hele feltet `<PopoverTrigger>`. Feltet er en
+  `<div role="group">` med tre `<input>` inni, så Base UI advarer om at
+  triggeren ikke er en ekte knapp. Her er feltet i stedet *anker*, og
+  klokkeknappen — som allerede er en `<button>` — er triggeren. Se
+  TIHLDE/Photon#725; fiksen hører hjemme der.
+- Skjermleser-tekstene i `dialog.tsx`, `sheet.tsx` og `sidebar.tsx` er oversatt
+  til norsk. Photon skriver «Close» og «Toggle Sidebar»; Proton hadde «Lukk» før
+  porteringen, og en norsk app skal ikke lese opp engelsk. Dette er den eneste
+  endringen som er gjort *inne i* en ellers ordrett kopiert fil — hold den ved
+  like ved neste synk, og send den gjerne oppstrøms til Photon.
+- `popover.tsx` — to ting. (1) Photons versjon portalerer til `<body>`. Ligger
+  popoveren inne i en modal dialog, havner den utenfor dialogen: den vises, men
+  klikk i den lukker dialogen eller når ikke fram i det hele tatt. Derfor finner
+  denne versjonen dialogen den står i og portalerer dit. Utenfor en dialog blir
+  målet null, og Base UI faller tilbake til body — altså Photons oppførsel.
+  (2) `anchor` slippes gjennom til `Positioner`, så en popover kan posisjoneres
+  mot ett element og utløses av et annet. Det er dette `time-picker.tsx` bruker.
 
 ### tRPC API Pattern
 Routers are in `src/server/api/` with this structure:

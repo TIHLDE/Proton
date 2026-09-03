@@ -44,9 +44,7 @@ export default function NotifyUnattended({ eventId }: NotifyUnattendedProps) {
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
-			<DialogTrigger asChild>
-				<Button>Send påminnelse</Button>
-			</DialogTrigger>
+			<DialogTrigger render={<Button>Send påminnelse</Button>} />
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>Send påminnelse</DialogTitle>

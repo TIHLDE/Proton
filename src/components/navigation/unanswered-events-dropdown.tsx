@@ -10,6 +10,7 @@ import { Button } from "~/components/ui/button";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
+	DropdownMenuGroup,
 	DropdownMenuItem,
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
@@ -33,63 +34,74 @@ export default function UnansweredEventsDropdown() {
 	return (
 		<>
 			<DropdownMenu>
-				<DropdownMenuTrigger asChild>
-					<Button
-						size="icon"
-						variant="ghost"
-						className="relative h-8 w-8 sm:h-10 sm:w-10"
-					>
-						<ListChecks className="h-[1rem] w-[1rem] sm:h-[1.2rem] sm:w-[1.2rem]" />
-						{unansweredCount > 0 && (
-							<span className="absolute top-0 right-0 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] text-white">
-								{unansweredCount > 9 ? "9+" : unansweredCount}
-							</span>
-						)}
-						<span className="sr-only">Ubesvarte events</span>
-					</Button>
-				</DropdownMenuTrigger>
-				<DropdownMenuContent align="end" className="w-80">
-					<DropdownMenuLabel>Ubesvarte events</DropdownMenuLabel>
-					<DropdownMenuSeparator />
-					{!unansweredEvents || unansweredEvents.length === 0 ? (
-						<div className="p-4 text-center text-muted-foreground text-sm">
-							Ingen ubesvarte events
-						</div>
-					) : (
-						<div className="max-h-[400px] overflow-y-auto">
-							{unansweredEvents.map(
-								(event: TeamEvent & { team?: { name: string } }) => (
-									<DropdownMenuItem
-										key={event.id}
-										onClick={() => handleEventClick(event)}
-										className="cursor-pointer flex-col items-start gap-1 p-3"
-									>
-										<div className="flex w-full items-start justify-between gap-2">
-											<div className="flex-1">
-												<div className="font-medium text-sm">{event.name}</div>
-												<div className="text-muted-foreground text-xs">
-													{"team" in event &&
-													event.team &&
-													typeof event.team === "object" &&
-													"name" in event.team
-														? (event.team as { name: string }).name
-														: ""}
-												</div>
-											</div>
-											<span className="whitespace-nowrap text-muted-foreground text-xs">
-												{getEventTypeLabel(event.eventType)}
-											</span>
-										</div>
-										<div className="text-muted-foreground text-xs">
-											{format(new Date(event.startAt), "EEE d. MMM HH:mm", {
-												locale: nb,
-											})}
-										</div>
-									</DropdownMenuItem>
-								),
+				<DropdownMenuTrigger
+					render={
+						<Button
+							size="icon"
+							variant="ghost"
+							className="relative h-8 w-8 sm:h-10 sm:w-10"
+						>
+							<ListChecks className="h-[1rem] w-[1rem] sm:h-[1.2rem] sm:w-[1.2rem]" />
+							{unansweredCount > 0 && (
+								<span className="absolute top-0 right-0 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] text-white">
+									{unansweredCount > 9 ? "9+" : unansweredCount}
+								</span>
 							)}
-						</div>
-					)}
+							<span className="sr-only">Ubesvarte events</span>
+						</Button>
+					}
+				/>
+				<DropdownMenuContent align="end" className="w-80">
+					{/* Gruppa er ikke pynt: Base UIs GroupLabel *må* stå i en
+					    <Menu.Group>, ellers kaster den «MenuGroupContext is
+					    missing». Radix tillot en frittstående label, og det er
+					    forskjellen som traff her. Ledeteksten hører uansett til
+					    valgene under, så gruppa omslutter begge. */}
+					<DropdownMenuGroup>
+						<DropdownMenuLabel>Ubesvarte events</DropdownMenuLabel>
+						<DropdownMenuSeparator />
+						{!unansweredEvents || unansweredEvents.length === 0 ? (
+							<div className="p-4 text-center text-muted-foreground text-sm">
+								Ingen ubesvarte events
+							</div>
+						) : (
+							<div className="max-h-[400px] overflow-y-auto">
+								{unansweredEvents.map(
+									(event: TeamEvent & { team?: { name: string } }) => (
+										<DropdownMenuItem
+											key={event.id}
+											onClick={() => handleEventClick(event)}
+											className="cursor-pointer flex-col items-start gap-1 p-3"
+										>
+											<div className="flex w-full items-start justify-between gap-2">
+												<div className="flex-1">
+													<div className="font-medium text-sm">
+														{event.name}
+													</div>
+													<div className="text-muted-foreground text-xs">
+														{"team" in event &&
+														event.team &&
+														typeof event.team === "object" &&
+														"name" in event.team
+															? (event.team as { name: string }).name
+															: ""}
+													</div>
+												</div>
+												<span className="whitespace-nowrap text-muted-foreground text-xs">
+													{getEventTypeLabel(event.eventType)}
+												</span>
+											</div>
+											<div className="text-muted-foreground text-xs">
+												{format(new Date(event.startAt), "EEE d. MMM HH:mm", {
+													locale: nb,
+												})}
+											</div>
+										</DropdownMenuItem>
+									),
+								)}
+							</div>
+						)}
+					</DropdownMenuGroup>
 				</DropdownMenuContent>
 			</DropdownMenu>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
 	Select,
 	SelectContent,
@@ -8,15 +8,9 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "~/components/ui/select";
+import { eventTypeOptions } from "~/lib/event-presentation";
 
 const ALL = "alle";
-
-const eventTypeOptions = [
-	{ value: "TRAINING", label: "Trening" },
-	{ value: "MATCH", label: "Kamp" },
-	{ value: "SOCIAL", label: "Sosialt" },
-	{ value: "OTHER", label: "Annet" },
-];
 
 interface StatisticsFiltersProps {
 	seasons: { id: string; label: string }[];
@@ -35,23 +29,39 @@ export default function StatisticsFilters({
 }: StatisticsFiltersProps) {
 	const router = useRouter();
 	const pathname = usePathname();
-	const searchParams = useSearchParams();
 
+	// Filtrene bygges av props, ikke av useSearchParams(). Serversiden leser
+	// allerede søkestrengen og sender ned de samme tre verdiene, så hooken ga
+	// ingen ny informasjon — men den fikk Next til å bail-e ut til
+	// klientrendering for undertreet, og da fikk server og klient hver sin
+	// useId-sekvens. Base UI setter en generert `id` på hver select-trigger,
+	// så avviket ble en hydreringsfeil på hele siden, også i søsken som
+	// MatchStatistics. Radix satte ingen id, og derfor var det usynlig før.
 	const setFilter = (key: string, value: string) => {
-		const params = new URLSearchParams(searchParams.toString());
-		if (value === ALL) {
-			params.delete(key);
-		} else {
-			params.set(key, value);
+		const params = new URLSearchParams();
+		const current: Record<string, string | undefined> = {
+			sesong: seasonId,
+			gruppe: groupId,
+			type: eventType,
+		};
+		current[key] = value === ALL ? undefined : value;
+
+		for (const [name, entry] of Object.entries(current)) {
+			if (entry) params.set(name, entry);
 		}
+
 		router.replace(`${pathname}?${params.toString()}`, { scroll: false });
 	};
 
 	return (
 		<div className="grid gap-3 sm:grid-cols-3">
 			<Select
+				items={seasons.map((season) => ({
+					value: season.id,
+					label: season.label,
+				}))}
 				value={seasonId}
-				onValueChange={(value) => setFilter("sesong", value)}
+				onValueChange={(value) => value !== null && setFilter("sesong", value)}
 			>
 				<SelectTrigger className="w-full" aria-label="Sesong">
 					<SelectValue placeholder="Sesong" />
@@ -67,8 +77,17 @@ export default function StatisticsFilters({
 
 			{groups.length > 0 && (
 				<Select
+					items={[
+						{ value: ALL, label: "Hele laget" },
+						...groups.map((group) => ({
+							value: group.id,
+							label: group.name,
+						})),
+					]}
 					value={groupId ?? ALL}
-					onValueChange={(value) => setFilter("gruppe", value)}
+					onValueChange={(value) =>
+						value !== null && setFilter("gruppe", value)
+					}
 				>
 					<SelectTrigger className="w-full" aria-label="Undergruppe">
 						<SelectValue placeholder="Undergruppe" />
@@ -85,8 +104,9 @@ export default function StatisticsFilters({
 			)}
 
 			<Select
+				items={[{ value: ALL, label: "Alle typer" }, ...eventTypeOptions]}
 				value={eventType ?? ALL}
-				onValueChange={(value) => setFilter("type", value)}
+				onValueChange={(value) => value !== null && setFilter("type", value)}
 			>
 				<SelectTrigger className="w-full" aria-label="Type arrangement">
 					<SelectValue placeholder="Type" />

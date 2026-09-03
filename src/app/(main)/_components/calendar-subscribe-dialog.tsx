@@ -8,6 +8,7 @@ import {
 	RefreshCw,
 } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
 import {
 	Dialog,
@@ -39,9 +40,17 @@ export function CalendarSubscribeDialog() {
 
 	const handleCopy = async () => {
 		if (!feedUrl) return;
-		await navigator.clipboard.writeText(feedUrl);
-		setCopied(true);
-		setTimeout(() => setCopied(false), 2000);
+		// Utklippstavla kan nektes — nettleseren krever sikker kontekst, og
+		// brukeren kan ha avslått. Uten fangst ble avslaget en ubehandlet
+		// rejection i konsollen, og brukeren satt igjen uten noe som helst
+		// tilbakemelding. Lenka står i feltet, så det er alltid en vei videre.
+		try {
+			await navigator.clipboard.writeText(feedUrl);
+			setCopied(true);
+			setTimeout(() => setCopied(false), 2000);
+		} catch {
+			toast.error("Fikk ikke kopiert lenka. Merk den i feltet og kopier selv.");
+		}
 	};
 
 	const googleCalUrl = feedUrl
@@ -50,12 +59,14 @@ export function CalendarSubscribeDialog() {
 
 	return (
 		<Dialog>
-			<DialogTrigger asChild>
-				<Button variant="outline" size="sm" className="gap-2">
-					<CalendarDays size={16} />
-					Abonner på kalender
-				</Button>
-			</DialogTrigger>
+			<DialogTrigger
+				render={
+					<Button variant="outline" size="sm" className="gap-2">
+						<CalendarDays size={16} />
+						Abonner på kalender
+					</Button>
+				}
+			/>
 			<DialogContent className="max-w-md">
 				<DialogHeader>
 					<DialogTitle>Abonner på kalender</DialogTitle>

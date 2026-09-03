@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import type { z } from "zod";
 import SubmitButton from "~/components/form/submit-button";
 import { Button } from "~/components/ui/button";
+import { DateTimePicker } from "~/components/ui/date-time-picker";
 import {
 	Dialog,
 	DialogContent,
@@ -29,7 +30,6 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { DateTimePicker } from "~/components/ui/photon/date-time-picker";
 import {
 	Select,
 	SelectContent,
@@ -40,6 +40,7 @@ import {
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
 import { anchorToAppZone, nowInAppZone, toAppZone } from "~/lib/datetime";
+import { eventTypeOptions } from "~/lib/event-presentation";
 import { UpdateEventInputSchema } from "~/schemas";
 import { api } from "~/trpc/react";
 import GroupPicker from "./group-picker";
@@ -127,11 +128,13 @@ export default function EditEvent({ event, teamId }: EditEventProps) {
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
-			<DialogTrigger asChild>
-				<Button size="sm">
-					<Pencil className="h-4 w-4" />
-				</Button>
-			</DialogTrigger>
+			<DialogTrigger
+				render={
+					<Button size="sm" aria-label={`Endre ${event.name}`}>
+						<Pencil className="h-4 w-4" />
+					</Button>
+				}
+			/>
 			<DialogContent className="sm:max-w-[425px] md:w-full md:max-w-xl">
 				<DialogHeader>
 					<DialogTitle>Rediger arrangement</DialogTitle>
@@ -208,6 +211,7 @@ export default function EditEvent({ event, teamId }: EditEventProps) {
 									<FormItem>
 										<FormLabel>Type</FormLabel>
 										<Select
+											items={eventTypeOptions}
 											onValueChange={field.onChange}
 											defaultValue={field.value}
 										>
@@ -217,10 +221,11 @@ export default function EditEvent({ event, teamId }: EditEventProps) {
 												</SelectTrigger>
 											</FormControl>
 											<SelectContent>
-												<SelectItem value="TRAINING">Trening</SelectItem>
-												<SelectItem value="MATCH">Kamp</SelectItem>
-												<SelectItem value="SOCIAL">Sosialt</SelectItem>
-												<SelectItem value="OTHER">Annet</SelectItem>
+												{eventTypeOptions.map((option) => (
+													<SelectItem key={option.value} value={option.value}>
+														{option.label}
+													</SelectItem>
+												))}
 											</SelectContent>
 										</Select>
 										<FormMessage />
@@ -313,18 +318,20 @@ export default function EditEvent({ event, teamId }: EditEventProps) {
 						)}
 						<div className="flex justify-end gap-2">
 							<Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-								<DialogTrigger asChild>
-									<Button
-										type="button"
-										variant="destructive"
-										size="sm"
-										disabled={
-											status === "pending" || deleteStatus === "pending"
-										}
-									>
-										Slett arrangement
-									</Button>
-								</DialogTrigger>
+								<DialogTrigger
+									render={
+										<Button
+											type="button"
+											variant="destructive"
+											size="sm"
+											disabled={
+												status === "pending" || deleteStatus === "pending"
+											}
+										>
+											Slett arrangement
+										</Button>
+									}
+								/>
 								<DialogContent>
 									<DialogHeader>
 										<DialogTitle>Bekreft sletting</DialogTitle>

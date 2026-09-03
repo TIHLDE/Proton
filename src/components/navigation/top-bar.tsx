@@ -113,7 +113,7 @@ const Navbar = () => {
 					>
 						<Sun className="dark:-rotate-90 h-[1rem] w-[1rem] rotate-0 scale-100 transition-all sm:h-[1.2rem] sm:w-[1.2rem] dark:scale-0" />
 						<Moon className="absolute h-[1rem] w-[1rem] rotate-90 scale-0 transition-all sm:h-[1.2rem] sm:w-[1.2rem] dark:rotate-0 dark:scale-100" />
-						<span className="sr-only">Toggle theme</span>
+						<span className="sr-only">Bytt mellom lys og mørk modus</span>
 					</Button>
 				</div>
 			</nav>

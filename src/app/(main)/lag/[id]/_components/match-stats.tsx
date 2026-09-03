@@ -98,9 +98,15 @@ export default function MatchStats({
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className="max-h-[85vh] overflow-y-auto">
 				<DialogHeader>
+					{/* Tittelen er en resultattavle: hjemmelag, stilling, motstander
+					    — der arrangementsnavnet er motstanderen, slik feltene i
+					    «Resultat» under også bruker det. Er ingen stilling ført,
+					    utelates den. Før sto det «? – ?» i stedet, som leste som
+					    om noe manglet i stedet for at kampen ikke er ført enda. */}
 					<DialogTitle>
-						{teamName} {match?.hasResult ? match.homeGoals : "?"} –{" "}
-						{match?.hasResult ? match.awayGoals : "?"} {eventName}
+						{match?.hasResult
+							? `${teamName} ${match.homeGoals} – ${match.awayGoals} ${eventName}`
+							: `${teamName} – ${eventName}`}
 					</DialogTitle>
 					<DialogDescription>
 						Mål, assist, kort og banens beste.
@@ -198,6 +204,10 @@ export default function MatchStats({
 								<Label>Ny hendelse</Label>
 								<div className="flex flex-col gap-2 sm:flex-row">
 									<Select
+										items={matchEventOrder.map((eventType) => ({
+											value: eventType,
+											label: getMatchEventLabel(eventType),
+										}))}
 										value={type}
 										onValueChange={(value) => setType(value as MatchEventType)}
 									>
@@ -213,7 +223,16 @@ export default function MatchStats({
 										</SelectContent>
 									</Select>
 
-									<Select value={userId} onValueChange={setUserId}>
+									<Select
+										items={players.map((player) => ({
+											value: player.id,
+											label: player.name,
+										}))}
+										value={userId}
+										onValueChange={(value) =>
+											value !== null && setUserId(value)
+										}
+									>
 										<SelectTrigger className="flex-1">
 											<SelectValue placeholder="Velg spiller" />
 										</SelectTrigger>

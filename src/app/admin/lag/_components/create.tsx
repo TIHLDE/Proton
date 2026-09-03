@@ -28,6 +28,12 @@ export default function CreateTeam() {
 
 	const form = useForm<z.infer<typeof CreateTeamInputSchema>>({
 		resolver: zodResolver(CreateTeamInputSchema),
+		// Uten defaultValues står feltene som `undefined` fram til første
+		// tastetrykk. Da treffer ikke `.min(1, "Du må angi et navn")` — Zod
+		// avviser på type i stedet, med sin egen engelske «Required». Feltene
+		// var dessuten ukontrollerte til de fikk innhold. Samme verdier som
+		// form.reset() bruker etter en vellykket opprettelse.
+		defaultValues: { name: "", slug: "" },
 	});
 
 	const { mutate: createTeam, status } = api.team.create.useMutation({
@@ -50,12 +56,14 @@ export default function CreateTeam() {
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
-			<DialogTrigger asChild>
-				<Button>
-					<Plus />
-					Opprett lag
-				</Button>
-			</DialogTrigger>
+			<DialogTrigger
+				render={
+					<Button>
+						<Plus />
+						Opprett lag
+					</Button>
+				}
+			/>
 			<DialogContent className="md:max-w-md">
 				<div className="mb-4 flex flex-col items-center gap-2">
 					<div

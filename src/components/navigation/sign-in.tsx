@@ -47,9 +47,7 @@ export default function LoginForm() {
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
-			<DialogTrigger asChild>
-				<Button variant="outline">Logg inn</Button>
-			</DialogTrigger>
+			<DialogTrigger render={<Button variant="outline">Logg inn</Button>} />
 			<DialogContent className="md:max-w-md">
 				<div className="mb-4 flex flex-col items-center gap-2">
 					<div

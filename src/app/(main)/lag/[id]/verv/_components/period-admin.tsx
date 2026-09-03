@@ -76,7 +76,14 @@ export default function PeriodAdmin({
 			<div className="space-y-2">
 				<Label className="text-xs">Tildel verv</Label>
 				<div className="flex flex-col gap-2 sm:flex-row">
-					<Select value={positionId} onValueChange={setPositionId}>
+					<Select
+						items={positions.map((position) => ({
+							value: position.id,
+							label: position.name,
+						}))}
+						value={positionId}
+						onValueChange={(value) => value !== null && setPositionId(value)}
+					>
 						<SelectTrigger className="w-full sm:w-44" aria-label="Verv">
 							<SelectValue placeholder="Velg verv" />
 						</SelectTrigger>
@@ -89,7 +96,14 @@ export default function PeriodAdmin({
 						</SelectContent>
 					</Select>
 
-					<Select value={userId} onValueChange={setUserId}>
+					<Select
+						items={members.map((member) => ({
+							value: member.id,
+							label: member.name,
+						}))}
+						value={userId}
+						onValueChange={(value) => value !== null && setUserId(value)}
+					>
 						<SelectTrigger className="flex-1" aria-label="Person">
 							<SelectValue placeholder="Velg person" />
 						</SelectTrigger>
@@ -112,12 +126,14 @@ export default function PeriodAdmin({
 			</div>
 
 			<Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-				<DialogTrigger asChild>
-					<Button variant="ghost" size="sm">
-						<Trash2 />
-						Slett perioden
-					</Button>
-				</DialogTrigger>
+				<DialogTrigger
+					render={
+						<Button variant="ghost" size="sm">
+							<Trash2 />
+							Slett perioden
+						</Button>
+					}
+				/>
 				<DialogContent>
 					<DialogHeader>
 						<DialogTitle>Slett {periodLabel}</DialogTitle>
@@ -138,11 +154,13 @@ export default function PeriodAdmin({
 						>
 							Slett perioden
 						</Button>
-						<DialogClose asChild>
-							<Button type="button" variant="ghost">
-								Avbryt
-							</Button>
-						</DialogClose>
+						<DialogClose
+							render={
+								<Button type="button" variant="ghost">
+									Avbryt
+								</Button>
+							}
+						/>
 					</div>
 				</DialogContent>
 			</Dialog>

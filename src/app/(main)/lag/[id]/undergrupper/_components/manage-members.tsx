@@ -76,12 +76,14 @@ export default function ManageMembers({
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogTrigger asChild>
-				<Button variant="outline" size="sm">
-					<UsersRound />
-					Medlemmer
-				</Button>
-			</DialogTrigger>
+			<DialogTrigger
+				render={
+					<Button variant="outline" size="sm">
+						<UsersRound />
+						Medlemmer
+					</Button>
+				}
+			/>
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>Medlemmer i {groupName}</DialogTitle>
@@ -129,11 +131,13 @@ export default function ManageMembers({
 					>
 						Lagre ({selected.size})
 					</Button>
-					<DialogClose asChild>
-						<Button type="button" variant="ghost">
-							Avbryt
-						</Button>
-					</DialogClose>
+					<DialogClose
+						render={
+							<Button type="button" variant="ghost">
+								Avbryt
+							</Button>
+						}
+					/>
 				</div>
 			</DialogContent>
 		</Dialog>

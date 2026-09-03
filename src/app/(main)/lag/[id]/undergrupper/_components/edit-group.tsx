@@ -68,12 +68,14 @@ export default function EditGroup({
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
-			<DialogTrigger asChild>
-				<Button variant="ghost" size="sm">
-					<Pencil />
-					Endre
-				</Button>
-			</DialogTrigger>
+			<DialogTrigger
+				render={
+					<Button variant="ghost" size="sm">
+						<Pencil />
+						Endre
+					</Button>
+				}
+			/>
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>Endre undergruppe</DialogTitle>
@@ -113,11 +115,13 @@ export default function EditGroup({
 
 						<div className="grid gap-2">
 							<SubmitButton text="Lagre" status={status} />
-							<DialogClose asChild>
-								<Button type="button" variant="ghost">
-									Avbryt
-								</Button>
-							</DialogClose>
+							<DialogClose
+								render={
+									<Button type="button" variant="ghost">
+										Avbryt
+									</Button>
+								}
+							/>
 						</div>
 					</form>
 				</Form>

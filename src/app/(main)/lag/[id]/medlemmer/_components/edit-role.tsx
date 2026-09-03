@@ -77,12 +77,14 @@ export default function EditRole({
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
-			<DialogTrigger asChild>
-				<Button variant="link">
-					Endre rolle
-					<PencilIcon />
-				</Button>
-			</DialogTrigger>
+			<DialogTrigger
+				render={
+					<Button variant="link">
+						Endre rolle
+						<PencilIcon />
+					</Button>
+				}
+			/>
 			<DialogContent>
 				<div className="mb-2 flex flex-col gap-2">
 					<div
@@ -182,11 +184,13 @@ export default function EditRole({
 								text="Endre rolle"
 								status={status}
 							/>
-							<DialogClose asChild>
-								<Button type="button" variant="ghost" className="w-full">
-									Avbryt
-								</Button>
-							</DialogClose>
+							<DialogClose
+								render={
+									<Button type="button" variant="ghost" className="w-full">
+										Avbryt
+									</Button>
+								}
+							/>
 						</div>
 					</form>
 				</Form>

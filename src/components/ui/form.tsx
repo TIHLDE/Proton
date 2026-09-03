@@ -1,7 +1,6 @@
 "use client";
 
-import type * as LabelPrimitive from "@radix-ui/react-label";
-import { Slot } from "@radix-ui/react-slot";
+import { useRender } from "@base-ui/react/use-render";
 import * as React from "react";
 import {
 	Controller,
@@ -13,8 +12,19 @@ import {
 	useFormState,
 } from "react-hook-form";
 
-import { Label } from "~/components/ui/label";
+import {
+	Field,
+	FieldDescription,
+	FieldError,
+	FieldLabel,
+} from "~/components/ui/field";
 import { cn } from "~/lib/utils";
+
+// Denne fila er *bare* en bro mellom react-hook-form og Photons Field-
+// primitiver. Alt visuelt bor i field.tsx, som er kopiert uendret fra
+// @tihlde/ui — så et designbytte i Photon slår gjennom her uten at denne
+// fila må røres. Kvark bruker @tanstack/react-form og har derfor sin egen
+// bro; Field-komponentene vet ikke om noen av delene.
 
 const Form = FormProvider;
 
@@ -73,16 +83,17 @@ const FormItemContext = React.createContext<FormItemContextValue>(
 	{} as FormItemContextValue,
 );
 
-function FormItem({ className, ...props }: React.ComponentProps<"div">) {
+// Merk at ingen av wrapperne under setter sin egen `data-slot`. Field-
+// primitivene setter den før de sprer props, så et `data-slot="form-label"`
+// herfra ville overstyrt `field-label` — og da slutter Photons egne
+// selektorer (`*:data-[slot=field-label]`, `has-[>[data-slot=field]]`) å
+// treffe. Slotene tilhører designsystemet, ikke denne broen.
+function FormItem({ ...props }: React.ComponentProps<typeof Field>) {
 	const id = React.useId();
 
 	return (
 		<FormItemContext.Provider value={{ id }}>
-			<div
-				data-slot="form-item"
-				className={cn("grid gap-2", className)}
-				{...props}
-			/>
+			<Field {...props} />
 		</FormItemContext.Provider>
 	);
 }
@@ -90,12 +101,11 @@ function FormItem({ className, ...props }: React.ComponentProps<"div">) {
 function FormLabel({
 	className,
 	...props
-}: React.ComponentProps<typeof LabelPrimitive.Root>) {
+}: React.ComponentProps<typeof FieldLabel>) {
 	const { error, formItemId } = useFormField();
 
 	return (
-		<Label
-			data-slot="form-label"
+		<FieldLabel
 			data-error={!!error}
 			className={cn("data-[error=true]:text-destructive", className)}
 			htmlFor={formItemId}
@@ -104,42 +114,36 @@ function FormLabel({
 	);
 }
 
-function FormControl({ ...props }: React.ComponentProps<typeof Slot>) {
+// Radix' <Slot> finnes ikke i Base UI. useRender gjør samme jobb: den slår
+// props-ene under sammen inn i elementet som sendes som children, i stedet
+// for å pakke det inn i en ekstra node.
+function FormControl({ children }: { children: React.ReactElement }) {
 	const { error, formItemId, formDescriptionId, formMessageId } =
 		useFormField();
 
-	return (
-		<Slot
-			data-slot="form-control"
-			id={formItemId}
-			aria-describedby={
-				!error
-					? `${formDescriptionId}`
-					: `${formDescriptionId} ${formMessageId}`
-			}
-			aria-invalid={!!error}
-			{...props}
-		/>
-	);
+	return useRender({
+		render: children as useRender.RenderProp,
+		props: {
+			id: formItemId,
+			"aria-describedby": error
+				? `${formDescriptionId} ${formMessageId}`
+				: formDescriptionId,
+			"aria-invalid": !!error,
+		},
+	});
 }
 
-function FormDescription({ className, ...props }: React.ComponentProps<"p">) {
+function FormDescription({
+	...props
+}: React.ComponentProps<typeof FieldDescription>) {
 	const { formDescriptionId } = useFormField();
 
 	return (
-		<p
-			data-slot="form-description"
-			id={formDescriptionId}
-			className={cn(
-				"text-left font-normal text-muted-foreground text-sm leading-normal [&>a:hover]:text-link [&>a]:underline [&>a]:underline-offset-4",
-				className,
-			)}
-			{...props}
-		/>
+		<FieldDescription id={formDescriptionId} {...props} />
 	);
 }
 
-function FormMessage({ className, ...props }: React.ComponentProps<"p">) {
+function FormMessage({ ...props }: React.ComponentProps<typeof FieldError>) {
 	const { error, formMessageId } = useFormField();
 	const body = error ? String(error?.message ?? "") : props.children;
 
@@ -148,14 +152,9 @@ function FormMessage({ className, ...props }: React.ComponentProps<"p">) {
 	}
 
 	return (
-		<p
-			data-slot="form-message"
-			id={formMessageId}
-			className={cn("font-normal text-destructive text-sm", className)}
-			{...props}
-		>
+		<FieldError id={formMessageId} {...props}>
 			{body}
-		</p>
+		</FieldError>
 	);
 }
 

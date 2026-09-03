@@ -31,17 +31,26 @@ function PopoverContent({
 	// tvinger fram en trigger selv der elementet ikke er en knapp — se
 	// time-picker.tsx, der feltet er ankeret og klokkeknappen er triggeren.
 	//
-	// Avvik fra Photon nr. 1: portalen får et mål. Proton bruker Radix' modale
-	// Dialog, som setter pointer-events: none på <body> og aria-hidden på alt
-	// utenfor seg selv. Portaleres popoveren til body havner den der og blir
-	// synlig, men helt uklikkbar — datovelgeren i «Nytt arrangement» tok ikke
-	// imot klikk i det hele tatt. Markøren under står der popoveren er brukt,
-	// så vi finner dialogen den ligger i og portalerer dit i stedet. Utenfor
-	// en dialog blir container null, og Base UI faller tilbake til body.
+	// Avvik fra Photon nr. 1: portalen får et mål. En modal dialog stenger alt
+	// utenfor seg selv ute — pointer-events på <body>, aria-hidden på søsknene
+	// — så en popover portalert til <body> blir synlig, men helt uklikkbar.
+	// Markøren under står der popoveren er brukt, så vi finner dialogen rundt
+	// og portalerer dit. Utenfor en dialog blir container null, og Base UI
+	// faller tilbake til body.
+	//
+	// Målet er *portalen*, ikke innholdet. dialog-content har både en
+	// `translate`-transform og `overflow-y-auto`: en popover der inne blir
+	// posisjonert mot dialogen og klippet av scroll-boksen hennes, så
+	// kalenderen la seg oppå tittelen med toppen avkuttet i stedet for å legge
+	// seg under feltet. dialog-portal er samme modale scope, men uten
+	// transform og uten overflow. Faller tilbake på innholdet for dialoger som
+	// ikke skulle ha noen portal-node.
 	const [container, setContainer] = React.useState<HTMLElement | null>(null);
 	const markerRef = React.useCallback((node: HTMLSpanElement | null) => {
 		setContainer(
-			node?.closest<HTMLElement>('[data-slot="dialog-content"]') ?? null,
+			node?.closest<HTMLElement>('[data-slot="dialog-portal"]') ??
+				node?.closest<HTMLElement>('[data-slot="dialog-content"]') ??
+				null,
 		);
 	}, []);
 

@@ -3,7 +3,6 @@
 import type { User } from "@prisma/client";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
 import { Button } from "~/components/ui/button";
 import { H2 } from "~/components/ui/typography";
 import { auth } from "~/lib/auth";
@@ -86,23 +85,16 @@ export default async function TeamStatistikkPage({
 		<div className="space-y-12 md:space-y-20">
 			<H2>Statistikk</H2>
 
-			{/* StatisticsFilters kaller useSearchParams(). Uten en Suspense-grense
-			    rundt bailer Next ut til klientrendering for undertreet, og da får
-			    serveren og klienten hver sin useId-sekvens. Radix satte ingen `id`
-			    på trigger-knappen, så avviket var usynlig; Base UI gjør det, og da
-			    ble det en hydreringsfeil. Grensen fjerner selve avviket. */}
-			<Suspense fallback={null}>
-				<StatisticsFilters
-					seasons={seasons.map((season) => ({
-						id: season.id,
-						label: season.label,
-					}))}
-					groups={groups.map((group) => ({ id: group.id, name: group.name }))}
-					seasonId={seasonId}
-					groupId={groupId}
-					eventType={eventType}
-				/>
-			</Suspense>
+			<StatisticsFilters
+				seasons={seasons.map((season) => ({
+					id: season.id,
+					label: season.label,
+				}))}
+				groups={groups.map((group) => ({ id: group.id, name: group.name }))}
+				seasonId={seasonId}
+				groupId={groupId}
+				eventType={eventType}
+			/>
 
 			<MatchStatistics teamId={id} seasonId={seasonId} groupId={groupId} />
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
 	Select,
 	SelectContent,
@@ -29,15 +29,27 @@ export default function StatisticsFilters({
 }: StatisticsFiltersProps) {
 	const router = useRouter();
 	const pathname = usePathname();
-	const searchParams = useSearchParams();
 
+	// Filtrene bygges av props, ikke av useSearchParams(). Serversiden leser
+	// allerede søkestrengen og sender ned de samme tre verdiene, så hooken ga
+	// ingen ny informasjon — men den fikk Next til å bail-e ut til
+	// klientrendering for undertreet, og da fikk server og klient hver sin
+	// useId-sekvens. Base UI setter en generert `id` på hver select-trigger,
+	// så avviket ble en hydreringsfeil på hele siden, også i søsken som
+	// MatchStatistics. Radix satte ingen id, og derfor var det usynlig før.
 	const setFilter = (key: string, value: string) => {
-		const params = new URLSearchParams(searchParams.toString());
-		if (value === ALL) {
-			params.delete(key);
-		} else {
-			params.set(key, value);
+		const params = new URLSearchParams();
+		const current: Record<string, string | undefined> = {
+			sesong: seasonId,
+			gruppe: groupId,
+			type: eventType,
+		};
+		current[key] = value === ALL ? undefined : value;
+
+		for (const [name, entry] of Object.entries(current)) {
+			if (entry) params.set(name, entry);
 		}
+
 		router.replace(`${pathname}?${params.toString()}`, { scroll: false });
 	};
 

@@ -136,7 +136,7 @@ export default function EditRole({ userId, isAdmin }: EditRoleProps) {
 								)}
 							>
 								<RadioGroupItem
-									value="2"
+									value="false"
 									id="false"
 									aria-describedby="false-description"
 									className="order-1 after:absolute after:inset-0"

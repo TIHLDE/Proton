@@ -130,7 +130,7 @@ export default function EditEvent({ event, teamId }: EditEventProps) {
 		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger
 				render={
-					<Button size="sm">
+					<Button size="sm" aria-label={`Endre ${event.name}`}>
 						<Pencil className="h-4 w-4" />
 					</Button>
 				}

@@ -96,6 +96,11 @@ Unntakene — filer som er Protons egne og *skal* redigeres her:
   triggeren ikke er en ekte knapp. Her er feltet i stedet *anker*, og
   klokkeknappen — som allerede er en `<button>` — er triggeren. Se
   TIHLDE/Photon#725; fiksen hører hjemme der.
+- Skjermleser-tekstene i `dialog.tsx`, `sheet.tsx` og `sidebar.tsx` er oversatt
+  til norsk. Photon skriver «Close» og «Toggle Sidebar»; Proton hadde «Lukk» før
+  porteringen, og en norsk app skal ikke lese opp engelsk. Dette er den eneste
+  endringen som er gjort *inne i* en ellers ordrett kopiert fil — hold den ved
+  like ved neste synk, og send den gjerne oppstrøms til Photon.
 - `popover.tsx` — to ting. (1) Photons versjon portalerer til `<body>`. Ligger
   popoveren inne i en modal dialog, havner den utenfor dialogen: den vises, men
   klikk i den lukker dialogen eller når ikke fram i det hele tatt. Derfor finner

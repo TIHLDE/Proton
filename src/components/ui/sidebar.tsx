@@ -272,7 +272,7 @@ function SidebarTrigger({
 			{...props}
 		>
 			<PanelLeftIcon />
-			<span className="sr-only">Toggle Sidebar</span>
+			<span className="sr-only">Vis eller skjul sidemenyen</span>
 		</Button>
 	);
 }

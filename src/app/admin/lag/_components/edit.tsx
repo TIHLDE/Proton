@@ -81,7 +81,7 @@ export default function EditTeam({ team }: EditTeamProps) {
 		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger
 				render={
-					<Button size="sm" variant="outline">
+					<Button size="sm" variant="outline" aria-label={`Endre ${team.name}`}>
 						<Pencil className="h-4 w-4" />
 					</Button>
 				}

@@ -123,6 +123,7 @@ export default function PeriodDialog({ teamId, period }: PeriodDialogProps) {
 									setStartDate(date ? anchorToAppZone(date) : null)
 								}
 								locale={nb}
+								placeholder="Velg dato"
 							/>
 						</div>
 						<div className="space-y-2">
@@ -134,6 +135,7 @@ export default function PeriodDialog({ teamId, period }: PeriodDialogProps) {
 									setEndDate(date ? anchorToAppZone(date) : null)
 								}
 								locale={nb}
+								placeholder="Velg dato"
 								minDate={startDate ? toAppZone(startDate) : undefined}
 							/>
 						</div>

@@ -70,7 +70,7 @@ function DialogContent({
 					//
 					// flex-col (ikke grid): lar `DialogBody` ta resthøyden og
 					// scrolle for seg selv, slik at header og footer står låst.
-					"data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 -translate-x-1/2 -translate-y-1/2 fixed top-1/2 left-1/2 z-50 flex max-h-[calc(100dvh-2rem)] w-full max-w-[calc(100%-2rem)] flex-col gap-4 overflow-y-auto overscroll-contain rounded-xl bg-popover p-4 text-popover-foreground text-sm outline-none ring-1 ring-foreground/10 duration-100 has-data-[slot=dialog-body]:overflow-hidden data-[state=closed]:animate-out data-[state=open]:animate-in sm:max-w-sm",
+					"data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 -translate-x-1/2 -translate-y-1/2 fixed top-1/2 left-1/2 z-50 flex max-h-[calc(100dvh-2rem)] w-full max-w-[calc(100%-2rem)] flex-col gap-4 overflow-y-auto overscroll-contain rounded-xl bg-popover p-4 text-popover-foreground text-sm outline-none ring-1 ring-foreground/10 duration-100 has-data-[slot=dialog-body]:overflow-hidden has-[[data-slot=popover-content]]:overflow-visible data-[state=closed]:animate-out data-[state=open]:animate-in sm:max-w-sm",
 					className,
 				)}
 				{...props}

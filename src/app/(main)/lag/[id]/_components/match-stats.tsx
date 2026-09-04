@@ -98,11 +98,6 @@ export default function MatchStats({
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className="max-h-[85vh] overflow-y-auto">
 				<DialogHeader>
-					{/* Tittelen er en resultattavle: hjemmelag, stilling, motstander
-					    — der arrangementsnavnet er motstanderen, slik feltene i
-					    «Resultat» under også bruker det. Er ingen stilling ført,
-					    utelates den. Før sto det «? – ?» i stedet, som leste som
-					    om noe manglet i stedet for at kampen ikke er ført enda. */}
 					<DialogTitle>
 						{match?.hasResult
 							? `${teamName} ${match.homeGoals} – ${match.awayGoals} ${eventName}`

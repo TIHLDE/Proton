@@ -52,11 +52,8 @@ export default function UnansweredEventsDropdown() {
 					}
 				/>
 				<DropdownMenuContent align="end" className="w-80">
-					{/* Gruppa er ikke pynt: Base UIs GroupLabel *må* stå i en
-					    <Menu.Group>, ellers kaster den «MenuGroupContext is
-					    missing». Radix tillot en frittstående label, og det er
-					    forskjellen som traff her. Ledeteksten hører uansett til
-					    valgene under, så gruppa omslutter begge. */}
+					{/* Uten gruppa kaster DropdownMenuLabel «MenuGroupContext is
+					    missing» og tar ned sida. */}
 					<DropdownMenuGroup>
 						<DropdownMenuLabel>Ubesvarte events</DropdownMenuLabel>
 						<DropdownMenuSeparator />

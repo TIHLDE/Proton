@@ -30,13 +30,8 @@ export default function StatisticsFilters({
 	const router = useRouter();
 	const pathname = usePathname();
 
-	// Filtrene bygges av props, ikke av useSearchParams(). Serversiden leser
-	// allerede søkestrengen og sender ned de samme tre verdiene, så hooken ga
-	// ingen ny informasjon — men den fikk Next til å bail-e ut til
-	// klientrendering for undertreet, og da fikk server og klient hver sin
-	// useId-sekvens. Base UI setter en generert `id` på hver select-trigger,
-	// så avviket ble en hydreringsfeil på hele siden, også i søsken som
-	// MatchStatistics. Radix satte ingen id, og derfor var det usynlig før.
+	// Ikke useSearchParams: den bailer ut til klientrendering, og da havner
+	// server og klient på hver sin useId-sekvens — hydreringsfeil på hele sida.
 	const setFilter = (key: string, value: string) => {
 		const params = new URLSearchParams();
 		const current: Record<string, string | undefined> = {

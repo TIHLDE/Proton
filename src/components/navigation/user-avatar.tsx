@@ -17,9 +17,8 @@ export default function UserAvatar() {
 
 	return (
 		<DropdownMenu>
-			{/* Triggeren er en ekte <button> med avataren inni, ikke en Avatar
-			    rendret som knapp: Base UI advarer mot det siste, fordi et
-			    <span> med role="button" mister de native knappesemantikkene. */}
+			{/* Avataren står inni triggeren, ikke som `render`: en <span> med
+			    role="button" mister de native knappesemantikkene. */}
 			<DropdownMenuTrigger
 				aria-label="Brukermeny"
 				className="rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50"

@@ -20,12 +20,6 @@ import {
 } from "~/components/ui/field";
 import { cn } from "~/lib/utils";
 
-// Denne fila er *bare* en bro mellom react-hook-form og Photons Field-
-// primitiver. Alt visuelt bor i field.tsx, som er kopiert uendret fra
-// @tihlde/ui — så et designbytte i Photon slår gjennom her uten at denne
-// fila må røres. Kvark bruker @tanstack/react-form og har derfor sin egen
-// bro; Field-komponentene vet ikke om noen av delene.
-
 const Form = FormProvider;
 
 type FormFieldContextValue<
@@ -83,11 +77,8 @@ const FormItemContext = React.createContext<FormItemContextValue>(
 	{} as FormItemContextValue,
 );
 
-// Merk at ingen av wrapperne under setter sin egen `data-slot`. Field-
-// primitivene setter den før de sprer props, så et `data-slot="form-label"`
-// herfra ville overstyrt `field-label` — og da slutter Photons egne
-// selektorer (`*:data-[slot=field-label]`, `has-[>[data-slot=field]]`) å
-// treffe. Slotene tilhører designsystemet, ikke denne broen.
+// Ingen av wrapperne setter egen `data-slot`: den ville overstyrt Fields egen,
+// og Photons selektorer slutter å treffe.
 function FormItem({ ...props }: React.ComponentProps<typeof Field>) {
 	const id = React.useId();
 
@@ -114,9 +105,6 @@ function FormLabel({
 	);
 }
 
-// Radix' <Slot> finnes ikke i Base UI. useRender gjør samme jobb: den slår
-// props-ene under sammen inn i elementet som sendes som children, i stedet
-// for å pakke det inn i en ekstra node.
 function FormControl({ children }: { children: React.ReactElement }) {
 	const { error, formItemId, formDescriptionId, formMessageId } =
 		useFormField();

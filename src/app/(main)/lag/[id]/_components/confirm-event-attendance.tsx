@@ -1,7 +1,7 @@
 "use client";
 
 import type { RegistrationType } from "@prisma/client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
@@ -24,13 +24,60 @@ import { api } from "~/trpc/react";
 
 type UserPreview = { id: string; name: string; image: string | null };
 
+type AbsenceReason = "overridden" | "not_attending" | "no_response";
+
 type RegistrationRow = {
 	id: string;
 	type: RegistrationType;
 	confirmedAbsent: boolean;
 	attendedWithoutRsvp: boolean;
+	absenceReason: AbsenceReason | null;
+	comment: string | null;
 	user: UserPreview;
 };
+
+const absenceLabel: Record<AbsenceReason, string> = {
+	overridden: "Møtte ikke likevel",
+	not_attending: "Meldte fravær",
+	no_response: "Svarte ikke",
+};
+
+function ExpandableComment({
+	id,
+	comment,
+	expanded,
+	onToggle,
+}: {
+	id: string;
+	comment: string;
+	expanded: boolean;
+	onToggle: () => void;
+}) {
+	const ref = useRef<HTMLParagraphElement>(null);
+	const [isClamped, setIsClamped] = useState(false);
+
+	useEffect(() => {
+		const el = ref.current;
+		if (el) setIsClamped(el.scrollHeight > el.clientHeight);
+	}, [id, comment]);
+
+	return (
+		<div className="text-muted-foreground text-xs">
+			<p ref={ref} className={expanded ? undefined : "line-clamp-1"}>
+				{comment}
+			</p>
+			{(isClamped || expanded) && (
+				<button
+					type="button"
+					className="underline-offset-2 hover:underline"
+					onClick={onToggle}
+				>
+					{expanded ? "Vis mindre" : "Les mer"}
+				</button>
+			)}
+		</div>
+	);
+}
 
 interface ConfirmEventAttendanceProps {
 	eventId: string;
@@ -52,6 +99,9 @@ export default function ConfirmEventAttendance({
 	const [tab, setTab] = useState<Tab>("present");
 	const [selectedWithoutRsvpUserId, setSelectedWithoutRsvpUserId] =
 		useState<string>("");
+	const [expandedComments, setExpandedComments] = useState<Set<string>>(
+		new Set(),
+	);
 	const utils = api.useUtils();
 
 	const { data: registrations, isLoading } =
@@ -94,13 +144,26 @@ export default function ConfirmEventAttendance({
 			},
 		});
 
-	const attending = (registrations ?? []).filter(
-		(r: RegistrationRow) => r.type === "ATTENDING",
+	const present = (registrations ?? []).filter(
+		(r: RegistrationRow) => r.absenceReason === null,
 	);
-	const present = attending.filter((r: RegistrationRow) => !r.confirmedAbsent);
-	const absent = attending.filter((r: RegistrationRow) => r.confirmedAbsent);
+	const absent = (registrations ?? []).filter(
+		(r: RegistrationRow) => r.absenceReason !== null,
+	);
 
 	const list = tab === "present" ? present : absent;
+
+	function toggleComment(id: string) {
+		setExpandedComments((prev) => {
+			const next = new Set(prev);
+			if (next.has(id)) {
+				next.delete(id);
+			} else {
+				next.add(id);
+			}
+			return next;
+		});
+	}
 
 	return (
 		<Dialog
@@ -110,6 +173,7 @@ export default function ConfirmEventAttendance({
 				if (!next) {
 					setTab("present");
 					setSelectedWithoutRsvpUserId("");
+					setExpandedComments(new Set());
 				}
 			}}
 		>
@@ -166,7 +230,7 @@ export default function ConfirmEventAttendance({
 											key={row.id}
 											className="flex flex-col gap-2 rounded-lg border bg-card p-3"
 										>
-											<div className="flex items-center gap-3">
+											<div className="flex items-start gap-3">
 												<Avatar>
 													<AvatarImage
 														src={row.user.image ?? undefined}
@@ -182,6 +246,19 @@ export default function ConfirmEventAttendance({
 														<div className="text-muted-foreground text-xs">
 															Uten påmelding
 														</div>
+													)}
+													{row.absenceReason && (
+														<div className="text-muted-foreground text-xs">
+															{absenceLabel[row.absenceReason]}
+														</div>
+													)}
+													{tab === "absent" && row.comment && (
+														<ExpandableComment
+															id={row.id}
+															comment={row.comment}
+															expanded={expandedComments.has(row.id)}
+															onToggle={() => toggleComment(row.id)}
+														/>
 													)}
 												</div>
 											</div>
@@ -203,24 +280,26 @@ export default function ConfirmEventAttendance({
 													Møtte ikke
 												</Button>
 											)}
-											{isAdmin && tab === "absent" && (
-												<Button
-													type="button"
-													size="sm"
-													variant="outline"
-													className="w-full"
-													disabled={isPending}
-													onClick={() =>
-														setConfirmedAbsentMutation({
-															eventId,
-															userId: row.user.id,
-															confirmedAbsent: false,
-														})
-													}
-												>
-													Opphev (møtte likevel)
-												</Button>
-											)}
+											{isAdmin &&
+												tab === "absent" &&
+												row.absenceReason === "overridden" && (
+													<Button
+														type="button"
+														size="sm"
+														variant="outline"
+														className="w-full"
+														disabled={isPending}
+														onClick={() =>
+															setConfirmedAbsentMutation({
+																eventId,
+																userId: row.user.id,
+																confirmedAbsent: false,
+															})
+														}
+													>
+														Opphev (møtte likevel)
+													</Button>
+												)}
 										</div>
 									))}
 								</div>

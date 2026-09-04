@@ -6,12 +6,8 @@
 		"useIgnoreFile": true
 	},
 	"files": { "ignoreUnknown": false, "ignore": [] },
-	// src/components/ui/* er kopiert ordrett fra @tihlde/ui i Photon-monorepoet,
-	// og skal kunne kopieres på nytt med `cp` uten at diffen fylles av
-	// formateringsstøy. Photon formaterer med oxfmt (4 mellomrom) og sorterer
-	// klasser etter oxlints regel; biome ville skrevet begge deler om, og da
-	// slutter filene å være identiske med kilden. Derfor er katalogen holdt
-	// utenfor både formateraren og linteren. Se CLAUDE.md for synkerutinen.
+	// src/components/ui/* er ordrette kopier fra Photon. Formaterer biome dem,
+	// slutter de å være byte-like med kilden og synk blir umulig å lese.
 	"formatter": { "enabled": true, "ignore": ["src/components/ui/**"] },
 	"organizeImports": { "enabled": true },
 	"linter": {

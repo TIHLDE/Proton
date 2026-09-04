@@ -235,18 +235,11 @@ export function TimePicker({
 
 	const stop = (e: React.SyntheticEvent) => e.stopPropagation();
 
-	// Avvik fra Photon: der er hele feltet <PopoverTrigger>. Feltet er en
-	// <div role="group"> med tre inputs inni, så Base UI advarer om at det ikke
-	// er en ekte knapp — og eneste måten å tilfredsstille den advarselen på er
-	// `nativeButton={false}`, som setter role="button" på gruppa. Innholdet i
-	// en button er presentasjonelt i ARIA, så skjermlesere ville sluttet å
-	// eksponere time- og minuttfeltene. Her er feltet i stedet *anker*, og
-	// klokkeknappen — som allerede er en ekte <button> — er triggeren.
-	//
-	// Bakgrunnsklikket åpner, slik det gjorde før. Det lukker ikke, men det
-	// gjorde det ikke med triggeren heller: popoveren lukkes hverken av
-	// bakgrunnsklikk, klokkeknappen eller Escape i dagens komponent. Se
-	// TIHLDE/Photon#725.
+	// Avvik fra Photon, se CLAUDE.md: feltet er anker og klokkeknappen trigger.
+	// `nativeButton={false}` på feltet ville gitt gruppa role="button", og da
+	// blir time- og minuttfeltene presentasjonelle for skjermlesere.
+	// Popoveren lukkes ikke av bakgrunnsklikk — den gjorde ikke det før heller,
+	// se TIHLDE/Photon#725.
 	const openFromBackground = (e: React.MouseEvent<HTMLDivElement>) => {
 		const target = e.target as HTMLElement;
 		if (target.tagName === "INPUT" || target.closest("button")) return;

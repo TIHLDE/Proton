@@ -40,10 +40,6 @@ export function CalendarSubscribeDialog() {
 
 	const handleCopy = async () => {
 		if (!feedUrl) return;
-		// Utklippstavla kan nektes — nettleseren krever sikker kontekst, og
-		// brukeren kan ha avslått. Uten fangst ble avslaget en ubehandlet
-		// rejection i konsollen, og brukeren satt igjen uten noe som helst
-		// tilbakemelding. Lenka står i feltet, så det er alltid en vei videre.
 		try {
 			await navigator.clipboard.writeText(feedUrl);
 			setCopied(true);

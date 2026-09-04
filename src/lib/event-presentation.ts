@@ -32,13 +32,8 @@ const eventTypePresentation: Record<
 	},
 };
 
-// Base UIs SelectValue viser den rå verdien med mindre <Select> får `items`
-// med etiketter. Lista bor her, sammen med etikettene den bruker, så den ikke
-// driver fra hverandre i de tre skjemaene som trenger den.
-//
-// Rekkefølgen er den brukerne har sett i nedtrekkene hele tiden, og er skrevet
-// ut med vilje: utleder vi den fra `Object.keys(eventTypePresentation)`, styres
-// menyen av hvilken rekkefølge fargene tilfeldigvis står i over.
+// Skrevet ut, ikke utledet av eventTypePresentation: ellers styres rekkefølgen
+// i nedtrekkene av hvilken rekkefølge fargene tilfeldigvis står i.
 const eventTypeOrder: TeamEventType[] = [
 	"TRAINING",
 	"MATCH",

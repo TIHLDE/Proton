@@ -28,11 +28,8 @@ export default function CreateTeam() {
 
 	const form = useForm<z.infer<typeof CreateTeamInputSchema>>({
 		resolver: zodResolver(CreateTeamInputSchema),
-		// Uten defaultValues står feltene som `undefined` fram til første
-		// tastetrykk. Da treffer ikke `.min(1, "Du må angi et navn")` — Zod
-		// avviser på type i stedet, med sin egen engelske «Required». Feltene
-		// var dessuten ukontrollerte til de fikk innhold. Samme verdier som
-		// form.reset() bruker etter en vellykket opprettelse.
+		// Uten disse er feltene `undefined`, og Zod avviser på type med sin
+		// egen engelske «Required» i stedet for meldinga i skjemaet.
 		defaultValues: { name: "", slug: "" },
 	});
 

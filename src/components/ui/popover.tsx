@@ -26,25 +26,9 @@ function PopoverContent({
 		PopoverPrimitive.Positioner.Props,
 		"align" | "alignOffset" | "side" | "sideOffset" | "anchor"
 	>) {
-	// Avvik fra Photon nr. 2: `anchor` slippes gjennom til Positioner. Uten den
-	// må alt som skal posisjonere en popover gå via <PopoverTrigger>, og det
-	// tvinger fram en trigger selv der elementet ikke er en knapp — se
-	// time-picker.tsx, der feltet er ankeret og klokkeknappen er triggeren.
-	//
-	// Avvik fra Photon nr. 1: portalen får et mål. En modal dialog stenger alt
-	// utenfor seg selv ute — pointer-events på <body>, aria-hidden på søsknene
-	// — så en popover portalert til <body> blir synlig, men helt uklikkbar.
-	// Markøren under står der popoveren er brukt, så vi finner dialogen rundt
-	// og portalerer dit. Utenfor en dialog blir container null, og Base UI
-	// faller tilbake til body.
-	//
-	// Målet er *portalen*, ikke innholdet. dialog-content har både en
-	// `translate`-transform og `overflow-y-auto`: en popover der inne blir
-	// posisjonert mot dialogen og klippet av scroll-boksen hennes, så
-	// kalenderen la seg oppå tittelen med toppen avkuttet i stedet for å legge
-	// seg under feltet. dialog-portal er samme modale scope, men uten
-	// transform og uten overflow. Faller tilbake på innholdet for dialoger som
-	// ikke skulle ha noen portal-node.
+	// To avvik fra Photon, begge dokumentert i CLAUDE.md: `anchor` slippes
+	// gjennom, og portalen får et mål. Målet er dialog-*portal*, ikke -content:
+	// content har transform og overflow-y-auto, som klipper popoveren.
 	const [container, setContainer] = React.useState<HTMLElement | null>(null);
 	const markerRef = React.useCallback((node: HTMLSpanElement | null) => {
 		setContainer(

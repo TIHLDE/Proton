@@ -43,6 +43,17 @@ export default function PeriodDialog({ teamId, period }: PeriodDialogProps) {
 	const [endDate, setEndDate] = useState<Date | null>(period?.endDate ?? null);
 	const router = useRouter();
 
+	// Dialogen forblir montert etter lukking, så feltene må settes tilbake ved
+	// åpning — ellers står forrige periodes datoer der neste gang.
+	const handleOpenChange = (next: boolean) => {
+		if (next) {
+			setName(period?.name ?? "");
+			setStartDate(period?.startDate ?? null);
+			setEndDate(period?.endDate ?? null);
+		}
+		setOpen(next);
+	};
+
 	const onDone = () => {
 		setOpen(false);
 		router.refresh();
@@ -80,7 +91,7 @@ export default function PeriodDialog({ teamId, period }: PeriodDialogProps) {
 	};
 
 	return (
-		<Dialog open={open} onOpenChange={setOpen}>
+		<Dialog open={open} onOpenChange={handleOpenChange}>
 			<DialogTrigger
 				render={
 					period ? (

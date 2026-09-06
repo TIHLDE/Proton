@@ -48,6 +48,14 @@ COPY --from=build /app/.next/static ./.next/static/
 COPY --from=build /app/prisma ./prisma/
 COPY --from=build /app/public ./public/
 
+# Bakes inn av byggekjeden. En container som ikke kom derfra — en lokal
+# `docker build` — har dem ikke, og ruta sier «unknown» i stedet for å finne
+# på en versjon.
+ARG APP_VERSION=unknown
+ARG GIT_SHA=unknown
+ENV APP_VERSION=$APP_VERSION
+ENV GIT_SHA=$GIT_SHA
+
 EXPOSE 3000
 ENV PORT=3000
 ENV NEXT_TELEMETRY_DISABLED=1

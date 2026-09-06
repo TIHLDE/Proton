@@ -23,6 +23,9 @@ jobs:
     with:
       context: .
       dockerfile: ./Dockerfile
+      build_args: |
+        APP_VERSION=${{ github.ref_name }}
+        GIT_SHA=${{ github.sha }}
 
   deploy:
     needs: build

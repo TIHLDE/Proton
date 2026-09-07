@@ -162,9 +162,23 @@
 	--radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* Fra shadcn/tailwind.css, som @tihlde/ui importerer. Bare denne ene utilityen
-   er portet — resten (scroll-fade, shimmer, data-*-varianter) har ingen bruker
-   i Proton, og Radix-komponentene her bruker `data-[state=…]` direkte. */
+/* Fra shadcn/tailwind.css, som @tihlde/ui importerer. Bare det som har en bruker
+   i Proton er portet — resten (scroll-fade, shimmer) står igjen der.
+
+   Base UI skriver `data-orientation`, ikke `data-horizontal`, så uten disse to
+   variantene faller `separator` og `tabs` tilbake til null høyde og bredde. */
+@custom-variant data-horizontal {
+	&:where([data-orientation="horizontal"]) {
+		@slot;
+	}
+}
+
+@custom-variant data-vertical {
+	&:where([data-orientation="vertical"]) {
+		@slot;
+	}
+}
+
 @utility no-scrollbar {
 	-ms-overflow-style: none;
 	scrollbar-width: none;

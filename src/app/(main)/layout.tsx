@@ -15,7 +15,7 @@ export default async function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<div className="relative min-h-dvh">
+		<div className="relative min-h-dvh pb-16 sm:pb-0">
 			<Navbar />
 			<main className="w-full">{children}</main>
 			<BottomBar />

@@ -1,92 +1,91 @@
-import { Facebook, Instagram } from "lucide-react";
-import Image from "next/image";
+import { Facebook, Instagram, Linkedin } from "lucide-react";
 import Link from "next/link";
-import TihldeLogo from "../logo";
+import { Separator } from "~/components/ui/separator";
 
 const Footer = () => {
-	const attributes = [
-		{ id: "email", key: "E-post", value: "idkom@tihlde.org" },
-		{ id: "orgNumber", key: "Organisasjonsnummer", value: "989 684 183" },
-		{ id: "location", key: "Lokasjon", value: "c/o IDI NTNU" },
-	];
-
-	const socials = [
-		{
-			id: "instagram",
-			icon: <Instagram size={24} />,
-			href: "https://instagram.com/tihlde",
-		},
-		{
-			id: "facebook",
-			icon: <Facebook size={24} />,
-			href: "https://facebook.com/tihlde",
-		},
-	];
-
 	return (
-		<div className="mx-auto w-full max-w-7xl px-4 py-16 md:px-20 md:py-16 [@media(display-mode:standalone)]:hidden">
-			<div className="flex w-full flex-col items-center space-y-12 md:flex-row md:items-start md:justify-between md:space-y-0">
-				{/* Left side - Tihlde logo with social icons */}
-				<div className="flex flex-col items-center space-y-6 md:items-start">
-					<Link
-						href="/"
-						aria-label="Til forsiden"
-						className="font-bold text-2xl text-logo"
+		<footer className="w-full">
+			<Separator variant="subtle" />
+			<div className="container mx-auto grid gap-6 px-4 py-6 md:grid-cols-3 md:gap-8 md:py-10">
+				<div className="flex flex-col items-center gap-1 text-center md:items-start md:gap-2 md:text-left">
+					<h3 className="font-heading font-semibold text-sm">Kontakt</h3>
+					<p>
+						E-post: <a href="mailto:hs@tihlde.org">hs@tihlde.org</a>
+					</p>
+					<p>Lokasjon: c/o IDI, NTNU</p>
+					<p>Org.nr: 989 684 183</p>
+				</div>
+
+				<div className="flex flex-col items-center gap-3 text-center">
+					<h3 className="font-heading font-semibold text-sm">
+						Hovedsamarbeidspartner
+					</h3>
+					<a
+						href="https://www.dnv.no/"
+						target="_blank"
+						rel="noopener noreferrer"
+						aria-label="DNV"
+						className="rounded-lg bg-white p-3 md:p-4"
 					>
-						<TihldeLogo size="large" className="h-fit w-52" />
-					</Link>
-					<div className="flex space-x-8">
-						{socials.map((social) => (
-							<Link
-								key={social.id}
-								href={social.href}
-								target="_blank"
-								rel="noopener noreferrer"
-								aria-label={social.id}
-								className="text-foreground-secondary transition-colors hover:text-foreground-primary"
-							>
-								{social.icon}
-							</Link>
-						))}
-					</div>
+						<img
+							src="https://cdn.onedesign.dnv.com/onedesigncdn/3.7.0/images/DNV_logo_RGB.svg"
+							alt="DNV"
+							loading="lazy"
+							className="w-36 md:w-48"
+						/>
+					</a>
 				</div>
 
-				{/* Middle - Contact information */}
-				<div className="space-y-4 md:items-start">
-					<h3 className="font-semibold text-3xl">Kontakt</h3>
-					{attributes.map((attribute) => (
-						<div key={attribute.id}>
-							<h4 className="text-sm">{attribute.key}</h4>
-							<p className="font-semibold">{attribute.value}</p>
-						</div>
-					))}
+				<div className="flex flex-col items-center gap-3 text-center md:items-end md:text-right">
+					<h3 className="font-heading font-semibold text-sm">Samarbeid</h3>
+					<a
+						href="https://www.nito.no/"
+						target="_blank"
+						rel="noopener noreferrer"
+						aria-label="NITO"
+					>
+						<img
+							src="data:image/svg+xml,%3csvg%20width='2100'%20height='484'%20viewBox='0%200%202100%20484'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cpath%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M471%20473H11V13H471V473ZM89%20395H300L89%2090V395ZM183%2090L394%20395V90H183Z'%20fill='%232EC78F'/%3e%3cpath%20d='M626%20473H704V154L947%20473H1015V12H937V332L694%2012H626V473Z'%20fill='%232EC78F'/%3e%3cpath%20d='M1115%20472V12L1193%2012.1054V472H1115Z'%20fill='%232EC78F'/%3e%3cpath%20d='M1393%2086V473H1471V86H1617V12H1251V86H1393Z'%20fill='%232EC78F'/%3e%3cpath%20fill-rule='evenodd'%20clip-rule='evenodd'%20d='M1855%205C1985.89%205%202092%20111.109%202092%20242C2092%20372.891%201985.89%20479%201855%20479C1724.11%20479%201618%20372.891%201618%20242C1618%20111.109%201724.11%205%201855%205ZM1855.5%2087C1769.62%2087%201700%20156.62%201700%20242.5C1700%20328.38%201769.62%20398%201855.5%20398C1941.38%20398%202011%20328.38%202011%20242.5C2011%20156.62%201941.38%2087%201855.5%2087Z'%20fill='%232EC78F'/%3e%3c/svg%3e"
+							alt="NITO"
+							loading="lazy"
+							className="w-24 md:w-28"
+						/>
+					</a>
 				</div>
 
-				{/* Right side - Nito logo */}
-				<div className="flex flex-col items-center space-y-4 md:items-start">
-					<h3 className="text-center font-semibold text-2xl">Samarbeid</h3>
-					{/* Show light logo in light mode, white logo in dark mode */}
-					<div className="relative h-[46px] w-[200px]">
-						<Image
-							src={"/nito_logo_primaer_gronn_dyp.png"}
-							alt="NITO Logo light"
-							fill
-							className="block object-contain dark:hidden"
-							sizes="200px"
-							priority={false}
-						/>
-						<Image
-							src={"/nito-logo-hvit.png"}
-							alt="NITO Logo dark"
-							fill
-							className="hidden object-contain dark:block"
-							sizes="200px"
-							priority={false}
-						/>
-					</div>
+				<div className="flex items-center justify-center gap-6 md:col-span-3 md:gap-3">
+					<a
+						href="https://www.facebook.com/tihlde"
+						target="_blank"
+						rel="noopener noreferrer"
+						aria-label="Facebook"
+					>
+						<Facebook className="size-5" />
+					</a>
+					<a
+						href="https://www.instagram.com/tihlde"
+						target="_blank"
+						rel="noopener noreferrer"
+						aria-label="Instagram"
+					>
+						<Instagram className="size-5" />
+					</a>
+					<a
+						href="https://www.linkedin.com/company/tihlde"
+						target="_blank"
+						rel="noopener noreferrer"
+						aria-label="LinkedIn"
+					>
+						<Linkedin className="size-5" />
+					</a>
 				</div>
 			</div>
-		</div>
+			<Separator variant="subtle" />
+			<div className="container mx-auto flex flex-col items-center justify-between gap-1 px-4 py-4 text-center text-sm md:flex-row md:gap-2 md:py-6 md:text-left">
+				<p>© {new Date().getFullYear()} TIHLDE</p>
+				<Link href="https://tihlde.org/personvern">Personvernerklæring</Link>
+			</div>
+		</footer>
 	);
 };
 

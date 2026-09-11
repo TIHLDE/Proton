@@ -1,7 +1,7 @@
 "use client";
 
 import { Bell, BellOff, Mail, Send } from "lucide-react";
-import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { usePushNotifications } from "~/hooks/use-push-notifications";
 import { api } from "~/trpc/react";
 import { Button } from "./ui/button";
@@ -18,23 +18,30 @@ export function NotificationSettings() {
 	const { isSupported, isSubscribed, isLoading, subscribe, unsubscribe } =
 		usePushNotifications();
 
-	const [emailNotificationsEnabled, setEmailNotificationsEnabled] =
-		useState(true);
-	const [isLoadingEmail, setIsLoadingEmail] = useState(true);
-
+	const utils = api.useUtils();
 	const getEmailStatusQuery = api.email.getStatus.useQuery();
-	const updateEmailStatusMutation = api.email.updateStatus.useMutation();
+	const updateEmailStatusMutation = api.email.updateStatus.useMutation({
+		onSuccess: async (_data, status) => {
+			await utils.email.getStatus.cancel();
+			utils.email.getStatus.setData(undefined, status);
+		},
+		onError: () => toast.error("Kunne ikke lagre e-postinnstillingene."),
+	});
 	const sendTestMutation = api.push.sendTest.useMutation();
-	const sendEmailTestMutation = api.email.sendTest.useMutation();
+	const sendEmailTestMutation = api.email.sendTest.useMutation({
+		onError: () => toast.error("Kunne ikke sende test-e-posten."),
+	});
 
-	useEffect(() => {
-		if (getEmailStatusQuery.data) {
-			setEmailNotificationsEnabled(
-				getEmailStatusQuery.data.emailNotificationsEnabled,
-			);
-		}
-		setIsLoadingEmail(getEmailStatusQuery.isLoading);
-	}, [getEmailStatusQuery.data, getEmailStatusQuery.isLoading]);
+	const status = getEmailStatusQuery.data;
+	const emailNotificationsEnabled = status?.emailNotificationsEnabled ?? false;
+	const newEventNotificationsEnabled =
+		status?.disabledEmailNotifications.newEvent !== true;
+	const unansweredEventNotificationsEnabled =
+		status?.disabledEmailNotifications.unansweredEvent !== true;
+	const isLoadingEmail =
+		!status ||
+		getEmailStatusQuery.isFetching ||
+		updateEmailStatusMutation.isPending;
 
 	const handleTogglePush = async () => {
 		if (isSubscribed) {
@@ -44,16 +51,21 @@ export function NotificationSettings() {
 		}
 	};
 
-	const handleToggleEmail = async () => {
-		setIsLoadingEmail(true);
-		try {
-			await updateEmailStatusMutation.mutateAsync({
-				emailNotificationsEnabled: !emailNotificationsEnabled,
-			});
-			setEmailNotificationsEnabled(!emailNotificationsEnabled);
-		} finally {
-			setIsLoadingEmail(false);
+	const handleToggleEmail = (
+		key: "master" | "newEvent" | "unansweredEvent",
+		checked: boolean,
+	) => {
+		if (!status || isLoadingEmail) return;
+		const disabledEmailNotifications = { ...status.disabledEmailNotifications };
+		if (key !== "master") {
+			if (checked) delete disabledEmailNotifications[key];
+			else disabledEmailNotifications[key] = true;
 		}
+		updateEmailStatusMutation.mutate({
+			emailNotificationsEnabled:
+				key === "master" ? checked : emailNotificationsEnabled,
+			disabledEmailNotifications,
+		});
 	};
 
 	const handleSendTest = () => {
@@ -90,6 +102,7 @@ export function NotificationSettings() {
 							</div>
 							<Switch
 								checked={isSubscribed}
+								aria-label="Aktiver push-varsler"
 								onCheckedChange={handleTogglePush}
 								disabled={isLoading}
 							/>
@@ -145,20 +158,60 @@ export function NotificationSettings() {
 						</div>
 						<Switch
 							checked={emailNotificationsEnabled}
-							onCheckedChange={handleToggleEmail}
+							aria-label="Aktiver e-postvarsler"
+							onCheckedChange={(checked) =>
+								handleToggleEmail("master", checked)
+							}
 							disabled={isLoadingEmail}
 						/>
 					</div>
 
 					{emailNotificationsEnabled && (
-						<Button
-							variant="outline"
-							onClick={handleSendEmailTest}
-							disabled={sendEmailTestMutation.isPending}
-						>
-							<Send className="mr-2 h-4 w-4" />
-							Send test-e-post
-						</Button>
+						<div className="space-y-3 border-t pt-4">
+							<p className="font-medium text-sm">Varseltyper</p>
+							{(
+								[
+									{
+										key: "newEvent",
+										label: "Nytt arrangement opprettet",
+										checked: newEventNotificationsEnabled,
+									},
+									{
+										key: "unansweredEvent",
+										label: "Husk å melde deg på arrangement",
+										checked: unansweredEventNotificationsEnabled,
+									},
+								] as const
+							).map(({ key, label, checked }) => (
+								<div className="flex items-center justify-between" key={key}>
+									<span className="text-sm">{label}</span>
+									<Switch
+										checked={checked}
+										aria-label={label}
+										onCheckedChange={(checked) =>
+											handleToggleEmail(key, checked)
+										}
+										disabled={isLoadingEmail}
+									/>
+								</div>
+							))}
+						</div>
+					)}
+
+					{emailNotificationsEnabled && (
+						<div>
+							<p className="mb-3 text-muted-foreground text-sm">
+								Test-e-posten er tilgjengelig når e-postvarsler er aktivert.
+							</p>
+							<Button
+								variant="outline"
+								onClick={handleSendEmailTest}
+								disabled={isLoadingEmail || sendEmailTestMutation.isPending}
+							>
+								<Send className="mr-2 h-4 w-4" />
+								Send test-e-post
+							</Button>
+						</div>
 					)}
 				</CardContent>
 			</Card>

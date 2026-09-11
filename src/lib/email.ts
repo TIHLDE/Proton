@@ -6,37 +6,28 @@ export async function sendEmail(
 	subject: string,
 	content: EmailContent[],
 ) {
-	if (env.NODE_ENV !== "production") return;
+	if (env.NODE_ENV !== "production" || to.length === 0) return;
 
-	if (to.length === 0) return;
-
-	try {
-		await Promise.all(
-			to.map(async (recipient) => {
-				const response = await fetch(
-					"https://photon.tihlde.org/api/email/send",
-					{
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
-							Authorization: `Bearer ${env.EMAIL_API_KEY}`,
-						},
-						body: JSON.stringify({
-							to: recipient,
-							subject,
-							content,
-						}),
-					},
-				);
-
-				if (!response.ok) {
-					throw new Error(
-						`Failed to send email to ${recipient}: ${response.statusText}`,
-					);
-				}
-			}),
+	const results = await Promise.allSettled(
+		to.map(async (recipient) => {
+			const response = await fetch("https://photon.tihlde.org/api/email/send", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bearer ${env.EMAIL_API_KEY}`,
+				},
+				body: JSON.stringify({ to: recipient, subject, content }),
+			});
+			if (!response.ok) {
+				throw new Error(`Failed to send email: ${response.status}`);
+			}
+		}),
+	);
+	const failures = results.filter((result) => result.status === "rejected");
+	if (failures.length) {
+		throw new AggregateError(
+			failures.map((result) => result.reason),
+			"Failed to send email",
 		);
-	} catch (error) {
-		console.error("Failed to send email:", error);
 	}
 }

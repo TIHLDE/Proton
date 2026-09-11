@@ -3,32 +3,72 @@ import type { EmailContent } from "~/types";
 import { sendEmail } from "./email";
 import { type PushPayload, sendPushNotification } from "./push";
 
+export type NotificationType =
+	| "newEvent"
+	| "unansweredEvent"
+	| "adminPromotion";
+export type PreferenceNotificationType = Exclude<
+	NotificationType,
+	"adminPromotion"
+>;
+export type DisabledEmailNotifications = Partial<
+	Record<PreferenceNotificationType, true>
+>;
+
 export interface NotificationOptions {
 	userIds: string[];
-	emails: string[];
+	type: NotificationType;
 	subject: string;
 	emailContent: EmailContent[];
 	pushPayload: PushPayload;
 }
 
-export async function sendNotification(options: NotificationOptions) {
-	const { userIds, emails, subject, emailContent, pushPayload } = options;
+export const settingsUrl =
+	"https://sporty.tihlde.org/min-oversikt/innstillinger";
 
-	// Filter out users who have disabled email notifications
-	const usersWithEmailEnabled = await db.user.findMany({
+function categoryEnabled(disabled: unknown, type: NotificationType) {
+	if (type === "adminPromotion") return true;
+	return !(
+		typeof disabled === "object" &&
+		disabled !== null &&
+		(disabled as Record<string, unknown>)[type] === true
+	);
+}
+
+export async function sendNotification(options: NotificationOptions) {
+	const { userIds, subject, emailContent, pushPayload, type } = options;
+	const uniqueUserIds = [...new Set(userIds)];
+	if (uniqueUserIds.length === 0) return;
+
+	const users = await db.user.findMany({
 		where: {
-			id: { in: userIds },
-			emailNotificationsEnabled: true,
+			id: { in: uniqueUserIds },
 		},
 		select: {
 			email: true,
+			emailNotificationsEnabled: true,
+			disabledEmailNotifications: true,
 		},
 	});
 
-	const filteredEmails = usersWithEmailEnabled.map((user) => user.email);
+	const filteredEmails = users
+		.filter(
+			(user) =>
+				user.emailNotificationsEnabled &&
+				categoryEnabled(user.disabledEmailNotifications, type),
+		)
+		.map((user) => user.email);
 
-	await Promise.all([
-		sendEmail([...emails, ...filteredEmails], subject, emailContent),
-		sendPushNotification(userIds, pushPayload),
+	const results = await Promise.allSettled([
+		sendEmail([...new Set(filteredEmails)], subject, [
+			...emailContent,
+			{ type: "button", text: "Endre e-postinnstillinger", url: settingsUrl },
+		]),
+		sendPushNotification(uniqueUserIds, pushPayload),
 	]);
+	for (const result of results) {
+		if (result.status === "rejected") {
+			console.error("Failed to send notification:", result.reason);
+		}
+	}
 }

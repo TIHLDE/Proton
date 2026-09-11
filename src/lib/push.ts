@@ -11,7 +11,7 @@ export interface PushPayload {
 const VAPID_PUBLIC_KEY = env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 const VAPID_PRIVATE_KEY = env.VAPID_PRIVATE_KEY;
 
-if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
+if (env.NODE_ENV === "production" && VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
 	webPush.setVapidDetails(
 		"mailto:sporty@tihlde.org",
 		VAPID_PUBLIC_KEY,

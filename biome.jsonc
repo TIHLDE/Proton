@@ -9,7 +9,10 @@
 	// src/components/ui/* er ordrette kopier fra Photon. Formaterer biome dem,
 	// slutter de å være byte-like med kilden og synk blir umulig å lese.
 	"formatter": { "enabled": true, "ignore": ["src/components/ui/**"] },
-	"organizeImports": { "enabled": true },
+	"organizeImports": {
+		"enabled": true,
+		"ignore": ["src/components/ui/**"]
+	},
 	"linter": {
 		"enabled": true,
 		"ignore": [

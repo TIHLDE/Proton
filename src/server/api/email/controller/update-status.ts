@@ -4,6 +4,12 @@ import { type Controller, authorizedProcedure } from "../../trpc";
 
 const EmailStatusInputSchema = z.object({
 	emailNotificationsEnabled: z.boolean(),
+	disabledEmailNotifications: z
+		.object({
+			newEvent: z.literal(true).optional(),
+			unansweredEvent: z.literal(true).optional(),
+		})
+		.strict(),
 });
 
 const handler: Controller<
@@ -13,12 +19,8 @@ const handler: Controller<
 	const user = ctx.user as User;
 
 	await ctx.db.user.update({
-		where: {
-			id: user.id,
-		},
-		data: {
-			emailNotificationsEnabled: input.emailNotificationsEnabled,
-		},
+		where: { id: user.id },
+		data: input,
 	});
 };
 

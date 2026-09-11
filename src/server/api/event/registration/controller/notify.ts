@@ -1,5 +1,6 @@
 import type { User } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
+import { after } from "next/server";
 import type z from "zod";
 import { env } from "~/env";
 import { formatDateTimeLong } from "~/lib/datetime";
@@ -24,6 +25,7 @@ const handler: Controller<
 	const event = await ctx.db.teamEvent.findUnique({
 		where: {
 			id: input.eventId,
+			teamId: input.teamId,
 		},
 	});
 
@@ -44,11 +46,6 @@ const handler: Controller<
 		},
 		select: {
 			userId: true,
-			user: {
-				select: {
-					email: true,
-				},
-			},
 		},
 	});
 
@@ -58,47 +55,45 @@ const handler: Controller<
 		},
 	});
 
+	const registeredUserIds = new Set(registrations.map(({ userId }) => userId));
 	const unattendedMembers = teamMembers.filter(
-		(member) =>
-			!registrations.some(
-				(registration) => registration.userId === member.userId,
-			),
+		(member) => !registeredUserIds.has(member.userId),
 	);
 
 	const userIds = unattendedMembers.map((member) => member.userId);
-	const emails = unattendedMembers.map((member) => member.user.email);
-
-	void sendNotification({
-		userIds,
-		emails,
-		subject: "Husk å melde deg på arrangement",
-		emailContent: [
-			{ type: "title", content: "Du har ikke meldt deg på" },
-			{
-				type: "text",
-				content: `Du har ikke meldt deg på "${event.name}". Vennligst gå til laget ditt for å melde oppmøtet på arrangementet.`,
-			},
-			{
-				type: "text",
-				content: `Dato og tid: ${formatDateTimeLong(event.startAt)}`,
-			},
-			{
-				type: "text",
-				content: event.location ? `Sted: ${event.location}` : "",
-			},
-			{ type: "text", content: event.note ? `Notat: ${event.note}` : "" },
-			{
-				type: "button",
-				text: "Se arrangementet",
+	after(() =>
+		sendNotification({
+			userIds,
+			type: "unansweredEvent",
+			subject: "Husk å melde deg på arrangement",
+			emailContent: [
+				{ type: "title", content: "Du har ikke meldt deg på" },
+				{
+					type: "text",
+					content: `Du har ikke meldt deg på "${event.name}". Vennligst gå til laget ditt for å melde oppmøtet på arrangementet.`,
+				},
+				{
+					type: "text",
+					content: `Dato og tid: ${formatDateTimeLong(event.startAt)}`,
+				},
+				{
+					type: "text",
+					content: event.location ? `Sted: ${event.location}` : "",
+				},
+				{ type: "text", content: event.note ? `Notat: ${event.note}` : "" },
+				{
+					type: "button",
+					text: "Se arrangementet",
+					url: `${env.NEXT_PUBLIC_URL}/lag/${input.teamId}`,
+				},
+			],
+			pushPayload: {
+				title: "Husk å melde deg på",
+				body: `Du har ikke meldt deg på "${event.name}"`,
 				url: `${env.NEXT_PUBLIC_URL}/lag/${input.teamId}`,
 			},
-		],
-		pushPayload: {
-			title: "Husk å melde deg på",
-			body: `Du har ikke meldt deg på "${event.name}"`,
-			url: `${env.NEXT_PUBLIC_URL}/lag/${input.teamId}`,
-		},
-	});
+		}),
+	);
 };
 
 export default authorizedProcedure

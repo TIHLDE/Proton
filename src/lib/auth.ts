@@ -12,15 +12,14 @@ const PHOTON_AUDIENCE =
 	env.PHOTON_ISSUER ?? "https://photon.tihlde.org/api/auth";
 
 export const auth = betterAuth({
+	baseURL: env.BETTER_AUTH_URL,
 	secret: env.BETTER_AUTH_SECRET,
 	database: prismaAdapter(db, {
 		provider: "postgresql",
 	}),
-	// Passord logges inn med på tihlde.org, ikke her. Lepton skal avvikles, og
-	// denne appen skal uansett ikke ta imot medlemmenes passord for å veksle
-	// dem inn i et token et annet sted.
+	// Lokal testinnlogging i utvikling. Produksjon bruker bare Photon OAuth.
 	emailAndPassword: {
-		enabled: false,
+		enabled: env.NODE_ENV === "development",
 	},
 	session: {
 		expiresIn: 60 * 60 * 24 * 120, // 120 days,
@@ -35,8 +34,8 @@ export const auth = betterAuth({
 			},
 			isAdmin: {
 				type: "boolean",
-				required: true,
-				default: false,
+				input: false,
+				defaultValue: false,
 			},
 			calendarToken: {
 				type: "string",

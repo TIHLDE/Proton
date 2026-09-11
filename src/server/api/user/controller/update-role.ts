@@ -1,3 +1,4 @@
+import { after } from "next/server";
 import type z from "zod";
 import { env } from "~/env";
 import { sendNotification } from "~/lib/notify";
@@ -14,32 +15,34 @@ const handler: Controller<
 	});
 
 	if (input.isAdmin) {
-		void sendNotification({
-			userIds: [user.id],
-			emails: [user.email],
-			subject: "Du har blitt superadmin",
-			emailContent: [
-				{
-					type: "title",
-					content: "Gratulerer! Du er nå superadmin",
-				},
-				{
-					type: "text",
-					content:
-						"Du har fått superadmin-tilgang på Sporty. Dette gir deg tilgang til alle funksjoner og innstillinger i systemet.",
-				},
-				{
-					type: "button",
-					text: "Gå til admin-panelet",
+		after(() =>
+			sendNotification({
+				userIds: [user.id],
+				type: "adminPromotion",
+				subject: "Du har blitt superadmin",
+				emailContent: [
+					{
+						type: "title",
+						content: "Gratulerer! Du er nå superadmin",
+					},
+					{
+						type: "text",
+						content:
+							"Du har fått superadmin-tilgang på Sporty. Dette gir deg tilgang til alle funksjoner og innstillinger i systemet.",
+					},
+					{
+						type: "button",
+						text: "Gå til admin-panelet",
+						url: `${env.NEXT_PUBLIC_URL}/admin`,
+					},
+				],
+				pushPayload: {
+					title: "Du har blitt superadmin",
+					body: "Du har fått superadmin-tilgang på Sporty.",
 					url: `${env.NEXT_PUBLIC_URL}/admin`,
 				},
-			],
-			pushPayload: {
-				title: "Du har blitt superadmin",
-				body: "Du har fått superadmin-tilgang på Sporty.",
-				url: `${env.NEXT_PUBLIC_URL}/admin`,
-			},
-		});
+			}),
+		);
 	}
 };
 

@@ -19,24 +19,32 @@ export default function LoginForm() {
 	const [open, setOpen] = useState<boolean>(false);
 	const [isPending, setIsPending] = useState<boolean>(false);
 
-	/**
-	 * Sender brukeren til tihlde.org. Passordet skrives inn der, aldri her —
-	 * denne appen ser det ikke, og Feide-innlogging blir tilgjengelig på
-	 * kjøpet. Ingen redirect tilbake å håndtere: better-auth setter sesjonen i
-	 * callback-ruten og sender brukeren videre selv.
-	 */
 	const onSignIn = async () => {
 		setIsPending(true);
 		try {
+			if (process.env.NODE_ENV === "development") {
+				const credentials = {
+					email: "local-test-user@example.com",
+					password: "local-development-password",
+				};
+				const signIn = await authClient.signIn.email(credentials);
+				if (signIn.error) {
+					const signUp = await authClient.signUp.email({
+						...credentials,
+						name: "Lokal testbruker",
+						username: "local-test-user",
+					});
+					if (signUp.error) throw new Error(signUp.error.message);
+				}
+				window.location.assign("/");
+				return;
+			}
+
 			const { error } = await authClient.signIn.oauth2({
 				providerId: "photon",
 				callbackURL: "/",
 			});
-
-			if (error) {
-				toast.error(error.message ?? "Noe gikk galt under innloggingen.");
-				setIsPending(false);
-			}
+			if (error) throw new Error(error.message);
 		} catch {
 			toast.error(
 				"Noe gikk galt under innloggingen. Vennligst prøv igjen senere.",
@@ -61,7 +69,9 @@ export default function LoginForm() {
 							Velkommen tilbake
 						</DialogTitle>
 						<DialogDescription className="sm:text-center">
-							Du sendes til tihlde.org for å logge inn
+							{process.env.NODE_ENV === "development"
+								? "Logg inn lokalt uten å kontakte TIHLDE"
+								: "Du sendes til tihlde.org for å logge inn"}
 						</DialogDescription>
 					</DialogHeader>
 				</div>
@@ -75,7 +85,11 @@ export default function LoginForm() {
 					{isPending ? (
 						<Loader2 className="animate-spin" />
 					) : (
-						<span>Logg inn med TIHLDE</span>
+						<span>
+							{process.env.NODE_ENV === "development"
+								? "Logg inn som testbruker"
+								: "Logg inn med TIHLDE"}
+						</span>
 					)}
 				</Button>
 			</DialogContent>

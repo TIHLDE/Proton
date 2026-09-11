@@ -17,8 +17,8 @@ export const authClient = createAuthClient({
 				},
 				isAdmin: {
 					type: "boolean",
-					required: true,
-					default: false,
+					input: false,
+					defaultValue: false,
 				},
 			},
 		}),

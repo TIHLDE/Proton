@@ -19,6 +19,7 @@ model User {
   isAdmin                   Boolean @default(false)
   username                  String? @unique
   emailNotificationsEnabled Boolean @default(true)
+  disabledEmailNotifications Json @default("{}")
   calendarToken     String?  @unique
 
   /// Sist gang medlemskapene ble hentet fra Photon. Brukes til å strupe den

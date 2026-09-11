@@ -12,6 +12,7 @@ export const env = createEnv({
 			.enum(["development", "test", "production"])
 			.default("development"),
 		BETTER_AUTH_SECRET: z.string().optional(),
+		BETTER_AUTH_URL: z.string().url().optional(),
 		EMAIL_API_KEY: z.string().optional(),
 		VAPID_PRIVATE_KEY: z.string().optional(),
 		// Registrer klienten under /admin/oauth-clients på tihlde.org.
@@ -43,6 +44,7 @@ export const env = createEnv({
 		DATABASE_URL: process.env.DATABASE_URL,
 		NODE_ENV: process.env.NODE_ENV,
 		BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
+		BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
 		NEXT_PUBLIC_URL: process.env.NEXT_PUBLIC_URL,
 		EMAIL_API_KEY: process.env.EMAIL_API_KEY,
 		VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY,

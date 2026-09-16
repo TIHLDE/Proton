@@ -18,7 +18,9 @@ import {
 	hasTeamAccess,
 } from "~/services";
 import EditRole from "./_components/edit-role";
+import EditStatus from "./_components/edit-status";
 import Role from "./_components/role";
+import StatusBadge from "./_components/status-badge";
 
 interface TeamMembersPageProps {
 	params: Promise<{ id: string }>;
@@ -72,11 +74,25 @@ export default async function TeamMembersPage({
 							<P>
 								<Role role={membership.role} />
 							</P>
+							{!membership.isActive && (
+								<StatusBadge comment={membership.inactiveComment} />
+							)}
 							{(roles.includes("ADMIN") || session.user.isAdmin) && (
 								<EditRole
 									membershipId={membership.id}
 									teamId={id}
 									role={membership.role}
+								/>
+							)}
+							{(roles.includes("ADMIN") ||
+								roles.includes("SUBADMIN") ||
+								session.user.isAdmin) && (
+								<EditStatus
+									membershipId={membership.id}
+									teamId={id}
+									memberName={membership.user.name}
+									isActive={membership.isActive}
+									comment={membership.inactiveComment}
 								/>
 							)}
 						</div>

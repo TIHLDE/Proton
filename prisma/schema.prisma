@@ -112,6 +112,11 @@ model TeamMember {
   user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   team   Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
 
+  /// Kun en visuell markering i medlemslisten, foreløpig. Påvirker ikke
+  /// påmelding, varsler eller oppmøtestatistikk.
+  isActive        Boolean @default(true)
+  inactiveComment String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 

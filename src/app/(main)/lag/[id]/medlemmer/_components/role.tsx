@@ -1,21 +1,12 @@
 "use client";
 
 import type { TeamRole } from "@prisma/client";
+import { getTeamRoleLabel } from "~/lib/team-presentation";
 
 interface RoleProps {
 	role: TeamRole;
 }
 
 export default function Role({ role }: RoleProps) {
-	const getRoleName = () => {
-		switch (role) {
-			case "ADMIN":
-				return "Administrator";
-			case "SUBADMIN":
-				return "Subadministrator";
-			default:
-				return "Medlem";
-		}
-	};
-	return <span>{getRoleName()}</span>;
+	return <span>{getTeamRoleLabel(role)}</span>;
 }

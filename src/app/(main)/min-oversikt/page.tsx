@@ -6,6 +6,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { H1, H2, P } from "~/components/ui/typography";
 import { auth } from "~/lib/auth";
+import { getTeamRoleLabel } from "~/lib/team-presentation";
 import { getMyTeamMemberships, syncTeamMembershipsIfStale } from "~/services";
 import ReconnectButton from "./_components/reconnect";
 
@@ -73,7 +74,7 @@ export default async function MyOverviewPage() {
 							href={`/lag/${membership.team.id}`}
 						>
 							<H2>{membership.team.name}</H2>
-							<P>{membership.role === "ADMIN" ? "Administrator" : "Medlem"}</P>
+							<P>{getTeamRoleLabel(membership.role)}</P>
 
 							<div className="flex items-center justify-end gap-x-2">
 								<p>Se mer</p>

@@ -13,6 +13,9 @@
 /prisma/db.sqlite-journal
 db.sqlite
 
+# lokale, ikke-innsjekkede seed-script (eksempeldata for egen testing)
+/prisma/seed-local.ts
+
 # next.js
 /.next/
 /out/

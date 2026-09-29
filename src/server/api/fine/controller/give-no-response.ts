@@ -101,8 +101,12 @@ const handler: Controller<
 	]);
 
 	const answered = new Set(registrations.map(({ userId }) => userId));
+	const selected = new Set(input.userIds);
+	// Utvalget avgjøres her, ikke av klienten: den som har svart siden
+	// dialogen ble åpnet, eller aldri var invitert, får ikke bot selv om
+	// id-en er med i forespørselen.
 	const unanswered = members
-		.filter(({ user }) => !answered.has(user.id))
+		.filter(({ user }) => !answered.has(user.id) && selected.has(user.id))
 		.map(({ user, inactiveSince }) => ({
 			...user,
 			inactive: inactiveSince !== null,

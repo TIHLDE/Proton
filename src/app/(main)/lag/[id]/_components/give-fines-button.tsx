@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
+import { Checkbox } from "~/components/ui/checkbox";
 import {
 	Dialog,
 	DialogClose,
@@ -37,7 +38,7 @@ const NO_LAW = "none";
 /** getNonResponded er typet som any på serveren, så formen står her. */
 type NonResponder = {
 	id: string;
-	user: { name: string };
+	user: { id: string; name: string };
 	inactive: boolean;
 };
 
@@ -58,6 +59,9 @@ export default function GiveFinesButton({
 	const [quantity, setQuantity] = useState(String(defaultQuantity(eventType)));
 	const [reason, setReason] = useState("");
 	const [lawId, setLawId] = useState(NO_LAW);
+	// Hvem som er krysset av bort. Å lagre de fravalgte i stedet for de valgte
+	// gjør at alle er valgt så snart lista er hentet.
+	const [deselected, setDeselected] = useState<Set<string>>(new Set());
 
 	const defaultReason = `Ikke svart på «${eventName}»`;
 
@@ -112,13 +116,27 @@ export default function GiveFinesButton({
 			setQuantity(String(defaultQuantity(eventType)));
 			setReason(defaultReason);
 			setLawId(NO_LAW);
+			setDeselected(new Set());
 		}
 		setOpen(next);
 	};
 
 	const members: NonResponder[] = unanswered ?? [];
-	// Inaktive står i lista så admin ser hvorfor de slipper, men telles ikke.
-	const count = members.filter((member) => !member.inactive).length;
+	// Inaktive står i lista så admin ser hvorfor de slipper, men kan ikke velges.
+	const eligible = members.filter((member) => !member.inactive);
+	const selectedIds = eligible
+		.filter((member) => !deselected.has(member.user.id))
+		.map((member) => member.user.id);
+	const count = selectedIds.length;
+	const allSelected = count === eligible.length;
+
+	const toggle = (userId: string) =>
+		setDeselected((previous) => {
+			const next = new Set(previous);
+			if (next.has(userId)) next.delete(userId);
+			else next.add(userId);
+			return next;
+		});
 
 	return (
 		<Dialog open={open} onOpenChange={handleOpenChange}>
@@ -131,38 +149,72 @@ export default function GiveFinesButton({
 				<DialogHeader>
 					<DialogTitle>Gi bot for manglende svar</DialogTitle>
 					<DialogDescription>
-						Alle inviterte som ikke har svart på «{eventName}» får en bot i
-						gruppa på tihlde.org. Den venter på godkjenning til botsjefen
-						godkjenner den der. De som allerede har fått bot for dette
+						De du krysser av blant dem som ikke har svart på «{eventName}», får
+						en bot i gruppa på tihlde.org. Den venter på godkjenning til
+						botsjefen godkjenner den der. De som allerede har fått bot for dette
 						arrangementet, får ikke en til.
 					</DialogDescription>
 				</DialogHeader>
 
 				<div className="space-y-4">
 					<div className="space-y-2">
-						<Label>
-							{isLoading
-								? "Henter hvem som ikke har svart …"
-								: members.length === 0
-									? "Alle har svart."
-									: `${members.length} har ikke svart`}
-						</Label>
+						<div className="flex items-center justify-between gap-2">
+							<Label>
+								{isLoading
+									? "Henter hvem som ikke har svart …"
+									: members.length === 0
+										? "Alle har svart."
+										: `${members.length} har ikke svart`}
+							</Label>
+							{eligible.length > 1 && (
+								<Button
+									type="button"
+									variant="link"
+									size="sm"
+									onClick={() =>
+										setDeselected(
+											allSelected
+												? new Set(eligible.map((member) => member.user.id))
+												: new Set(),
+										)
+									}
+								>
+									{allSelected ? "Fjern alle" : "Velg alle"}
+								</Button>
+							)}
+						</div>
 						{members.length > 0 && (
-							<ul className="max-h-40 overflow-y-auto rounded-md border p-2 text-sm">
-								{members.map((member) => (
-									<li
-										key={member.id}
-										className={
-											member.inactive
-												? "px-2 py-1 text-muted-foreground"
-												: "px-2 py-1"
-										}
-									>
-										{member.user.name}
-										{member.inactive && " (inaktiv, får ikke bot)"}
-									</li>
-								))}
-							</ul>
+							<div className="max-h-56 space-y-1 overflow-y-auto rounded-md border p-2">
+								{members.map((member) => {
+									const checkboxId = `fine-${eventId}-${member.user.id}`;
+									return (
+										<div
+											key={member.id}
+											className="flex items-center gap-3 rounded-md px-2 py-1.5 hover:bg-accent"
+										>
+											<Checkbox
+												id={checkboxId}
+												checked={
+													!member.inactive && !deselected.has(member.user.id)
+												}
+												disabled={member.inactive}
+												onCheckedChange={() => toggle(member.user.id)}
+											/>
+											<Label
+												htmlFor={checkboxId}
+												className={
+													member.inactive
+														? "flex-1 font-normal text-muted-foreground"
+														: "flex-1 cursor-pointer font-normal"
+												}
+											>
+												{member.user.name}
+												{member.inactive && " (inaktiv, får ikke bot)"}
+											</Label>
+										</div>
+									);
+								})}
+							</div>
 						)}
 					</div>
 
@@ -239,6 +291,7 @@ export default function GiveFinesButton({
 							}
 							giveFines({
 								eventId,
+								userIds: selectedIds,
 								quantity: Number(quantity),
 								reason,
 								lawId: lawId === NO_LAW ? undefined : lawId,

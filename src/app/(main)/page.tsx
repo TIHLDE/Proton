@@ -6,7 +6,7 @@ import TihldeLogo from "~/components/logo";
 import { NotificationPrompt } from "~/components/notification-prompt";
 import { PWAInstallPrompt } from "~/components/pwa-install-prompt";
 import { auth } from "~/lib/auth";
-import { getAllMyEvents } from "~/services";
+import { getAllMyEvents, getRegistrationCountsForEvents } from "~/services";
 import Hero from "../_components/hero";
 import MyCalendar from "./_components/calendar";
 
@@ -42,6 +42,13 @@ export default async function Home({ searchParams }: HomeProps) {
 				: fallbackEnd;
 
 		const events = await getAllMyEvents(session.user.id, startDate, endDate);
+		const registrationCounts = await getRegistrationCountsForEvents(
+			events.map((event) => ({ id: event.id, teamId: event.teamId })),
+		);
+		const eventsWithCounts = events.map((event) => ({
+			...event,
+			registrationCounts: registrationCounts.get(event.id),
+		}));
 		const initialDate = startDate;
 		const allowedViews = ["month", "week", "day", "agenda"] as const;
 		const viewParam = resolvedSearchParams.view;
@@ -52,7 +59,7 @@ export default async function Home({ searchParams }: HomeProps) {
 				<PWAInstallPrompt isLoggedIn={true} />
 				<NotificationPrompt isLoggedIn={true} />
 				<MyCalendar
-					events={events}
+					events={eventsWithCounts}
 					initialDate={initialDate}
 					initialView={initialView}
 				/>

@@ -123,12 +123,13 @@ export function getAllEventsForDay(
 }
 
 /**
- * Get all events for a day (for agenda view)
+ * Get all events for a day (for agenda view). Generic so the richer
+ * agenda event type (with `team` attached) survives the filter/sort.
  */
-export function getAgendaEventsForDay(
-	events: TeamEvent[],
+export function getAgendaEventsForDay<T extends TeamEvent>(
+	events: T[],
 	day: Date,
-): TeamEvent[] {
+): T[] {
 	return events
 		.filter((event) => {
 			const eventStart = new Date(event.startAt);

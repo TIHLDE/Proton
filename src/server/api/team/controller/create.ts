@@ -33,6 +33,9 @@ const handler: Controller<
 		data: {
 			name: input.name,
 			slug: input.slug,
+			category: input.category,
+			logoUrl: input.logoUrl || null,
+			emoji: input.emoji || null,
 		},
 	});
 };

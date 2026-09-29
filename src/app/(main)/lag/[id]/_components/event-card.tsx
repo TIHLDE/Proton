@@ -4,6 +4,7 @@ import type { TeamEvent } from "@prisma/client";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { EventOverview } from "~/components/event-overview";
+import RegistrationList from "~/components/registration-list";
 import { Button } from "~/components/ui/button";
 import {
 	type AttendanceStatusFilter,
@@ -11,9 +12,9 @@ import {
 } from "~/lib/event-presentation";
 import { cn } from "~/lib/utils";
 import ConfirmEventAttendance from "./confirm-event-attendance";
+import GiveFinesButton from "./give-fines-button";
 import MatchStats from "./match-stats";
 import NotifyUnattended from "./notify-unattended";
-import RegistrationList from "./registration-list";
 
 interface EventCardProps {
 	event: TeamEvent;
@@ -38,6 +39,8 @@ export default function EventCard({
 
 	const now = new Date();
 	const isPastEvent = new Date(event.endAt ?? event.startAt) < now;
+	const isDeadlinePassed =
+		new Date(event.registrationDeadline ?? event.startAt) < now;
 
 	const handleStatusClick = (status: AttendanceStatusFilter) => {
 		setSelectedStatus(status);
@@ -47,14 +50,14 @@ export default function EventCard({
 	return (
 		<div
 			className={cn(
-				"rounded-xl p-6 transition-shadow",
+				"space-y-6 rounded-xl p-6 transition-shadow",
 				getEventDetailCardClassName(),
 			)}
 		>
 			<EventOverview
 				event={event}
 				headerActions={actions}
-				showAttendanceSummary={showRegistration}
+				showAttendanceSummary
 				showRegistration={showRegistration}
 				onAttendanceStatusClick={handleStatusClick}
 				footer={
@@ -96,6 +99,14 @@ export default function EventCard({
 					</Button>
 				</div>
 			)}
+
+			{isAdmin &&
+				(event.eventType === "TRAINING" || event.eventType === "MATCH") &&
+				isDeadlinePassed && (
+					<div className="border-t pt-6">
+						<GiveFinesButton eventId={event.id} eventType={event.eventType} />
+					</div>
+				)}
 
 			<ConfirmEventAttendance
 				eventId={event.id}

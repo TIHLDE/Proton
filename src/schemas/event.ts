@@ -13,6 +13,9 @@ export const CreateEventInputSchema = z
 			.string()
 			.optional()
 			.transform((val) => (val?.trim() ? val : undefined)),
+		// Kun satt når stedet kommer fra et adresseforslag - se schema.prisma.
+		locationLat: z.number().optional(),
+		locationLng: z.number().optional(),
 		note: z
 			.string()
 			.optional()
@@ -45,6 +48,8 @@ export const UpdateEventInputSchema = z
 			.string()
 			.optional()
 			.transform((val) => (val?.trim() ? val : undefined)),
+		locationLat: z.number().optional(),
+		locationLng: z.number().optional(),
 		note: z
 			.string()
 			.optional()

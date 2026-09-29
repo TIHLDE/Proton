@@ -8,6 +8,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type { z } from "zod";
+import LocationAutocomplete from "~/components/form/location-autocomplete";
 import { Button } from "~/components/ui/button";
 import { DateTimePicker } from "~/components/ui/date-time-picker";
 import {
@@ -199,9 +200,21 @@ export default function CreateEvent({ teamId }: CreateEventProps) {
 									<FormItem>
 										<FormLabel>Sted</FormLabel>
 										<FormControl>
-											<Input
+											<LocationAutocomplete
+												id={field.name}
+												value={field.value ?? ""}
 												placeholder="Hvor skal arrangementet være?"
-												{...field}
+												onChange={(value) => {
+													field.onChange(value);
+													// Skrives det videre på et valgt forslag, er
+													// teksten ikke lenger det forslaget pekte på.
+													form.setValue("locationLat", undefined);
+													form.setValue("locationLng", undefined);
+												}}
+												onSelect={(selection) => {
+													form.setValue("locationLat", selection.lat);
+													form.setValue("locationLng", selection.lng);
+												}}
 											/>
 										</FormControl>
 										<FormMessage />

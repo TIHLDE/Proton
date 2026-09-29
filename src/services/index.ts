@@ -4,6 +4,8 @@ export * from "./membership";
 export * from "./membership-sync";
 export * from "./event";
 export * from "./group";
+export * from "./registration";
 export * from "./leadership";
 export * from "./user";
 export * from "./auth";
+export * from "./fine";

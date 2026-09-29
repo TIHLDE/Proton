@@ -73,6 +73,17 @@ export const getAllMyEvents = async (
 		orderBy: {
 			startAt: "asc",
 		},
+		include: {
+			team: {
+				select: {
+					id: true,
+					name: true,
+					category: true,
+					logoUrl: true,
+					emoji: true,
+				},
+			},
+		},
 	});
 
 	return events;

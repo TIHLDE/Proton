@@ -6,6 +6,7 @@ import { nb } from "date-fns/locale";
 import { Users } from "lucide-react";
 import type { ReactNode } from "react";
 import EventRegistration from "~/app/(main)/lag/[id]/_components/event-registration";
+import { EventLocationMap } from "~/components/event-location-map";
 import { toAppZone } from "~/lib/datetime";
 import {
 	type AttendanceStatusFilter,
@@ -173,6 +174,16 @@ export function EventOverview({
 				>
 					{event.location || "Ikke oppgitt"}
 				</EventInfoBlock>
+
+				{event.location && (
+					<div className="sm:col-span-2">
+						<EventLocationMap
+							location={event.location}
+							lat={event.locationLat}
+							lng={event.locationLng}
+						/>
+					</div>
+				)}
 
 				{event.registrationDeadline && (
 					<EventInfoBlock

@@ -35,6 +35,7 @@ import {
 	EventGap,
 	EventHeight,
 	MonthView,
+	type TeamEventWithTeam,
 	WeekCellsHeight,
 	WeekView,
 } from "~/components/event-calendar";
@@ -50,7 +51,7 @@ import { nowInAppZone } from "~/lib/datetime";
 import { cn } from "~/lib/utils";
 
 export interface EventCalendarProps {
-	events?: TeamEvent[];
+	events?: TeamEventWithTeam[];
 	onEventAdd?: (event: TeamEvent) => void;
 	onEventUpdate?: (event: TeamEvent) => void;
 	onEventDelete?: (eventId: string) => void;

@@ -34,6 +34,8 @@ const handler: Controller<
 			startAt: input.startDatetime,
 			endAt: input.endDatetime,
 			location: input.location,
+			locationLat: input.locationLat ?? null,
+			locationLng: input.locationLng ?? null,
 			note: input.note,
 			registrationDeadline: input.registrationDeadline,
 			invitedGroups: {

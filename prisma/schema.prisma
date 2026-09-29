@@ -37,6 +37,9 @@ model User {
   groupMemberships  TeamGroupMember[]
   matchEvents       MatchEvent[]
   positions         PositionAssignment[]
+  finesReceived     Fine[]               @relation("FineRecipient")
+  finesIssued       Fine[]               @relation("FineIssuedBy")
+  finesReversed     Fine[]               @relation("FineReversedBy")
 
   @@unique([email])
   @@map("user")
@@ -92,6 +95,13 @@ model Team {
   name String  @unique
   slug String? @unique
 
+  /// Styrer fargegradienten laget vises med rundt om i appen (lagkort,
+  /// forsidens agenda). Ingen automatikk her - Pythons-lag heter ikke alltid
+  /// noe med "Pythons", så en administrator setter denne selv.
+  category TeamCategory @default(TIHLDE)
+  logoUrl  String?
+  emoji    String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
@@ -100,6 +110,7 @@ model Team {
   groups    TeamGroup[]
   positions TeamPosition[]
   periods   LeadershipPeriod[]
+  fines     Fine[]
 
   @@map("team")
 }
@@ -128,6 +139,11 @@ enum TeamRole {
   ADMIN
   SUBADMIN
   USER
+}
+
+enum TeamCategory {
+  PYTHONS
+  TIHLDE
 }
 
 /// En undergruppe av et lag, f.eks. "11'er" eller "7'er". Lagets egne
@@ -176,6 +192,12 @@ model TeamEvent {
   startAt              DateTime
   endAt                DateTime?
   location             String?
+  /// Kun satt når stedet er valgt fra adresseforslagene, ikke skrevet fritt.
+  /// Gjør kartvisningen entydig - et fritekstsøk mot Google gjetter ellers ut
+  /// fra hvor DEN SOM SER PÅ kartet befinner seg, så samme adresse kan vises
+  /// på feil sted for ulike brukere.
+  locationLat          Float?
+  locationLng          Float?
   note                 String?
   registrationDeadline DateTime?
   team                 Team           @relation(fields: [teamId], references: [id], onDelete: Cascade)
@@ -183,6 +205,7 @@ model TeamEvent {
   attendances          Attendance[]
   invitedGroups        TeamEventGroup[]
   match                Match?
+  fines                Fine[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -195,6 +218,38 @@ enum TeamEventType {
   MATCH
   SOCIAL
   OTHER
+}
+
+/// En bot for å ikke ha svart på trening eller kamp innen påmeldingsfristen.
+/// Gis aldri som en fellesbot til hele laget - bare til de som faktisk
+/// mangler svar, via en admin-knapp per arrangement. `amount` er
+/// bøt-enheter (1 for trening, 2 for kamp), ikke kroner; ekte kroneverdi
+/// kommer eventuelt med en fremtidig TIHLDE-integrasjon.
+model Fine {
+  id      String @id @default(cuid())
+  userId  String
+  teamId  String
+  eventId String
+  amount  Int
+
+  issuedByUserId String
+  /// Myk angring, ikke sletting - historikken skal forbli synlig.
+  reversed         Boolean   @default(false)
+  reversedByUserId String?
+  reversedAt       DateTime?
+
+  user       User      @relation("FineRecipient", fields: [userId], references: [id], onDelete: Cascade)
+  team       Team      @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  event      TeamEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  issuedBy   User      @relation("FineIssuedBy", fields: [issuedByUserId], references: [id])
+  reversedBy User?     @relation("FineReversedBy", fields: [reversedByUserId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@unique([userId, eventId])
+  @@index([teamId])
+  @@map("fine")
 }
 
 /// Hvilke undergrupper et arrangement er åpent for. Ingen rader betyr at

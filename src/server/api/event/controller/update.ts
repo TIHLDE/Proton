@@ -29,6 +29,12 @@ const handler: Controller<
 			startAt: input.startDatetime,
 			endAt: input.endDatetime,
 			location: input.location,
+			// ?? null, ikke undefined: uten det ville en redigert stedstekst
+			// (uten å velge et nytt forslag) latt den gamle, nå feil,
+			// koordinaten stå igjen i databasen - Prisma hopper over
+			// undefined-felt i stedet for å nullstille dem.
+			locationLat: input.locationLat ?? null,
+			locationLng: input.locationLng ?? null,
 			note: input.note,
 			registrationDeadline: input.registrationDeadline,
 			// Utvalget settes på nytt i sin helhet, slik dialogen sender det.

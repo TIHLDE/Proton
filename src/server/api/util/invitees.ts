@@ -59,3 +59,35 @@ export async function getInvitedGroups(
 
 	return rows.map((row) => row.group);
 }
+
+/**
+ * Inviterte medlemmer som verken har meldt seg på eller av. Delt mellom
+ * registration.getNonResponded, event.registration.notify og bot-utstedelse
+ * - alle tre må telle nøyaktig de samme personene, ellers kan noen bli
+ * bøtelagt for noe telleren andre steder i appen ikke er enig i.
+ */
+export async function getNonRespondedUserIds(
+	eventId: string,
+): Promise<string[]> {
+	const event = await db.teamEvent.findUniqueOrThrow({
+		where: { id: eventId },
+		select: { teamId: true },
+	});
+
+	const invitedUserIds = await getInvitedUserIds(eventId);
+
+	const teamMembers = await db.teamMember.findMany({
+		where: { teamId: event.teamId, ...invitedUserFilter(invitedUserIds) },
+		select: { userId: true },
+	});
+
+	const registrations = await db.registration.findMany({
+		where: { eventId },
+		select: { userId: true },
+	});
+	const registeredUserIds = new Set(registrations.map((r) => r.userId));
+
+	return teamMembers
+		.map((member) => member.userId)
+		.filter((userId) => !registeredUserIds.has(userId));
+}

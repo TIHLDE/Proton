@@ -8,6 +8,16 @@ const eventTypePresentation: Record<
 	{
 		label: string;
 		badgeClassName: string;
+		emoji: string;
+		// Vinklede 3-stopp-gradienter, faste per arrangementstype uavhengig av
+		// hvilket lag arrangementet tilhører. Trening/Annet gjenbruker bevisst
+		// samme HEX-verdier som gruppefargene til hhv. Pythons og vanlige
+		// TIHLDE-lag (se team-presentation.ts) - resten av paletten (Kamp,
+		// Sosialt) finnes bare her.
+		gradient: string;
+		// Samme HEX som gradientens 0%-stopp, til steder en gradient ikke er
+		// mulig (tekst/ikonfarge - `color` støtter ikke gradienter).
+		accentColor: string;
 	}
 > = {
 	// Kortet er nøytralt for alle typer, som ethvert annet kort i TIHLDE-
@@ -17,18 +27,30 @@ const eventTypePresentation: Record<
 	MATCH: {
 		label: "Kamp",
 		badgeClassName: "bg-primary text-primary-foreground",
+		emoji: "🏆",
+		gradient: "linear-gradient(135deg, #D746AE 0%, #71254C 50%, #D746AE 100%)",
+		accentColor: "#D746AE",
 	},
 	TRAINING: {
 		label: "Trening",
 		badgeClassName: "bg-secondary text-secondary-foreground",
+		emoji: "🏋️",
+		gradient: "linear-gradient(135deg, #8346D7 0%, #452571 50%, #8346D7 100%)",
+		accentColor: "#8346D7",
 	},
 	SOCIAL: {
 		label: "Sosialt",
 		badgeClassName: "bg-foreground text-background",
+		emoji: "🎉",
+		gradient: "linear-gradient(135deg, #D7CD46 0%, #6F7125 50%, #D7CD46 100%)",
+		accentColor: "#D7CD46",
 	},
 	OTHER: {
 		label: "Annet",
 		badgeClassName: "border border-border text-muted-foreground",
+		emoji: "📌",
+		gradient: "linear-gradient(135deg, #005CFF 0%, #20478C 50%, #005CFF 100%)",
+		accentColor: "#005CFF",
 	},
 };
 
@@ -66,6 +88,40 @@ export function getEventTypeBadgeClassName(type: TeamEventType): string {
 	return (
 		eventTypePresentation[type]?.badgeClassName ??
 		eventTypePresentation.OTHER.badgeClassName
+	);
+}
+
+export function getEventTypeEmoji(type: TeamEventType): string {
+	return (
+		eventTypePresentation[type]?.emoji ?? eventTypePresentation.OTHER.emoji
+	);
+}
+
+export function getEventTypeGradient(type: TeamEventType): string {
+	return (
+		eventTypePresentation[type]?.gradient ??
+		eventTypePresentation.OTHER.gradient
+	);
+}
+
+// rgba(...) med gitt alpha av aksentfargen - til nedtonede bakgrunner
+// (måned-/uke-/dagvisningens ruter) der en full gradient ville vært for
+// dominerende, men fargen fortsatt skal gå igjen.
+export function getEventTypeTintedBackground(
+	type: TeamEventType,
+	alpha: number,
+): string {
+	const hex = getEventTypeAccentColor(type);
+	const r = Number.parseInt(hex.slice(1, 3), 16);
+	const g = Number.parseInt(hex.slice(3, 5), 16);
+	const b = Number.parseInt(hex.slice(5, 7), 16);
+	return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+export function getEventTypeAccentColor(type: TeamEventType): string {
+	return (
+		eventTypePresentation[type]?.accentColor ??
+		eventTypePresentation.OTHER.accentColor
 	);
 }
 

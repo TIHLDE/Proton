@@ -3,6 +3,7 @@
 import {
 	BarChart3,
 	CalendarDays,
+	Gavel,
 	Layers,
 	ScrollText,
 	UsersRound,
@@ -36,6 +37,7 @@ export function TeamTabs({ teamId, showAdmin }: TeamTabsProps) {
 		{ href: `${base}/medlemmer`, label: "Medlemmer", icon: <UsersRound /> },
 		{ href: `${base}/undergrupper`, label: "Undergrupper", icon: <Layers /> },
 		{ href: `${base}/verv`, label: "Verv", icon: <ScrollText /> },
+		{ href: `${base}/boter`, label: "Bøter", icon: <Gavel /> },
 		{ href: `${base}/statistikk`, label: "Statistikk", icon: <BarChart3 /> },
 	];
 

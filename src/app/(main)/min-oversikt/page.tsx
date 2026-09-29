@@ -6,7 +6,10 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { H1, H2, P } from "~/components/ui/typography";
 import { auth } from "~/lib/auth";
-import { getTeamRoleLabel } from "~/lib/team-presentation";
+import {
+	getTeamCategoryGradient,
+	getTeamRoleLabel,
+} from "~/lib/team-presentation";
 import { getMyTeamMemberships, syncTeamMembershipsIfStale } from "~/services";
 import ReconnectButton from "./_components/reconnect";
 
@@ -70,15 +73,47 @@ export default async function MyOverviewPage() {
 					{memberships.map((membership) => (
 						<Link
 							key={membership.id}
-							className="rounded-lg border bg-card p-6 shadow"
+							className="rounded-lg p-0.5 shadow transition-opacity hover:opacity-90"
+							style={{
+								backgroundImage: getTeamCategoryGradient(
+									membership.team.category,
+								),
+							}}
 							href={`/lag/${membership.team.id}`}
 						>
-							<H2>{membership.team.name}</H2>
-							<P>{getTeamRoleLabel(membership.role)}</P>
+							<div className="flex h-full flex-col gap-4 rounded-[calc(var(--radius-lg)-2px)] bg-card p-6">
+								<div className="flex items-center gap-4">
+									{membership.team.logoUrl ? (
+										<img
+											src={membership.team.logoUrl}
+											alt=""
+											className="size-14 shrink-0 rounded object-contain"
+										/>
+									) : (
+										<div
+											className="flex size-14 shrink-0 items-center justify-center rounded font-semibold text-lg text-white"
+											style={{
+												backgroundImage: getTeamCategoryGradient(
+													membership.team.category,
+												),
+											}}
+											aria-hidden="true"
+										>
+											{membership.team.name.charAt(0)}
+										</div>
+									)}
+									<div className="min-w-0 flex-1">
+										<H2 className="truncate">{membership.team.name}</H2>
+										<P className="text-muted-foreground italic">
+											{getTeamRoleLabel(membership.role)}
+										</P>
+									</div>
+								</div>
 
-							<div className="flex items-center justify-end gap-x-2">
-								<p>Se mer</p>
-								<ArrowRight className="h-4 w-4" />
+								<div className="flex items-center justify-end gap-x-2">
+									<p>Se mer</p>
+									<ArrowRight className="h-4 w-4" />
+								</div>
 							</div>
 						</Link>
 					))}

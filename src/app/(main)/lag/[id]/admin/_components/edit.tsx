@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import type { z } from "zod";
+import LocationAutocomplete from "~/components/form/location-autocomplete";
 import SubmitButton from "~/components/form/submit-button";
 import { Button } from "~/components/ui/button";
 import { DateTimePicker } from "~/components/ui/date-time-picker";
@@ -66,6 +67,8 @@ export default function EditEvent({ event, teamId }: EditEventProps) {
 			endDatetime: new Date(event.endAt || new Date()),
 			type: event.eventType,
 			location: event.location || "",
+			locationLat: event.locationLat ?? undefined,
+			locationLng: event.locationLng ?? undefined,
 			note: event.note || "",
 			registrationDeadline: event.registrationDeadline
 				? new Date(event.registrationDeadline)
@@ -240,9 +243,19 @@ export default function EditEvent({ event, teamId }: EditEventProps) {
 									<FormItem>
 										<FormLabel>Sted</FormLabel>
 										<FormControl>
-											<Input
+											<LocationAutocomplete
+												id={field.name}
+												value={field.value ?? ""}
 												placeholder="Hvor skal arrangementet være?"
-												{...field}
+												onChange={(value) => {
+													field.onChange(value);
+													form.setValue("locationLat", undefined);
+													form.setValue("locationLng", undefined);
+												}}
+												onSelect={(selection) => {
+													form.setValue("locationLat", selection.lat);
+													form.setValue("locationLng", selection.lng);
+												}}
 											/>
 										</FormControl>
 										<FormMessage />

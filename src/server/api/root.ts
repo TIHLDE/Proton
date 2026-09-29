@@ -1,6 +1,8 @@
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 import { emailRouter } from "./email/router";
 import { eventRouter } from "./event/router";
+import { fineRouter } from "./fine/router";
+import { geocodingRouter } from "./geocoding/router";
 import { groupRouter } from "./group/router";
 import { leadershipRouter } from "./leadership/router";
 import { matchRouter } from "./match/router";
@@ -19,6 +21,8 @@ export const appRouter = createTRPCRouter({
 	team: teamRouter,
 	me: meRouter,
 	event: eventRouter,
+	fine: fineRouter,
+	geocoding: geocodingRouter,
 	group: groupRouter,
 	match: matchRouter,
 	leadership: leadershipRouter,

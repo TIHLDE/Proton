@@ -5,17 +5,17 @@ import { addDays, format, isToday } from "date-fns";
 import { nb } from "date-fns/locale";
 import { useMemo } from "react";
 
-import type { TeamEvent } from "@prisma/client";
 import {
 	AgendaDaysToShow,
 	EventItem,
+	type TeamEventWithTeam,
 	getAgendaEventsForDay,
 } from "~/components/event-calendar";
 
 interface AgendaViewProps {
 	currentDate: Date;
-	events: TeamEvent[];
-	onEventSelect: (event: TeamEvent) => void;
+	events: TeamEventWithTeam[];
+	onEventSelect: (event: TeamEventWithTeam) => void;
 }
 
 export function AgendaView({
@@ -25,15 +25,13 @@ export function AgendaView({
 }: AgendaViewProps) {
 	// Show events for the next days based on constant
 	const days = useMemo(() => {
-		console.log("Agenda view updating with date:", currentDate.toISOString());
 		return Array.from({ length: AgendaDaysToShow }, (_, i) =>
 			addDays(new Date(currentDate), i),
 		);
 	}, [currentDate]);
 
-	const handleEventClick = (event: TeamEvent, e: React.MouseEvent) => {
+	const handleEventClick = (event: TeamEventWithTeam, e: React.MouseEvent) => {
 		e.stopPropagation();
-		console.log("Agenda view event clicked:", event);
 		onEventSelect(event);
 	};
 

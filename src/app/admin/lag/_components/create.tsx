@@ -18,7 +18,22 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "~/components/ui/dialog";
-import { Form } from "~/components/ui/form";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "~/components/ui/form";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "~/components/ui/select";
+import { teamCategoryOptions } from "~/lib/team-presentation";
 import { CreateTeamInputSchema } from "~/schemas";
 import { api } from "~/trpc/react";
 
@@ -30,7 +45,13 @@ export default function CreateTeam() {
 		resolver: zodResolver(CreateTeamInputSchema),
 		// Uten disse er feltene `undefined`, og Zod avviser på type med sin
 		// egen engelske «Required» i stedet for meldinga i skjemaet.
-		defaultValues: { name: "", slug: "" },
+		defaultValues: {
+			name: "",
+			slug: "",
+			category: "TIHLDE",
+			logoUrl: "",
+			emoji: "",
+		},
 	});
 
 	const { mutate: createTeam, status } = api.team.create.useMutation({
@@ -39,6 +60,9 @@ export default function CreateTeam() {
 			form.reset({
 				name: "",
 				slug: "",
+				category: "TIHLDE",
+				logoUrl: "",
+				emoji: "",
 			});
 			router.refresh();
 			toast.success("Lag opprettet!");
@@ -93,6 +117,52 @@ export default function CreateTeam() {
 							label="Nettside-slug"
 							placeholder="Nettside-slug til laget"
 							description="Vi trenger denne for å hente medlemskap"
+						/>
+
+						<FormField
+							control={form.control}
+							name="category"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Fargekategori</FormLabel>
+									<Select
+										items={teamCategoryOptions}
+										onValueChange={field.onChange}
+										defaultValue={field.value}
+									>
+										<FormControl>
+											<SelectTrigger className="w-full bg-card">
+												<SelectValue placeholder="Velg fargekategori" />
+											</SelectTrigger>
+										</FormControl>
+										<SelectContent>
+											{teamCategoryOptions.map((option) => (
+												<SelectItem key={option.value} value={option.value}>
+													{option.label}
+												</SelectItem>
+											))}
+										</SelectContent>
+									</Select>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+
+						<FormInput
+							form={form}
+							name="logoUrl"
+							label="Logo (URL)"
+							placeholder="https://..."
+							description="Lenke til et bilde av lagets logo"
+						/>
+
+						<FormInput
+							form={form}
+							name="emoji"
+							label="Emoji"
+							placeholder="🏐"
+							description="Vises ved siden av lagnavnet"
+							maxLength={8}
 						/>
 
 						<SubmitButton

@@ -8,3 +8,4 @@ export * from "./leadership";
 export * from "./user";
 export * from "./registration";
 export * from "./push";
+export * from "./fine";

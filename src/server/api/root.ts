@@ -1,6 +1,7 @@
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 import { emailRouter } from "./email/router";
 import { eventRouter } from "./event/router";
+import { fineRouter } from "./fine/router";
 import { groupRouter } from "./group/router";
 import { leadershipRouter } from "./leadership/router";
 import { matchRouter } from "./match/router";
@@ -26,6 +27,7 @@ export const appRouter = createTRPCRouter({
 	registration: registrationRouter,
 	push: pushRouter,
 	email: emailRouter,
+	fine: fineRouter,
 });
 
 // export type definition of API

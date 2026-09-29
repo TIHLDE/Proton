@@ -68,6 +68,8 @@ const handler: Controller<
 		.map((member) => ({
 			id: member.id,
 			user: member.user,
+			// Bot-dialogen viser dem, men gir dem ikke bot.
+			inactive: member.inactiveSince !== null,
 		}));
 
 	return nonResponded;

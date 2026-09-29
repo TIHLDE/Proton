@@ -11,6 +11,7 @@ import {
 } from "~/lib/event-presentation";
 import { cn } from "~/lib/utils";
 import ConfirmEventAttendance from "./confirm-event-attendance";
+import GiveFinesButton from "./give-fines-button";
 import MatchStats from "./match-stats";
 import NotifyUnattended from "./notify-unattended";
 import RegistrationList from "./registration-list";
@@ -38,6 +39,9 @@ export default function EventCard({
 
 	const now = new Date();
 	const isPastEvent = new Date(event.endAt ?? event.startAt) < now;
+	// Uten egen påmeldingsfrist er det starten som er fristen.
+	const deadlinePassed =
+		new Date(event.registrationDeadline ?? event.startAt) < now;
 
 	const handleStatusClick = (status: AttendanceStatusFilter) => {
 		setSelectedStatus(status);
@@ -58,8 +62,17 @@ export default function EventCard({
 				showRegistration={showRegistration}
 				onAttendanceStatusClick={handleStatusClick}
 				footer={
-					isAdmin && !isPastEvent ? (
-						<NotifyUnattended eventId={event.id} />
+					isAdmin && (!isPastEvent || deadlinePassed) ? (
+						<div className="flex flex-wrap gap-2">
+							{!isPastEvent && <NotifyUnattended eventId={event.id} />}
+							{deadlinePassed && (
+								<GiveFinesButton
+									eventId={event.id}
+									eventName={event.name}
+									eventType={event.eventType}
+								/>
+							)}
+						</div>
 					) : null
 				}
 			/>

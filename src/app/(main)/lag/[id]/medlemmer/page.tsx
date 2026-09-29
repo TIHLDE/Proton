@@ -19,6 +19,7 @@ import {
 } from "~/services";
 import EditRole from "./_components/edit-role";
 import Role from "./_components/role";
+import SetInactive from "./_components/set-inactive";
 
 interface TeamMembersPageProps {
 	params: Promise<{ id: string }>;
@@ -51,6 +52,10 @@ export default async function TeamMembersPage({
 	const membershipsData = await getTeamMemberships(id, currentPage, search);
 	const membersCount = await getTeamMembershipsCount(id);
 	const roles = await getTeamMembershipRoles(session.user.id, id);
+	const isLeadership =
+		session.user.isAdmin ||
+		roles.includes("ADMIN") ||
+		roles.includes("SUBADMIN");
 
 	return (
 		<div className="space-y-12 md:space-y-20">
@@ -71,12 +76,29 @@ export default async function TeamMembersPage({
 							<H3>{membership.user.name}</H3>
 							<P>
 								<Role role={membership.role} />
+								{membership.inactiveSince && (
+									<span className="text-muted-foreground"> · Inaktiv</span>
+								)}
 							</P>
+							{/* Begrunnelsen kan handle om skade eller sykdom, så den
+							    vises bare for dem som kan endre statusen. */}
+							{isLeadership && membership.inactiveReason && (
+								<P className="text-muted-foreground text-sm">
+									{membership.inactiveReason}
+								</P>
+							)}
 							{(roles.includes("ADMIN") || session.user.isAdmin) && (
 								<EditRole
 									membershipId={membership.id}
 									teamId={id}
 									role={membership.role}
+								/>
+							)}
+							{isLeadership && (
+								<SetInactive
+									membershipId={membership.id}
+									name={membership.user.name}
+									inactiveReason={membership.inactiveReason}
 								/>
 							)}
 						</div>
@@ -87,7 +109,7 @@ export default async function TeamMembersPage({
 					<Navigation
 						page={currentPage}
 						nextPage={currentPage + 1}
-						totalPages={Math.ceil(membersCount / 10)}
+						totalPages={membershipsData.totalPages}
 					/>
 				</div>
 			</div>

@@ -15,41 +15,53 @@ import {
 	DialogTrigger,
 } from "../ui/dialog";
 
+// Testbrukeren finnes bare lokalt. TIHLDE-innloggingen virker også lokalt,
+// så lenge OAuth-klienten har localhost-callbacken som redirect-URI.
+const isDevelopment = process.env.NODE_ENV === "development";
+
 export default function LoginForm() {
 	const [open, setOpen] = useState<boolean>(false);
-	const [isPending, setIsPending] = useState<boolean>(false);
+	const [pending, setPending] = useState<"tihlde" | "test" | null>(null);
 
-	const onSignIn = async () => {
-		setIsPending(true);
+	const onError = () => {
+		toast.error(
+			"Noe gikk galt under innloggingen. Vennligst prøv igjen senere.",
+		);
+		setPending(null);
+	};
+
+	const onSignInWithTihlde = async () => {
+		setPending("tihlde");
 		try {
-			if (process.env.NODE_ENV === "development") {
-				const credentials = {
-					email: "local-test-user@example.com",
-					password: "local-development-password",
-				};
-				const signIn = await authClient.signIn.email(credentials);
-				if (signIn.error) {
-					const signUp = await authClient.signUp.email({
-						...credentials,
-						name: "Lokal testbruker",
-						username: "local-test-user",
-					});
-					if (signUp.error) throw new Error(signUp.error.message);
-				}
-				window.location.assign("/");
-				return;
-			}
-
 			const { error } = await authClient.signIn.oauth2({
 				providerId: "photon",
 				callbackURL: "/",
 			});
 			if (error) throw new Error(error.message);
 		} catch {
-			toast.error(
-				"Noe gikk galt under innloggingen. Vennligst prøv igjen senere.",
-			);
-			setIsPending(false);
+			onError();
+		}
+	};
+
+	const onSignInAsTestUser = async () => {
+		setPending("test");
+		try {
+			const credentials = {
+				email: "local-test-user@example.com",
+				password: "local-development-password",
+			};
+			const signIn = await authClient.signIn.email(credentials);
+			if (signIn.error) {
+				const signUp = await authClient.signUp.email({
+					...credentials,
+					name: "Lokal testbruker",
+					username: "local-test-user",
+				});
+				if (signUp.error) throw new Error(signUp.error.message);
+			}
+			window.location.assign("/");
+		} catch {
+			onError();
 		}
 	};
 
@@ -69,29 +81,41 @@ export default function LoginForm() {
 							Velkommen tilbake
 						</DialogTitle>
 						<DialogDescription className="sm:text-center">
-							{process.env.NODE_ENV === "development"
-								? "Logg inn lokalt uten å kontakte TIHLDE"
-								: "Du sendes til tihlde.org for å logge inn"}
+							Du sendes til tihlde.org for å logge inn
 						</DialogDescription>
 					</DialogHeader>
 				</div>
 
-				<Button
-					type="button"
-					className="w-full"
-					disabled={isPending}
-					onClick={onSignIn}
-				>
-					{isPending ? (
-						<Loader2 className="animate-spin" />
-					) : (
-						<span>
-							{process.env.NODE_ENV === "development"
-								? "Logg inn som testbruker"
-								: "Logg inn med TIHLDE"}
-						</span>
+				<div className="grid gap-2">
+					<Button
+						type="button"
+						className="w-full"
+						disabled={pending !== null}
+						onClick={onSignInWithTihlde}
+					>
+						{pending === "tihlde" ? (
+							<Loader2 className="animate-spin" />
+						) : (
+							<span>Logg inn med TIHLDE</span>
+						)}
+					</Button>
+
+					{isDevelopment && (
+						<Button
+							type="button"
+							variant="ghost"
+							className="w-full"
+							disabled={pending !== null}
+							onClick={onSignInAsTestUser}
+						>
+							{pending === "test" ? (
+								<Loader2 className="animate-spin" />
+							) : (
+								<span>Logg inn som testbruker (lokalt)</span>
+							)}
+						</Button>
 					)}
-				</Button>
+				</div>
 			</DialogContent>
 		</Dialog>
 	);

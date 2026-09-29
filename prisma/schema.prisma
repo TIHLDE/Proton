@@ -37,6 +37,8 @@ model User {
   groupMemberships  TeamGroupMember[]
   matchEvents       MatchEvent[]
   positions         PositionAssignment[]
+  fines             EventFine[]          @relation("FineRecipient")
+  issuedFines       EventFine[]          @relation("FineIssuer")
 
   @@unique([email])
   @@map("user")
@@ -112,6 +114,13 @@ model TeamMember {
   user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   team   Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
 
+  /// Satt når lagets ledelse har merket spilleren som inaktiv, null ellers.
+  /// Egen status og ikke en rolle, så en inaktiv subadmin beholder rollen sin.
+  /// Inaktive får ikke bot for manglende svar.
+  inactiveSince  DateTime?
+  /// Påkrevd når spilleren er inaktiv. Vises bare for lagets ledelse.
+  inactiveReason String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
@@ -178,6 +187,7 @@ model TeamEvent {
   attendances          Attendance[]
   invitedGroups        TeamEventGroup[]
   match                Match?
+  fines                EventFine[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -352,6 +362,36 @@ enum AttendanceStatus {
 enum AttendanceSource {
   RSVP
   MANUAL
+}
+
+/// En bot gitt fra Proton for manglende svar på et arrangement.
+///
+/// Selve boten bor på tihlde.org. Raden her er låsen som hindrer at samme
+/// person får bot to ganger for samme arrangement — den unike nøkkelen slår
+/// inn også ved dobbeltklikk eller to admins samtidig — og holder på id-en
+/// boten fikk der.
+model EventFine {
+  id           String  @id @default(cuid())
+  eventId      String
+  userId       String
+  issuedById   String?
+  /// Antall bøter. Negativt er en motpost, 0 er en advarsel.
+  quantity     Int
+  reason       String
+  /// Paragrafen i gruppas lovverk på tihlde.org, om en ble valgt.
+  lawId        String?
+  /// Id-en på tihlde.org. Null når bøter ikke sendes dit (PHOTON_FINES_ENABLED).
+  photonFineId String?
+
+  event    TeamEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user     User      @relation("FineRecipient", fields: [userId], references: [id], onDelete: Cascade)
+  issuedBy User?     @relation("FineIssuer", fields: [issuedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@unique([eventId, userId])
+  @@index([userId])
+  @@map("event_fine")
 }
 
 model PushSubscription {

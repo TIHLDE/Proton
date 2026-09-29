@@ -44,7 +44,7 @@ export type PhotonMembership = {
 export type PhotonFailure =
 	| { ok: false; reason: "no-session" }
 	| { ok: false; reason: "reauth" }
-	| { ok: false; reason: "photon-error"; status: number };
+	| { ok: false; reason: "photon-error"; status: number; message?: string };
 
 export type PhotonMembershipsResult =
 	| { ok: true; memberships: PhotonMembership[] }
@@ -176,6 +176,126 @@ async function performRefresh(
 	});
 
 	return data.access_token;
+}
+
+type PhotonResult<T> = { ok: true; data: T } | PhotonFailure;
+
+/**
+ * Ett kall mot Photons API som den innloggede brukeren. Photon håndhever sine
+ * egne tilgangsregler på tokenet, så Proton trenger ikke gjette hva brukeren
+ * har lov til på tihlde.org.
+ */
+async function photonRequest<T>(
+	path: string,
+	init: { method?: "GET" | "POST"; body?: unknown } = {},
+): Promise<PhotonResult<T>> {
+	const token = await getPhotonAccessToken();
+	if (!token.ok) return token;
+
+	let response: Response;
+	try {
+		response = await fetch(`${API_URL}/${path}`, {
+			method: init.method ?? "GET",
+			headers: {
+				Authorization: `Bearer ${token.token}`,
+				...(init.body ? { "Content-Type": "application/json" } : {}),
+			},
+			body: init.body ? JSON.stringify(init.body) : undefined,
+			cache: "no-store",
+			signal: AbortSignal.timeout(PHOTON_TIMEOUT_MS),
+		});
+	} catch {
+		return { ok: false, reason: "photon-error", status: 408 };
+	}
+
+	if (response.status === 401) return { ok: false, reason: "reauth" };
+
+	if (!response.ok) {
+		// Photon forklarer avslag (ikke medlem, bøter ikke aktivert osv.) i
+		// `message`. Den er mer til hjelp for brukeren enn en statuskode.
+		const body = (await response.json().catch(() => null)) as {
+			message?: string;
+		} | null;
+		return {
+			ok: false,
+			reason: "photon-error",
+			status: response.status,
+			message: body?.message,
+		};
+	}
+
+	return { ok: true, data: (await response.json()) as T };
+}
+
+/** En paragraf i gruppas lovverk på tihlde.org. */
+export type PhotonLaw = {
+	id: string;
+	/** Desimalstreng, f.eks. "3.10". */
+	paragraph: string;
+	title: string;
+	description: string;
+	/** Foreslått antall bøter for å bryte den. */
+	amount: number;
+};
+
+export async function getGroupLaws(groupSlug: string) {
+	return photonRequest<PhotonLaw[]>(
+		`groups/${encodeURIComponent(groupSlug)}/laws`,
+	);
+}
+
+/** Et medlem av gruppa med summen av bøtene som ikke er gjort opp. */
+export type PhotonFineUser = {
+	id: string;
+	name: string;
+	image: string | null;
+	/** Venter på godkjenning, eller godkjent og ikke betalt. */
+	finesAmount: number;
+	finesCount: number;
+};
+
+export async function getGroupFineUsers(
+	groupSlug: string,
+): Promise<PhotonResult<PhotonFineUser[]>> {
+	const users: PhotonFineUser[] = [];
+	let page: number | null = 0;
+
+	while (page !== null) {
+		const result: PhotonResult<{
+			users: PhotonFineUser[];
+			nextPage: number | null;
+		}> = await photonRequest(
+			`groups/${encodeURIComponent(groupSlug)}/fines/users?page=${page}&pageSize=100`,
+		);
+		if (!result.ok) return result;
+		users.push(...result.data.users);
+		page = result.data.nextPage;
+	}
+
+	return { ok: true, data: users };
+}
+
+export type CreatePhotonFineInput = {
+	/** Mottakerens bruker-ID på tihlde.org (`account.accountId`). */
+	userId: string;
+	/** Antall bøter. Negativt er en motpost, 0 er en advarsel. */
+	amount: number;
+	reason: string;
+	lawId?: string;
+};
+
+/**
+ * Gir én person en bot i gruppa på tihlde.org, som den innloggede brukeren.
+ * Boten venter på godkjenning til gruppas botsjef godkjenner den der.
+ */
+export async function createGroupFine(
+	groupSlug: string,
+	input: CreatePhotonFineInput,
+) {
+	return photonRequest<{ id: string }>(
+		`groups/${encodeURIComponent(groupSlug)}/fines`,
+		{ method: "POST", body: { ...input, groupSlug } },
+	);
 }
 
 /**

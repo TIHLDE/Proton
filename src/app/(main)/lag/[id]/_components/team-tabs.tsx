@@ -3,6 +3,7 @@
 import {
 	BarChart3,
 	CalendarDays,
+	Coins,
 	Layers,
 	ScrollText,
 	UsersRound,
@@ -37,6 +38,7 @@ export function TeamTabs({ teamId, showAdmin }: TeamTabsProps) {
 		{ href: `${base}/undergrupper`, label: "Undergrupper", icon: <Layers /> },
 		{ href: `${base}/verv`, label: "Verv", icon: <ScrollText /> },
 		{ href: `${base}/statistikk`, label: "Statistikk", icon: <BarChart3 /> },
+		{ href: `${base}/boter`, label: "Bøter", icon: <Coins /> },
 	];
 
 	// Lagsiden ligger på prefikset til alle underrutene, så en ren
@@ -48,7 +50,7 @@ export function TeamTabs({ teamId, showAdmin }: TeamTabsProps) {
 			.at(0) ?? base;
 
 	return (
-		// Fem faner er bredere enn en mobilskjerm. ScrollFade toner ut i den
+		// Fanene er bredere enn en mobilskjerm. ScrollFade toner ut i den
 		// kanten det finnes mer å scrolle til, slik som i Photon.
 		<ScrollFade render={<nav />}>
 			<Tabs value={active}>

@@ -24,6 +24,10 @@ export const env = createEnv({
 			.string()
 			.url()
 			.default("https://photon.tihlde.org/api/auth"),
+		// Bøter sendes til tihlde.org bare når denne er "true". Tokenet er ekte
+		// også lokalt, så uten bryteren ville en test gitt ekte bøter i ekte
+		// grupper. Mangler den, er den på i produksjon og av ellers.
+		PHOTON_FINES_ENABLED: z.enum(["true", "false"]).optional(),
 	},
 
 	/**
@@ -52,6 +56,7 @@ export const env = createEnv({
 		PHOTON_CLIENT_ID: process.env.PHOTON_CLIENT_ID,
 		PHOTON_CLIENT_SECRET: process.env.PHOTON_CLIENT_SECRET,
 		PHOTON_ISSUER: process.env.PHOTON_ISSUER,
+		PHOTON_FINES_ENABLED: process.env.PHOTON_FINES_ENABLED,
 	},
 	/**
 	 * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

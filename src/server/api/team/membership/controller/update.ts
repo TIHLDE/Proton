@@ -9,21 +9,24 @@ const handler: Controller<
 	z.infer<typeof UpdateTeamMembershipRoleSchema>,
 	void
 > = async ({ input, ctx }) => {
-	// Check if user has accsess
-	await hasTeamAccessMiddleware(ctx.user as User, input.teamId, ["ADMIN"]);
-
 	const membership = await ctx.db.teamMember.findUnique({
 		where: {
 			id: input.membershipId,
 		},
 	});
 
-	if (!membership) {
+	// Et medlemskap i et annet lag enn det klienten oppgir svarer likt som et
+	// som ikke finnes, så feilen ikke røper at id-en er ekte.
+	if (!membership || membership.teamId !== input.teamId) {
 		throw new TRPCError({
 			code: "NOT_FOUND",
 			message: "Medlemskapet finnes ikke.",
 		});
 	}
+
+	// Tilgangen sjekkes mot laget medlemskapet faktisk hører til, så admin i
+	// ett lag ikke kan endre roller i et annet.
+	await hasTeamAccessMiddleware(ctx.user as User, membership.teamId, ["ADMIN"]);
 
 	await ctx.db.teamMember.update({
 		where: {

@@ -25,3 +25,23 @@ export const GiveNoResponseFinesSchema = z.object({
 export const GetFineLawsSchema = z.object({
 	teamId: z.string().min(1, { message: "Lag ID er påkrevd" }),
 });
+
+export const GetCourtSchema = z.object({
+	teamId: z.string().min(1, { message: "Lag ID er påkrevd" }),
+});
+
+export const ApplyCourtRuleSchema = z.object({
+	teamId: z.string().min(1, { message: "Lag ID er påkrevd" }),
+	rule: z.enum(["SNITCH", "GOOD_BOY"]),
+	// Et utvalg av dem regelen gjelder. Serveren regner ut på nytt hvem som
+	// faktisk skal ha bot, og hvor mange.
+	userIds: z
+		.array(z.string().min(1))
+		.min(1, { message: "Velg minst én person" }),
+});
+
+export const SetLastCourtDateSchema = z.object({
+	teamId: z.string().min(1, { message: "Lag ID er påkrevd" }),
+	// Dagen, ikke et tidspunkt: serveren gjør den om til midnatt norsk tid.
+	date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: "Ugyldig dato" }),
+});

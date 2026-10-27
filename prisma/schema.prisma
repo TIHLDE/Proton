@@ -11,23 +11,23 @@ datasource db {
 }
 
 model User {
-  id                        String  @id
-  name                      String
-  email                     String
-  emailVerified             Boolean @default(true)
-  image                     String?
-  isAdmin                   Boolean @default(false)
-  username                  String? @unique
-  emailNotificationsEnabled Boolean @default(true)
-  disabledEmailNotifications Json @default("{}")
-  calendarToken     String?  @unique
+  id                         String  @id
+  name                       String
+  email                      String
+  emailVerified              Boolean @default(true)
+  image                      String?
+  isAdmin                    Boolean @default(false)
+  username                   String? @unique
+  emailNotificationsEnabled  Boolean @default(true)
+  disabledEmailNotifications Json    @default("{}")
+  calendarToken              String? @unique
 
   /// Sist gang medlemskapene ble hentet fra Photon. Brukes til å strupe den
   /// automatiske synkingen, så et sidebesøk ikke betyr et Photon-kall.
   membershipsSyncedAt DateTime?
 
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @default(now()) @updatedAt
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @default(now()) @updatedAt
   sessions          Session[]
   accounts          Account[]
   memberships       TeamMember[]
@@ -39,6 +39,8 @@ model User {
   positions         PositionAssignment[]
   fines             EventFine[]          @relation("FineRecipient")
   issuedFines       EventFine[]          @relation("FineIssuer")
+  courtFines        CourtFine[]          @relation("CourtFineRecipient")
+  issuedCourtFines  CourtFine[]          @relation("CourtFineIssuer")
 
   @@unique([email])
   @@map("user")
@@ -94,14 +96,19 @@ model Team {
   name String  @unique
   slug String? @unique
 
+  /// Datoen for siste rettsak. Rettsak-reglene teller bøter fra og med denne.
+  /// Null betyr at den aldri er satt, og da gjelder `DEFAULT_LAST_COURT`.
+  lastCourtAt DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  members   TeamMember[]
-  events    TeamEvent[]
-  groups    TeamGroup[]
-  positions TeamPosition[]
-  periods   LeadershipPeriod[]
+  members    TeamMember[]
+  events     TeamEvent[]
+  groups     TeamGroup[]
+  positions  TeamPosition[]
+  periods    LeadershipPeriod[]
+  courtFines CourtFine[]
 
   @@map("team")
 }
@@ -173,7 +180,7 @@ model TeamGroupMember {
 }
 
 model TeamEvent {
-  id                   String         @id @default(cuid())
+  id                   String           @id @default(cuid())
   teamId               String
   eventType            TeamEventType
   name                 String
@@ -182,7 +189,7 @@ model TeamEvent {
   location             String?
   note                 String?
   registrationDeadline DateTime?
-  team                 Team           @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  team                 Team             @relation(fields: [teamId], references: [id], onDelete: Cascade)
   registrations        Registration[]
   attendances          Attendance[]
   invitedGroups        TeamEventGroup[]
@@ -392,6 +399,39 @@ model EventFine {
   @@unique([eventId, userId])
   @@index([userId])
   @@map("event_fine")
+}
+
+enum CourtRule {
+  /// Snitches don't get stitches: ingen bøter gitt siden sist rettsak.
+  SNITCH
+  /// Snill gutt-syndrom: fylt opp til 8 bøter fått siden sist rettsak.
+  GOOD_BOY
+}
+
+/// En bot gitt fra Proton av en rettsak-regel.
+///
+/// Samme lås som `EventFine`: den unike nøkkelen hindrer at samme person får
+/// samme regel to ganger for samme periode. `since` er en del av nøkkelen, så
+/// en ny rettsak-dato åpner for en ny runde.
+model CourtFine {
+  id           String    @id @default(cuid())
+  teamId       String
+  since        DateTime
+  rule         CourtRule
+  userId       String
+  issuedById   String?
+  quantity     Int
+  /// Id-en på tihlde.org. Null når bøter ikke sendes dit (PHOTON_FINES_ENABLED).
+  photonFineId String?
+
+  team     Team  @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user     User  @relation("CourtFineRecipient", fields: [userId], references: [id], onDelete: Cascade)
+  issuedBy User? @relation("CourtFineIssuer", fields: [issuedById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@unique([teamId, since, rule, userId])
+  @@map("court_fine")
 }
 
 model PushSubscription {

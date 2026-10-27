@@ -19,6 +19,7 @@ import { H2, P } from "~/components/ui/typography";
 import { auth } from "~/lib/auth";
 import { photonFailureMessage, tihldeFinesUrl } from "~/lib/photon";
 import { getTeam, hasTeamAccess } from "~/services";
+import CourtRules from "./_components/court-rules";
 
 interface TeamBoterPageProps {
 	params: Promise<{ id: string }>;
@@ -37,8 +38,9 @@ export default async function TeamBoterPage({ params }: TeamBoterPageProps) {
 	const session = await auth.api.getSession({ headers: await headers() });
 	if (!session) notFound();
 
-	const membership = await hasTeamAccess(id, session.user as User);
-	if (!membership) notFound();
+	const role = await hasTeamAccess(id, session.user as User);
+	if (!role) notFound();
+	const isLeadership = role === "ADMIN" || role === "SUBADMIN";
 
 	const team = await getTeam(id);
 	if (!team) notFound();
@@ -84,6 +86,8 @@ export default async function TeamBoterPage({ params }: TeamBoterPageProps) {
 					</Button>
 				)}
 			</div>
+
+			{isLeadership && team.slug && <CourtRules teamId={team.id} />}
 
 			{errorMessage ? (
 				<div className="mx-auto w-full space-y-12 rounded-lg border bg-card p-20 shadow">

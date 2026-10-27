@@ -2,8 +2,7 @@ import { Prisma, type User } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import type z from "zod";
 import { createGroupFine } from "~/actions";
-import { env } from "~/env";
-import { photonFailureMessage } from "~/lib/photon";
+import { photonFailureMessage, sendFinesToTihlde } from "~/lib/photon";
 import { GiveNoResponseFinesSchema } from "~/schemas";
 import { type Controller, authorizedProcedure } from "~/server/api/trpc";
 import { hasTeamAccessMiddleware } from "~/server/api/util/auth";
@@ -11,15 +10,6 @@ import {
 	getInvitedUserIds,
 	invitedUserFilter,
 } from "~/server/api/util/invitees";
-
-/**
- * Tokenet er ekte også lokalt, så en test mot localhost ville gitt ekte bøter
- * i ekte grupper. Uten eksplisitt verdi sendes det derfor bare i produksjon.
- */
-const sendToTihlde =
-	env.PHOTON_FINES_ENABLED !== undefined
-		? env.PHOTON_FINES_ENABLED === "true"
-		: env.NODE_ENV === "production";
 
 type Outcome = { name: string; message: string };
 
@@ -163,7 +153,7 @@ const handler: Controller<
 			continue;
 		}
 
-		if (!sendToTihlde) {
+		if (!sendFinesToTihlde) {
 			given.push(user.name);
 			continue;
 		}
@@ -191,7 +181,7 @@ const handler: Controller<
 		given.push(user.name);
 	}
 
-	return { given, skipped, failed, sentToTihlde: sendToTihlde };
+	return { given, skipped, failed, sentToTihlde: sendFinesToTihlde };
 };
 
 export default authorizedProcedure

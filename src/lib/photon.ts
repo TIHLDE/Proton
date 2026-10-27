@@ -1,4 +1,14 @@
 import type { PhotonFailure } from "~/actions";
+import { env } from "~/env";
+
+/**
+ * Tokenet er ekte også lokalt, så en test mot localhost ville gitt ekte bøter
+ * i ekte grupper. Uten eksplisitt verdi sendes det derfor bare i produksjon.
+ */
+export const sendFinesToTihlde =
+	env.PHOTON_FINES_ENABLED !== undefined
+		? env.PHOTON_FINES_ENABLED === "true"
+		: env.NODE_ENV === "production";
 
 /** Adressen til gruppas bøter på tihlde.org. */
 export function tihldeFinesUrl(groupSlug: string) {

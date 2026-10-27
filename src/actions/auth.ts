@@ -275,6 +275,48 @@ export async function getGroupFineUsers(
 	return { ok: true, data: users };
 }
 
+/** En bot i gruppa på tihlde.org, med bare feltene Proton bruker. */
+export type PhotonFine = {
+	id: string;
+	/** Mottakerens bruker-ID på tihlde.org. */
+	userId: string;
+	createdByUserId: string | null;
+	amount: number;
+	status: "pending" | "approved" | "paid" | "rejected";
+	createdAt: string;
+};
+
+/**
+ * Alle bøter i gruppa gitt fra og med `since`. Photon har ikke datofilter,
+ * men lista kommer nyeste først, så vi blar til vi passerer datoen.
+ */
+export async function getGroupFines(
+	groupSlug: string,
+	since: Date,
+): Promise<PhotonResult<PhotonFine[]>> {
+	const fines: PhotonFine[] = [];
+	let page: number | null = 0;
+
+	while (page !== null) {
+		const result: PhotonResult<{
+			fines: PhotonFine[];
+			nextPage: number | null;
+		}> = await photonRequest(
+			`groups/${encodeURIComponent(groupSlug)}/fines?page=${page}&pageSize=100`,
+		);
+		if (!result.ok) return result;
+
+		const recent: PhotonFine[] = result.data.fines.filter(
+			(fine) => new Date(fine.createdAt) >= since,
+		);
+		fines.push(...recent);
+		page =
+			recent.length < result.data.fines.length ? null : result.data.nextPage;
+	}
+
+	return { ok: true, data: fines };
+}
+
 export type CreatePhotonFineInput = {
 	/** Mottakerens bruker-ID på tihlde.org (`account.accountId`). */
 	userId: string;
